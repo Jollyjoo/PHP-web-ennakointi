@@ -1,4 +1,8 @@
 <?php
+
+    $q = $_REQUEST["q"];
+    
+
     $serverName = "ennakointi-srv.database.windows.net"; // update me
     $connectionOptions = array(
         "Database" => "EnnakointiDB", // update me
@@ -20,7 +24,7 @@
     if ($getResults == FALSE)
         die(FormatErrors(sqlsrv_errors()));
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        echo ("<b>" . $row['uutisen_pvm'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " " . $row['Url'] . "<br>" . PHP_EOL);
+        echo ("<b>" . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " " . $row['Url'] . "<br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
 
