@@ -20,7 +20,7 @@
 
     $tsql= "SELECT CONVERT(CHAR(8),[uutisen_pvm],112) as aika, Maakunta_ID, Teema, Uutinen, Url 
                 FROM dbo.Mediaseuranta
-                where Maakunta_ID = (SELECT maakunta_id from dbo.maakunnat where maakunta = '%$q%') and Teema = 'Julkinen talous'
+                where Maakunta_ID = (SELECT maakunta_id from dbo.maakunnat where maakunta LIKE '%" . $q . "%') and Teema = 'Julkinen talous'
                 order by uutisen_pvm;";
     $getResults= sqlsrv_query($conn, $tsql);
     echo ("Reading data from table <br>" . PHP_EOL);
