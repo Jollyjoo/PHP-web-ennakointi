@@ -7,6 +7,14 @@
     );
     //Establishes the connection
     $conn = sqlsrv_connect($serverName, $connectionOptions);
+    if( $conn === false ) {
+        die( print_r( sqlsrv_errors(), true));
+    }
+    else {
+        echo"Connection Success: connected!";
+
+    }
+    
     $tsql= "SELECT TOP 20 Uuutinen as Uutinen, Teema as Teema
          FROM Mediaseuranta";
     $getResults= sqlsrv_query($conn, $tsql);
