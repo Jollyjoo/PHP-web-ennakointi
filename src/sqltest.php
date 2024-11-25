@@ -20,7 +20,7 @@
     if ($getResults == FALSE)
         die(FormatErrors(sqlsrv_errors()));
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        echo ($row['uutisen_pvm'] . " " . $row['Teema'] . " " . $row['Uutinen'] . PHP_EOL);
+        echo ($row['Maakunta_ID'] . " " . $row['Teema'] . " " . $row['Uutinen'] . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
 
