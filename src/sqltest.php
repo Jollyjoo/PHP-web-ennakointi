@@ -14,7 +14,7 @@
         echo"Connection Success: connected!";
     }
 
-    $tsql= "SELECT uutisen_pvm, Teema, Uutinen, Url FROM dbo.Mediaseuranta;";
+    $tsql= "SELECT uutisen_pvm, Teema, Uutinen FROM dbo.Mediaseuranta;";
     $getResults= sqlsrv_query($conn, $tsql);
     echo ("Reading data from table" . PHP_EOL);
     if ($getResults == FALSE)
