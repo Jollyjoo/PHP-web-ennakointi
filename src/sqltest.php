@@ -18,7 +18,10 @@
         echo"Connection Success: connected!";
     }
 
-    $tsql= "SELECT CONVERT(CHAR(8),[uutisen_pvm],112) as aika, Maakunta_ID, Teema, Uutinen, Url FROM dbo.Mediaseuranta order by uutisen_pvm;";
+    $tsql= "SELECT CONVERT(CHAR(8),[uutisen_pvm],112) as aika, Maakunta_ID, Teema, Uutinen, Url 
+                FROM dbo.Mediaseuranta
+                where Maakunta_ID = 1 and Teema = 'Julkinen talous'
+                order by uutisen_pvm;";
     $getResults= sqlsrv_query($conn, $tsql);
     echo ("Reading data from table <br>" . PHP_EOL);
     if ($getResults == FALSE)
