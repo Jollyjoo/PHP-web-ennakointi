@@ -14,13 +14,13 @@
         echo"Connection Success: connected!";
     }
 
-    $tsql= "SELECT Uutisen_pvm, Teema, Uutinen, Url FROM dbo.Mediaseuranta;";
+    $tsql= "SELECT uutisen_pvm, Teema, Uutinen, Url FROM dbo.Mediaseuranta;";
     $getResults= sqlsrv_query($conn, $tsql);
     echo ("Reading data from table" . PHP_EOL);
     if ($getResults == FALSE)
         die(FormatErrors(sqlsrv_errors()));
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        echo ($row['Uutisen_pvm'] . " " . $row['Teema'] . " " . $row['Uutinen'] . " " . $row['Url'] . "<br>" . PHP_EOL);
+        echo ($row['uutisen_pvm'] . " " . $row['Teema'] . " " . $row['Uutinen'] . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
 
@@ -50,5 +50,4 @@
     }
     sqlsrv_free_stmt($getResults);
     */
-
 ?>
