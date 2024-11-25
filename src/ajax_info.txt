@@ -1,0 +1,7 @@
+
+<h3>AJAX Uutisvirta</h3>
+<p> 15.5. TEM: Suomen työllisyysaste putoaa tänä vuonna selvästi: https://www.hs.fi/talous/art-2000010427725.html  
+
+<p>20.5. Konkursseja enemmän kuin finanssikriisissä, mutta rakennusalallakin valtaosa yrityksistä lopettaa hallitusti: https://stat.fi/tietotrendit/artikkelit/2024/konkursseja-enemman-kuin-finanssikriisissa-mutta-rakennusalallakin-valtaosa-yrityksista-lopettaa-hallitusti/  
+
+<p>23.5. Lappi ja isot kaupungit vetävät työllisiä – poikkeuksina Oulu, Jyväskylä ja Vantaa: https://stat.fi/tietotrendit/blogit/2024/lappi-ja-isot-kaupungit-vetavat-tyollisia-poikkeuksina-oulu-jyvaskyla-ja-vantaa/  
