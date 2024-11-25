@@ -21,7 +21,7 @@
     $tsql= "SELECT CONVERT(CHAR(8),[uutisen_pvm],112) as aika, Maakunta_ID, Teema, Uutinen, Url 
                 FROM dbo.Mediaseuranta
                 where Maakunta_ID = (SELECT maakunta_id from dbo.maakunnat where maakunta LIKE '%" . $q . "%')
-                order by uutisen_pvm;";
+                order by uutisen_pvm DESC;";
     $getResults= sqlsrv_query($conn, $tsql);
     echo ("Reading data from table <br>" . PHP_EOL);
     if ($getResults == FALSE)
