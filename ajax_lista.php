@@ -12,7 +12,7 @@ $a[] = "Päijät-Häme	Julkinen talous	18.10.2024		Valtuutettu ihmetteli seminaa
 $a[] = "Päijät-Häme	Julkinen talous	23.10.2024		”Mahtava Excel-taulukko” oli liikaa viranhaltijoille  näin Lahti selittää 3,5 miljoonan euron virhettä kilpailutuksessa:	https://yle.fi/a/74-20119120 <br> ";
 $a[] = "Päijät-Häme	Julkinen talous	25.10.2024		Maksullinen pysäköinti Lahdessa laajenee  myös asukaspysäköintialue kasvaa:	https://yle.fi/a/74-20120198 <br>";
 $a[] = "Päijät-Häme	Julkinen talous	28.10.2024		Lahden tulosennuste koheni taas: alijäämä jää alle puoleen budjetoidusta:	https://www.ess.fi/paikalliset/8017392 <br>  ";
-$a[] = "Päijät-Häme	Julkinen talous	1.11.2024		SDP aikaistaisi Lahden veronkorotusta Haluamme auttaa sivistyspuolta:	https://www.ess.fi/paikalliset/8030952 <br>  ";
+
 
 
 
