@@ -77,9 +77,9 @@
         </select>
     </form>
 
-    <p><b>Tai kirjoita alue:</b></p>
+    <p><b>Hae uutista hakusanalla:</b></p>
     <form>
-    Alue: <input type="text" onkeyup="showHint(this.value)">
+    Alue: <input type="text" onkeyup="HaeHakusanalla(this.value)">
     </form>
     <p>Löytyneet: <div id="txtHint">Listaus tulee tähän</div></p>
     
@@ -102,6 +102,23 @@
         }
         </script>
 
+<script>
+    function HaeHakusanalla(str) {
+      var xhttp;    
+      if (str == "") {
+        document.getElementById("txtHint").innerHTML = "";
+        return;
+      }
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("txtHint").innerHTML = this.responseText;
+        }
+      }; 
+      xhttp.open("GET", "./haehakusanalla.php?q="+str, true);
+      xhttp.send();
+    }
+    </script>
 
 
     <!-- ******************************** seuraava-->   
