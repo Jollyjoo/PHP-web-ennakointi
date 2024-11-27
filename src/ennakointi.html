@@ -89,40 +89,40 @@
     
 
         <script>
-        function showHint(str) {
-          var xhttp;    
-          if (str == "") {
-            document.getElementById("txtHint").innerHTML = "";
-            return;
-          }
-          xhttp = new XMLHttpRequest();
-          xhttp.onreadystatechange = function() {
-            if (this.readyState == 4 && this.status == 200) {
-              document.getElementById("txtHint").innerHTML = this.responseText;
+            function showHint(str) {
+            var xhttp;    
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
             }
-          }; 
-          xhttp.open("GET", "./sqltest.php?q="+str, true);
-          xhttp.send();
-        }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("txtHint").innerHTML = this.responseText;
+                }
+            }; 
+            xhttp.open("GET", "./sqltest.php?q="+str, true);
+            xhttp.send();
+            }
         </script>
 
-<script>
-    function HaeHakusanalla(str) {
-      var xhttp;    
-      if (str == "") {
-        document.getElementById("txtHint").innerHTML = "";
-        return;
-      }
-      xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          document.getElementById("txtHint").innerHTML = this.responseText;
-        }
-      }; 
-      xhttp.open("GET", "./haehakusanalla.php?q="+str, true);
-      xhttp.send();
-    }
-    </script>
+        <script>
+            function HaeHakusanalla(str) {
+            var xhttp;    
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (this.readyState == 4 && this.status == 200) {
+                document.getElementById("txtHint").innerHTML = this.responseText;
+                }
+            }; 
+            xhttp.open("GET", "./haehakusanalla.php?q="+str, true);
+            xhttp.send();
+            }
+        </script>
 
 
     <!-- ******************************** seuraava-->   

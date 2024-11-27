@@ -27,8 +27,9 @@
     if ($getResults == FALSE)
         die(FormatErrors(sqlsrv_errors()));
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        $url = htmlspecialchars($row['Url'], ENT_QUOTES, 'UTF-8');
-        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . $url . "'>Linkki</a><br>" . PHP_EOL);
+        // Remove any unwanted characters from the URL
+        $url = trim($row['Url'], ' "');
+        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'>Linkki</a><br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
     
