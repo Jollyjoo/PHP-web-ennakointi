@@ -27,9 +27,11 @@
     if ($getResults == FALSE)
         die(FormatErrors(sqlsrv_errors()));
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . $row['Url'] . "'>Linkki uutiseen</a><br>" . PHP_EOL);
+        $url = htmlspecialchars($row['Url'], ENT_QUOTES, 'UTF-8');
+        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . $url . "'>Linkki</a><br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
+    
 
 
 
