@@ -27,7 +27,7 @@
     if ($getResults == FALSE)
         die(FormatErrors(sqlsrv_errors()));
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " " . $row['Url'] . "<br>" . PHP_EOL);
+        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href=>" . $row['Url'] . ">Linkki</a><br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
 
