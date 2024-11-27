@@ -29,6 +29,10 @@
     while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
         // Remove any unwanted characters from the URL
         $url = trim($row['Url'], ' "');
+        // Remove any trailing commas or spaces
+        $url = rtrim($url, ', ');
+        // Decode any HTML entities
+        $url = htmlspecialchars_decode($url, ENT_QUOTES);
         echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'>Linkki</a><br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
