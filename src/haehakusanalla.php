@@ -33,7 +33,8 @@
         $url = rtrim($url, ', ');
         // Decode any HTML entities
         $url = htmlspecialchars_decode($url, ENT_QUOTES);
-        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'>Linkki</a><br>" . PHP_EOL);
+        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . $row['Url'] . "'>Linkki</a><br>" . PHP_EOL);
+        //echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'>Linkki</a><br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
     
