@@ -35,7 +35,7 @@
         $url = htmlspecialchars_decode($url, ENT_QUOTES);
         // Remove non-breaking spaces and other unwanted characters
         $url = preg_replace('/[\x00-\x1F\x7F-\xFF]/', '', $url);
-        echo ("<b> tes " . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'>Linkki</a><br>" . PHP_EOL);
+        echo ("<b> " . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " <a href='" . htmlspecialchars($url, ENT_QUOTES, 'UTF-8') . "'>Lisää...</a><br>" . PHP_EOL);
     }
     sqlsrv_free_stmt($getResults);
     
