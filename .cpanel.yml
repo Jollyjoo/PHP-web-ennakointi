@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/catbxjbt/public_html/ennakointi/
+    - /bin/cp src/ennakointi.html $DEPLOYPATH
+    - /bin/cp src/webflow.css $DEPLOYPATH
+    - /bin/cp src/haehakusanalla.php $DEPLOYPATH
