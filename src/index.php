@@ -1,6 +1,11 @@
 
 <?php
 echo "Hello Azure!!";
+
+
+echo phpinfo();
+
+
 /*
 $mysqli = new mysqli("servername", "username", "password", "dbname");
 if($mysqli->connect_error) {
