@@ -31,7 +31,11 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while($row = $result->fetch_assoc()) {
-        echo "Result: " . $row["your_column"];
+        echo "Aika: " . $row["aika"] . ", ";
+        echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
+        echo "Teema: " . $row["Teema"] . ", ";
+        echo "Uutinen: " . $row["Uutinen"] . ", ";
+        echo "Url: " . $row["Url"] . "<br>";
     }
 } else {
     echo "0 results";
