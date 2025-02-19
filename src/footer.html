@@ -1,0 +1,18 @@
+// lisää tämä html tiedostoon, niin se lataa tämän tiedoston sisällön...
+
+<script type="text/javascript">
+    // Ladataan tuo footer.html tiedostosta, kun sitä samaa käytetään niin monessa paikassa
+    // muokkaile sitä jos haluat joka sivun yläosaan muutoksia
+    function footer() {
+        fetch('./footer.html')
+            .then(response => response.text())
+            .then(data => {
+                const head = document.head;
+                const footerContent = document.createElement('div');
+                footerContent.innerHTML = data;
+                head.appendChild(footerContent);
+            })
+            .catch(error => console.error('Error loading footer.html:', error));
+    }
+    footer();
+</script>

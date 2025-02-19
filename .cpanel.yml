@@ -1,8 +1,16 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/catbxjbt/public_html/ennakointi/
+    - export DEPLOYPATH=/home/catbxjbt/public_html/red/
     - /bin/cp src/ennakointi.html $DEPLOYPATH
     - /bin/cp src/webflow.css $DEPLOYPATH
     - /bin/cp src/haehakusanalla.php $DEPLOYPATH
-    - /bin/cp src/index.php $DEPLOYPATH    
+    - /bin/cp src/index.php $DEPLOYPATH
+    - /bin/cp src/sqltest.php $DEPLOYPATH
+    - /bin/cp src/vaesto.html $DEPLOYPATH
+    - /bin/cp src/tyollisyys.html $DEPLOYPATH
+    - /bin/cp src/opiskelu.html $DEPLOYPATH
+    - /bin/cp src/aluekehitys.html $DEPLOYPATH
+    - /bin/cp src/toimialaennakointi.html $DEPLOYPATH
+    - /bin/cp src/tyomarkkinasignaalit.html $DEPLOYPATH
+    - /bin/cp src/webflow-contact.html $DEPLOYPATH
