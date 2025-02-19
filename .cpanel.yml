@@ -4,6 +4,7 @@ deployment:
     - export DEPLOYPATH=/home/catbxjbt/public_html/red/
     - /bin/cp src/ennakointi.html $DEPLOYPATH
     - /bin/cp src/webflow.css $DEPLOYPATH
+    - /bin/cp src/webflow.js $DEPLOYPATH    
     - /bin/cp src/haehakusanalla.php $DEPLOYPATH
     - /bin/cp src/index.html $DEPLOYPATH
     - /bin/cp src/sqltest.php $DEPLOYPATH
