@@ -6,8 +6,8 @@
     $serverName = "ennakointi-srv.database.windows.net"; // update me
     $connectionOptions = array(
         "Database" => "EnnakointiDB", // update me
-        "Uid" => "Christian", // update me
-        "PWD" => "Ennakointi24" // update me
+        "Uid" => "catbxjbt_readonly", // update me
+        "PWD" => "TamaonSalainen44" // update me
     );
     //Establishes the connection
     $conn = sqlsrv_connect($serverName, $connectionOptions);

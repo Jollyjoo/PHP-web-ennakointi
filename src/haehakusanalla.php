@@ -2,8 +2,8 @@
 
 
 $servername = "tulevaisuusluotain.fi";
-$username = "catbxjbt_Christian";
-$password = "Juustonaksu5";
+$username = "catbxjbt_readonly";
+$password = "TamaonSalainen44";
 $dbname = "catbxjbt_ennakointi";
 
 // Create connection
