@@ -5,7 +5,7 @@ deployment:
     - /bin/cp src/ennakointi.html $DEPLOYPATH
     - /bin/cp src/webflow.css $DEPLOYPATH
     - /bin/cp src/haehakusanalla.php $DEPLOYPATH
-    - /bin/cp src/index.php $DEPLOYPATH
+    - /bin/cp src/index.html $DEPLOYPATH
     - /bin/cp src/sqltest.php $DEPLOYPATH
     - /bin/cp src/vaesto.html $DEPLOYPATH
     - /bin/cp src/tyollisyys.html $DEPLOYPATH
