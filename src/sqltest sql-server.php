@@ -3,9 +3,9 @@
     $q = $_REQUEST["q"];
     
 
-    $serverName = "tulevaisuusluotain.fi"; // update me
+    $serverName = "ennakointi-srv.database.windows.net"; // update me
     $connectionOptions = array(
-        "Database" => "catbxjbt_readonly", // update me
+        "Database" => "EnnakointiDB", // update me
         "Uid" => "catbxjbt_readonly", // update me
         "PWD" => "TamaonSalainen44" // update me
     );
