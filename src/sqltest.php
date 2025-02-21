@@ -1,14 +1,12 @@
 <?php
-
+/* 
 $q = $_REQUEST["q"];
+ */
 
-
-$serverName = "tulevaisuusluotain.fi"; // update me
-$connectionOptions = array(
-    "Database" => "catbxjbt_readonly", // update me
-    "Uid" => "catbxjbt_readonly", // update me
-    "PWD" => "TamaonSalainen44" // update me
-);
+$servername = "tulevaisuusluotain.fi";
+$username = "catbxjbt_readonly";
+$password = "TamaonSalainen44";
+$dbname = "catbxjbt_ennakointi";
 
 // Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
