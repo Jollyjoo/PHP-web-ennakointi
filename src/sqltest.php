@@ -1,50 +1,63 @@
 <?php
 
-    $q = $_REQUEST["q"];
-    
+$q = $_REQUEST["q"];
 
-    $serverName = "tulevaisuusluotain.fi"; // update me
-    $connectionOptions = array(
-        "Database" => "catbxjbt_readonly", // update me
-        "Uid" => "catbxjbt_readonly", // update me
-        "PWD" => "TamaonSalainen44" // update me
-    );
-    //Establishes the connection
-    $conn = sqlsrv_connect($serverName, $connectionOptions);
-    if( $conn === false ) {
-        die( print_r( sqlsrv_errors(), true));
-    }
-    else {
-        echo"Connection Success: connected!";
-    }
 
-    $tsql= "SELECT CONVERT(CHAR(8),[uutisen_pvm],112) as aika, Maakunta_ID, Teema, Uutinen, Url 
-                FROM dbo.Mediaseuranta
-                where Maakunta_ID = (SELECT maakunta_id from dbo.maakunnat where maakunta LIKE '%" . $q . "%')
+$serverName = "tulevaisuusluotain.fi"; // update me
+$connectionOptions = array(
+    "Database" => "catbxjbt_readonly", // update me
+    "Uid" => "catbxjbt_readonly", // update me
+    "PWD" => "TamaonSalainen44" // update me
+);
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+// Set character set to UTF-8
+$conn->set_charset("utf8");
+
+$q = $_GET['q'];
+
+$sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Url 
+FROM catbxjbt_ennakointi.Mediaseuranta
+where Maakunta_ID = (SELECT maakunta_id from dbo.maakunnat where maakunta LIKE '%" . $q . "%')
                 order by uutisen_pvm DESC;";
-    $getResults= sqlsrv_query($conn, $tsql);
-    echo ("Reading data from table <br>" . PHP_EOL);
-    if ($getResults == FALSE)
-        die(FormatErrors(sqlsrv_errors()));
-    while ($row = sqlsrv_fetch_array($getResults, SQLSRV_FETCH_ASSOC)) {
-        echo ("<b>" . $row['aika'] . " " . $row['Teema'] . "</b> " . $row['Uutinen'] . " " . $row['Url'] . "<br>" . PHP_EOL);
+
+
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        echo "Aika: " . $row["aika"] . ", ";
+        echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
+        echo "Teema: " . $row["Teema"] . ", ";
+        echo "Uutinen: " . $row["Uutinen"] . ", ";
+        echo "Url: " . $row["Url"] . "<br>";
     }
-    sqlsrv_free_stmt($getResults);
+} else {
+    echo "0 results";
+}
+$conn->close();
 
 
 
-    function FormatErrors( $errors )
+function FormatErrors($errors)
 {
     /* Display errors. */
     echo "Error information: ";
 
-    foreach ( $errors as $error )
-    {
-        echo "SQLSTATE: ".$error['SQLSTATE']."";
-        echo "Code: ".$error['code']."";
-        echo "Message: ".$error['message']."";
+    foreach ($errors as $error) {
+        echo "SQLSTATE: " . $error['SQLSTATE'] . "";
+        echo "Code: " . $error['code'] . "";
+        echo "Message: " . $error['message'] . "";
     }
 }
+
+
 
 
 ?>

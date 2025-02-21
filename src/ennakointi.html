@@ -73,7 +73,9 @@
 
     </div>
 
-    <form action="">
+    
+    <p align="center"><b>Valitse maakunta..</b></p>
+    <form align="center">        
         <select name="customers" onchange="showHint(this.value)">
             <option value="">Valitse alue:</option>
             <option value="Päijät-Häme">Päijät-Häme</option>
@@ -83,10 +85,11 @@
         </select>
     </form>
 
-    <p><b>Hae uutista hakusanalla:</b></p>
-    <form>
-        Hakusana: <input type="text" onkeyup="HaeHakusanalla(this.value)">
+    <p align="center"><b>..tai hae uutista hakusanalla:</b><br>
+    <form align="center">
+        <input type="text" onkeyup="HaeHakusanalla(this.value)">
     </form>
+</p>
     <p>
     <div id="txtHint"></div>
     </p>
