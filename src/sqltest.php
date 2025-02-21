@@ -22,7 +22,7 @@ $q = $_GET['q'];
 
 $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Url 
 FROM catbxjbt_ennakointi.Mediaseuranta
-where Maakunta_ID = (SELECT maakunta_id from dbo.maakunnat where maakunta LIKE '%" . $q . "%')
+where Maakunta_ID = (SELECT maakunta_id from catbxjbt_ennakointi.maakunnat where maakunta LIKE '%" . $q . "%')
                 order by uutisen_pvm DESC;";
 
 
