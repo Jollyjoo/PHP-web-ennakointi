@@ -141,7 +141,7 @@
         <script type="text/javascript">
             // Ladataan tuo otsikot.html tiedostosta, kun sitä samaa käytetään niin monessa paikassa
             function otsikot() {
-                fetch('otsikot.html')
+                fetch('./otsikot.html')
                     .then(response => response.text())
                     .then(data => {
                         const placeholder = document.getElementById('otsikot-placeholder');
