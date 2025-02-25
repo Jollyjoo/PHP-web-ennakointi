@@ -106,7 +106,9 @@
   font-style: italic;
 }
 
-/* poppins */
+/* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins */
+/* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins */
+/* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins */
 
 
 
@@ -159,6 +161,9 @@ html {
   -ms-text-size-adjust: 100%;
   font-family: 'Poppins';
 }
+
+
+#centerContainer { max-width: 1500px; text-align: center; margin: 0px auto; }
 
 body {
   margin: 0;
