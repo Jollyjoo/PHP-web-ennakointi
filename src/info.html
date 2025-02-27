@@ -42,58 +42,7 @@
                     <img src="img/esr2.jpg" width="60">
                 </div>
         </div>
-<!--
-        <div class="banner">
-            <div class="banner-content">
-                <b>Mediaseuranta</b>
-                <i>Viimeisimmät uutiset valitulta alueelta</i>
-            </div>
-        </div>
-        <script>
-            const stories = [
-                {
-                    title: "2024-11-02	Lahdessa on keskivertoa enemmän kansainvälisiä opiskelijoita:",
-                    content: "https://www.ess.fi/paikalliset/8031811"
-                },
-                {
-                    title: "2024-11-01	SDP aikaistaisi Lahden veronkorotusta - \"Haluamme auttaa sivistyspuolta\": ",
-                    content: "https://yle.fi/a/74-20121701"
-                },
-                {
-                    title: "2024-11-01	Vesibisnes Päijät-Hämeessä saa uutta vauhtia - Finnwater haluaa saada tuotannon käyntiin Hollolassa jo vuoden päästä:",
-                    content: "https://yle.fi/a/74-20121701"
-                },
-                {
-                    title: "2024-11-01	Murskatappio kulttuurille - Näin valtion säästöt osuvat lahtelaisiin taidelaitoksiin:",
-                    content: "https://www.ess.fi/paikalliset/8029810"
-                }
-            ];
-    
-            let currentStoryIndex = 1;
-    
-            function updateBannerContent() {
-                const bannerContent = document.querySelector('.banner-content');
-                bannerContent.classList.add('hidden');
-    
-                setTimeout(() => {
-                    bannerContent.querySelector('b').textContent = stories[currentStoryIndex].title;
-                    bannerContent.querySelector('i').textContent = stories[currentStoryIndex].content;
-                    bannerContent.classList.remove('hidden');
-    
-                    currentStoryIndex = (currentStoryIndex + 1) % stories.length;
-                }, 500); // Match this duration with the CSS transition duration
-            }
-    
-            // Initialize the banner with the first story
-            document.addEventListener('DOMContentLoaded', () => {
-                const bannerContent = document.querySelector('.banner-content');
-                bannerContent.querySelector('b').textContent = stories[0].title;
-                bannerContent.querySelector('i').textContent = stories[0].content;
-            });
 
-            setInterval(updateBannerContent, 8000); // Change content every 5 seconds
-            </script>
-        -->
     </div>
 
     <div class="hero-section centered">
@@ -116,7 +65,7 @@
                 <!-- Placeholder for otsikot.html content -->
                 <a href="tyollisyys.html" class="hollow-button all-caps">Tilannekuva</a>
                 <a href="ennakointi.html" class="hollow-button all-caps">Osaamisen tulevaisuuskuva</a>
-                <a href="info.html" class="hollow-button all-caps">Tietoa meistä</a>
+                <a href="info.html" class="button">Tietoa meistä</a>
             </div>
         </div>
     </div>
@@ -137,6 +86,37 @@
         </div>
     </div>
 
+    <div class="footer">
+        <div class="w-container">
+            <div class="w-row">
+                <div class="spc w-col w-col-4">
+                    <h5>Hämeen ennakoinnin visio</h5>
+                    <p>Häme osaa ennakoida tulevaisuutta ja vastata osaamistarpeisiin. Tämä toteutuu vaikuttavalla
+                        osaamistarpeiden ennakoinnin yhteistyöllä, alueen tarpeisiin vastaavan tiedon tuottamisella
+                        ja hyödyntämisellä sekä osuvilla toimilla.</p>
+                </div>
+                <div class="spc w-col w-col-4">
+                    <h5>Hyödyllisiä linkkejä</h5>
+                    <a href="https://www.osaamistarvekompassi.fi" class="footer-link" target="_blank">JOTPA -
+                        Osaamistarvekompassi</a>
+                    <a href="https://www.oph.fi/fi/palvelut/osaamisen-ennakointifoorumi-oef" target="_blank"
+                        class="footer-link">OEF - Osaamisen ennakointifoorumi</a>
+                    <a href="https://tyomarkkinatori.fi/teemasivut/tyovoiman-saatavuus-ja-kohtaanto" target="_blank"
+                        class="footer-link">Työvoiman saatavuus ja kohtaanto</a>
+                    <a href="https://vipunen.fi/fi-fi/ennakointi" class="footer-link" target="_blank">Vipunen /
+                        Ennakointi</a>
+                </div>
+
+                <div class="w-col w-col-4">
+                    <h5> Muuta sisältöä</h5>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
     <div class="footer center">
         <td>
             Sivustoa kehitetään osana <a
@@ -144,7 +124,7 @@
                 target="_blank"> Hämeen yhteinen osaamistarpeiden ennakoinnin toimintamalli -hanketta (ESR+)</a>
         </td>
         <td>
-            <img src="img/ely.png" height="70" alt="">
+            <img src="./img/ely.png" height="70" alt="">
         </td>
     </div>
 

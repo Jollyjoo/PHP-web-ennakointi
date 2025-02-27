@@ -18,3 +18,4 @@ deployment:
     - /bin/cp src/tyomarkkinasignaalit.html $DEPLOYPATH
     - /bin/cp src/webflow-contact.html $DEPLOYPATH
     - /bin/cp src/otsikot.html $DEPLOYPATH
+    - /bin/cp src/info.html $DEPLOYPATH
