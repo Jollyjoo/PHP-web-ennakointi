@@ -70,9 +70,9 @@
             </div>
         </div>
     </div>
-  
- 
-    
+
+
+
 
     <div class="section">
         <div id="centerContainer">
@@ -95,7 +95,7 @@
                     <p>Laadullisen ennakoinnin työpajaan</p>
                     <h2 id="ennakointipaja"></h2>
                     (02.04.2025)
-                    
+
                 </div>
                 <div class="tilastobox">
                     <p>Työttömät työnhakijat</p>
@@ -112,7 +112,7 @@
             const startDate = new Date('2024-01-01T00:00:00+02:00');
             const endDate = new Date('2025-12-31T23:59:59+02:00');
             // Haetaan nykyinen päivämäärä
-            const currentDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Helsinki"}));
+            const currentDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Helsinki" }));
             // Lasketaan aikojen erotus millisekunneissa
             const timeDifference = currentDate - startDate;
 
@@ -135,60 +135,91 @@
         setInterval(updateTime, 1000);
     </script>
 
-<script>
-    function updateHours() {
-        // Määritetään tapahtuman päivämäärä
-        const eventDate = new Date('2025-03-20T00:00:00+02:00');
-        // Haetaan nykyinen päivämäärä ja aika
-        const currentDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Helsinki"}));
-        // Lasketaan aikojen erotus millisekunneissa
-        const timeDifference = eventDate - currentDate;
+    <script>
+        function updateHours() {
+            // Määritetään tapahtuman päivämäärä
+            const eventDate = new Date('2025-03-20T00:00:00+02:00');
+            // Haetaan nykyinen päivämäärä ja aika
+            const currentDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Helsinki" }));
+            // Lasketaan aikojen erotus millisekunneissa
+            const timeDifference = eventDate - currentDate;
 
-        // Lasketaan tuntien määrä
-        const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
+            // Lasketaan tuntien määrä
+            const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
 
-        // Näytetään tulos
-        document.getElementById('hoursCount').innerText = `${hoursDifference} tuntia`;
-    }
+            // Näytetään tulos
+            document.getElementById('hoursCount').innerText = `${hoursDifference} tuntia`;
+        }
 
-    // Päivitetään aika joka sekunti
-    setInterval(updateHours, 1000);
-</script>
+        // Päivitetään aika joka sekunti
+        setInterval(updateHours, 1000);
+    </script>
 
-<script>
-    function updateennakointipaja() {
-        // Määritetään tapahtuman päivämäärä
-        const eventDate = new Date('2025-04-02T00:00:00+02:00');
-        // Haetaan nykyinen päivämäärä ja aika
-        const currentDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Helsinki"}));
-        // Lasketaan aikojen erotus millisekunneissa
-        const timeDifference = eventDate - currentDate;
+    <script>
+        function updateennakointipaja() {
+            // Määritetään tapahtuman päivämäärä
+            const eventDate = new Date('2025-04-02T00:00:00+02:00');
+            // Haetaan nykyinen päivämäärä ja aika
+            const currentDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Helsinki" }));
+            // Lasketaan aikojen erotus millisekunneissa
+            const timeDifference = eventDate - currentDate;
 
-        // Lasketaan tuntien määrä
-        const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
+            // Lasketaan tuntien määrä
+            const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
 
-        // Näytetään tulos
-        document.getElementById('ennakointipaja').innerText = `${hoursDifference} tuntia`;
-    }
+            // Näytetään tulos
+            document.getElementById('ennakointipaja').innerText = `${hoursDifference} tuntia`;
+        }
 
-    // Päivitetään aika joka sekunti
-    setInterval(updateennakointipaja, 1000);
-</script>
+        // Päivitetään aika joka sekunti
+        setInterval(updateennakointipaja, 1000);
+    </script>
 
 
     <div class="section">
         <div class="w-container">
-            <div class="section-title-group">
-                <div class="section-subheading center">
-                    <div class="w-row">
-                        <br><br>
-                        <a href="https://www.linkedin.com/company/tulevaisuusluotain/">
-                            <img src="img/LinkedIn-Blue.png" alt="Tulevaisuusluotain LinkedIn" width="90"></a>
-                        <p> Seuraa meitä LinkedInissä ja pysyt kuulolla ajankohtaisista uutisista!
-                        </p>
+
+
+            <h4> Tulossa olevaa sisältöä: <br>
+           
+                <li> MITEN OSAAMISTARPEET TULEVAT MUUTTUMAAN TULEVAISUUDESSA
+                
+                <li> MITKÄ ON TYÖIKÄISTEN ENITEN TARVITSEMAT UUDET OSAAMISET
+
+                  
+                <li> MILLAISTA OSAAMISTA ALUEILLA HALUTAAN KEHITTÄÄ JA MIKSI
+
+              
+                <li> MITKÄ OSAAMISTARPEET TULEVAT KASVAMAAN ENITEN YLI ALOJEN
+
+                <li> TYÖELÄMÄN MUUTOKSET YLEISESTI
+
+                <li> TOIMINTAYMPÄRISTÖN MUUTOKSET TYÖELÄMÄSSÄ
+
+                <li> ALUEELLINEN TIETO TYÖPAIKOISTA NYT JA ENNAKOITU TULEVAISUUDESSA vs. koulutustarjonta ja kohtaanto
+
+                <li> MILLÄ ALOILLA TARVITAAN ENITEN UUTTA OSAAMISTA
+
+                <li> PUUTTEET ALUEEN KOULUTUSTARJONNASSA
+
+                <li> ERI ALUEIDEN ELINKEINORAKENTEEN VAIKUTUS OSAAMISEN KYSYNTÄÄN JA TARJONTAAN.
+
+                <li> OPISKELIJOIDEN/VALMISTUNEIDEN TYÖLLISTYMINEN aloittain
+            </h4>
+
+
+
+                    <div class="section-title-group">
+                        <div class="section-subheading center">
+                            <div class="w-row">
+                                <br><br>
+                                <a href="https://www.linkedin.com/company/tulevaisuusluotain/">
+                                    <img src="img/LinkedIn-Blue.png" alt="Tulevaisuusluotain LinkedIn" width="90"></a>
+                                <p> Seuraa meitä LinkedInissä ja pysyt kuulolla ajankohtaisista uutisista!
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
         </div>
     </div>
 
