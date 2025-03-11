@@ -1,3 +1,34 @@
+/* Yleinen laatikon tyyli */
+.tilastobox {
+  border: 2px solid #000; /* Reunan väri ja paksuus */
+  border-radius: 10px; /* Pyöristetyt kulmat */
+  padding: 10px; /* Sisätyhjä */
+  margin: 10px; /* Ulkoinen tyhjä */
+  background-color: #e7e2e6; /* Taustaväri */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Varjo */
+  flex: 1; /* Laatikot venyvät tasaisesti */
+}
+
+/* Tekstin tyyli */
+.tilastobox h2 {
+  font-size: 32px; /* Otsikon fonttikoko */
+  font-weight: bold;
+  color: #714ea4; /* Otsikon väri */
+}
+
+.tilastobox p {
+  font-size: 18px; /* Tekstin fonttikoko */
+  color: #714ea4; /* Tekstin väri */
+}
+
+/* Kontainerin tyyli */
+.container {
+  display: flex;
+  flex-wrap: wrap; /* Laatikot menevät seuraavalle riville, jos eivät mahdu */
+  gap: 10px; /* Välit laatikoiden välillä */
+}
+
+
 .poppins-thin {
   font-family: "Poppins", serif;
   font-weight: 100;

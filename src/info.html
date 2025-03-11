@@ -24,6 +24,7 @@
         }
         header();
     </script>
+
 </head>
 
 <body>
@@ -69,6 +70,111 @@
             </div>
         </div>
     </div>
+  
+ 
+    
+
+    <div class="section">
+        <div id="centerContainer">
+            <div class="container">
+                <div class="tilastobox">
+                    <p>Hankkeen kuluminen</p>
+                    <p id="timeCount"></p>
+                    <h2 id="percentageCount"></h2>
+                    (Hankkeen kestosta)
+                    </p>
+                </div>
+                <div class="tilastobox">
+                    <p>Salpausselän kisoihin</p>
+                    <h2 id=hoursCount></h2>
+                    (20.03.2025)
+                    <p>Lahtiskigames.com
+                    </p>
+                </div>
+                <div class="tilastobox">
+                    <p>Laadullisen ennakoinnin työpajaan</p>
+                    <h2 id="ennakointipaja"></h2>
+                    (02.04.2025)
+                    
+                </div>
+                <div class="tilastobox">
+                    <p>Työttömät työnhakijat</p>
+                    <h2>14 000</h2>(Päijät-Häme)
+                    <p>Tammikuu 2025
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function updateTime() {
+            // Määritetään aloituspäivä ja lopetuspäivä
+            const startDate = new Date('2024-01-01T00:00:00+02:00');
+            const endDate = new Date('2025-12-31T23:59:59+02:00');
+            // Haetaan nykyinen päivämäärä
+            const currentDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Helsinki"}));
+            // Lasketaan aikojen erotus millisekunneissa
+            const timeDifference = currentDate - startDate;
+
+            // Lasketaan päivien, tuntien, minuuttien ja sekuntien määrä
+            const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+            const hoursDifference = Math.floor((timeDifference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutesDifference = Math.floor((timeDifference % (1000 * 60 * 60)) / (1000 * 60));
+            const secondsDifference = Math.floor((timeDifference % (1000 * 60)) / 1000);
+
+            // Lasketaan prosenttiosuus
+            const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+            const percentageElapsed = ((daysDifference / totalDays) * 100).toFixed(2);
+
+            // Näytetään tulos
+            document.getElementById('timeCount').innerText = `${daysDifference} päivää, ${hoursDifference} tuntia, ${minutesDifference} minuuttia, ${secondsDifference} sek.`;
+            document.getElementById('percentageCount').innerText = `${percentageElapsed}%`;
+        }
+
+        // Päivitetään aika joka sekunti
+        setInterval(updateTime, 1000);
+    </script>
+
+<script>
+    function updateHours() {
+        // Määritetään tapahtuman päivämäärä
+        const eventDate = new Date('2025-03-20T00:00:00+02:00');
+        // Haetaan nykyinen päivämäärä ja aika
+        const currentDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Helsinki"}));
+        // Lasketaan aikojen erotus millisekunneissa
+        const timeDifference = eventDate - currentDate;
+
+        // Lasketaan tuntien määrä
+        const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
+
+        // Näytetään tulos
+        document.getElementById('hoursCount').innerText = `${hoursDifference} tuntia`;
+    }
+
+    // Päivitetään aika joka sekunti
+    setInterval(updateHours, 1000);
+</script>
+
+<script>
+    function updateennakointipaja() {
+        // Määritetään tapahtuman päivämäärä
+        const eventDate = new Date('2025-04-02T00:00:00+02:00');
+        // Haetaan nykyinen päivämäärä ja aika
+        const currentDate = new Date(new Date().toLocaleString("en-US", {timeZone: "Europe/Helsinki"}));
+        // Lasketaan aikojen erotus millisekunneissa
+        const timeDifference = eventDate - currentDate;
+
+        // Lasketaan tuntien määrä
+        const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
+
+        // Näytetään tulos
+        document.getElementById('ennakointipaja').innerText = `${hoursDifference} tuntia`;
+    }
+
+    // Päivitetään aika joka sekunti
+    setInterval(updateennakointipaja, 1000);
+</script>
+
 
     <div class="section">
         <div class="w-container">
@@ -133,7 +239,7 @@
         crossorigin="anonymous"></script>
     <script src="webflow.js" type="text/javascript"></script>
 
-   
+
 
 </body>
 
