@@ -62,73 +62,16 @@
 
 
 
-    <!-- ******************************** UUTISVIRTA -->
-    <!-- ******************************** UUTISVIRTA -->
-    <!-- ******************************** UUTISVIRTA -->
-    <div id="demo">
-        <h2>Mediaseuranta - uutisvirta</h2>
 
+
+<div class="section">
+
+    <div id="centerContainer">
+    <iframe src='https://flo.uri.sh/story/2982272/embed' title='Interactive or visual content' class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;' 
+    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
     </div>
 
 
-    <p align="center"><b>Valitse maakunta..</b></p>
-    <form align="center">
-        <select name="customers" onchange="showHint(this.value)">
-            <option value="">Maakunta:</option>
-            <option value="Päijät-Häme">Päijät-Häme</option>
-            <option value="Kanta-Häme ">Kanta-Häme</option>
-            <option value="koko-häme">KOKO-HÄME</option>
-            <option value="Yleiset">Yleiset</option>
-        </select>
-    </form>
-
-    <p align="center"><b>..tai hae uutista hakusanalla:</b><br>
-    <form align="center">
-        <input type="text" onkeyup="HaeHakusanalla(this.value)">
-    </form>
-    </p>
-    <p>
-    <div id="txtHint"></div>
-    </p>
-
-
-    <script>
-        function showHint(str) {
-            var xhttp;
-            if (str == "") {
-                document.getElementById("txtHint").innerHTML = "";
-                return;
-            }
-            xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    document.getElementById("txtHint").innerHTML = this.responseText;
-                }
-            };
-            xhttp.open("GET", "./sqltest.php?q=" + str, true);
-            xhttp.send();
-        }
-    </script>
-
-    <script>
-        function HaeHakusanalla(str) {
-            var xhttp;
-            if (str == "") {
-                document.getElementById("txtHint").innerHTML = "";
-                return;
-            }
-            xhttp = new XMLHttpRequest();
-            xhttp.onreadystatechange = function () {
-                if (this.readyState == 4 && this.status == 200) {
-                    document.getElementById("txtHint").innerHTML = this.responseText;
-                }
-            };
-            xhttp.open("GET", "./haehakusanalla.php?q=" + str, true);
-            xhttp.send();
-        }
-    </script>
-
-<div class="section">
         <!-- <div id="centerContainer">
         <iframe src='https://flo.uri.sh/visualisation/21571614/embed' title='Interactive or visual content' class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;' 
         sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
@@ -296,6 +239,72 @@
             </div>
         </div>
 
+            <!-- ******************************** UUTISVIRTA -->
+    <!-- ******************************** UUTISVIRTA -->
+    <!-- ******************************** UUTISVIRTA -->
+    <div id="demo">
+        <h2>Mediaseuranta - uutisvirta</h2>
+
+    </div>
+
+
+    <p align="center"><b>Valitse maakunta..</b></p>
+    <form align="center">
+        <select name="customers" onchange="showHint(this.value)">
+            <option value="">Maakunta:</option>
+            <option value="Päijät-Häme">Päijät-Häme</option>
+            <option value="Kanta-Häme ">Kanta-Häme</option>
+            <option value="koko-häme">KOKO-HÄME</option>
+            <option value="Yleiset">Yleiset</option>
+        </select>
+    </form>
+
+    <p align="center"><b>..tai hae uutista hakusanalla:</b><br>
+    <form align="center">
+        <input type="text" onkeyup="HaeHakusanalla(this.value)">
+    </form>
+    </p>
+    <p>
+    <div id="txtHint"></div>
+    </p>
+
+
+    <script>
+        function showHint(str) {
+            var xhttp;
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("txtHint").innerHTML = this.responseText;
+                }
+            };
+            xhttp.open("GET", "./sqltest.php?q=" + str, true);
+            xhttp.send();
+        }
+    </script>
+
+    <script>
+        function HaeHakusanalla(str) {
+            var xhttp;
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("txtHint").innerHTML = this.responseText;
+                }
+            };
+            xhttp.open("GET", "./haehakusanalla.php?q=" + str, true);
+            xhttp.send();
+        }
+    </script>
+    
         <div class="footer center">
         </div>
 
