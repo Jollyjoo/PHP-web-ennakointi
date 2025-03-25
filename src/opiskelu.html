@@ -76,7 +76,8 @@
         </div>
 
         <br><br>
-        <div id="centerContainer"><h2> Valitse tarkasteltava oppilaitos: </h2><br><br>
+        <div id="centerContainer">
+            <h2> Valitse tarkasteltava oppilaitos: </h2><br><br>
             <!-- Buttons to select which visualization to show -->
             <div style="text-align: center; margin-bottom: 25px;">
                 <button onclick="showVisualization('visual1')">Salpaus</button>
@@ -97,14 +98,31 @@
 
             <!-- Visualization 2 kiipula -->
             <div id="visual2" class="visualization" style="display: none;">
-                <iframe src='https://flo.uri.sh/story/2998165/embed' title='Interactive or visual content' 
-                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;' 
-                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+                <iframe src='https://flo.uri.sh/story/2998165/embed' title='Interactive or visual content'
+                    class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;'
+                    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
             </div>
 
             <!-- Visualization 3 -->
-            <div id="visual3" class="visualization" style="display: none;"> 
-                <h2>TULOSSA</h2>   </div>
+            <div id="visual3" class="visualization" style="display: none;">
+                <h2>HYRIA - TULOSSA</h2>
+            </div>
+            <!-- Visualization 3 -->
+            <div id="visual4" class="visualization" style="display: none;">
+                <h2>HAMK - TULOSSA</h2>
+            </div>
+            <!-- Visualization 3 -->
+            <div id="visual5" class="visualization" style="display: none;">
+                <h2>LAB - TULOSSA</h2>
+            </div>
+            <!-- Visualization 3 -->
+            <div id="visual6" class="visualization" style="display: none;">
+                <h2>TAVASTIA - TULOSSA</h2>
+            </div>
+            <!-- Visualization 3 -->
+            <div id="visual7" class="visualization" style="display: none;">
+                <h2>LHKK - TULOSSA</h2>
+            </div>
         </div>
         <script>
             // Function to show the selected visualization and hide others
@@ -127,7 +145,7 @@
         </script>
         <br><br>
 
-<!-- 
+        <!-- 
         <div id="centerContainer">
             <iframe src='https://flo.uri.sh/story/2982272/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;'
