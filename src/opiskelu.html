@@ -35,13 +35,13 @@
         <div class="w-container"> <a href="index.html" aria-current="page" class="brand-link w-nav-brand w--current">
                 <img src="img/2logo-tulevaisuusluotain.png" width="170">
                 <nav role="navigation" class="navigation-menu w-nav-menu"><a href="index.html" aria-current="page"
-                    class="brand-link w-nav-brand w--current">
-                    <img src="img/esr.jpg" width="350"><a></a>
-            </nav>
+                        class="brand-link w-nav-brand w--current">
+                        <img src="img/esr.jpg" width="350"><a></a>
+                </nav>
 
-            <div class="hamburger-button w-nav-button">
-                <img src="img/esr2.jpg" width="100">
-            </div>
+                <div class="hamburger-button w-nav-button">
+                    <img src="img/esr2.jpg" width="100">
+                </div>
         </div>
 
 
@@ -50,33 +50,91 @@
             <div data-w-id="e464d218-f801-55d1-1f50-7da00b5bfb8f" style="opacity:0" class="w-container">
                 <h1 data-ix="fade-in-bottom-page-loads" class="hero-heading">TULEVAISUUSLUOTAIN</h1>
 
-                        <div data-ix="fade-in-bottom-page-loads" id="otsikot-placeholder">
-                            <!--OTSIKOIDEN PLACEHOLDER - OTSIKOT.HTML -->
-                        </div>
-        
+                <div data-ix="fade-in-bottom-page-loads" id="otsikot-placeholder">
+                    <!--OTSIKOIDEN PLACEHOLDER - OTSIKOT.HTML -->
                 </div>
+
             </div>
-        
-            <div class="footer center"> <b>
+        </div>
+
+        <div class="footer center"> <b>
                 <a href="opiskelu.html" class="button">Osaaminen</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <a href="tyollisyys.html">Työllisyys</a>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                <a href="vaesto.html">Väestö</a>    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="tyollisyys.html">Työllisyys</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <a href="vaesto.html">Väestö</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <a href="aluekehitys.html">Aluekehitys</a>
-              </b>
-              </b>
-            </div>
+            </b>
+            </b>
+        </div>
 
-            <div id="centerContainer">
-            <iframe src='https://flo.uri.sh/visualisation/21612862/embed' title='Interactive or visual content' class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:350px;' sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-            <iframe src='https://flo.uri.sh/visualisation/21613675/embed' title='Interactive or visual content' class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:350px;' sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-        
-            </div>
-
-            <div id="centerContainer">
-                <iframe src='https://flo.uri.sh/story/2982272/embed' title='Interactive or visual content' class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;' 
+        <div id="centerContainer">
+            <iframe src='https://flo.uri.sh/visualisation/21612862/embed' title='Interactive or visual content'
+                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:350px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-                </div>
+            <iframe src='https://flo.uri.sh/visualisation/21613675/embed' title='Interactive or visual content'
+                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:350px;'
+                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+        </div>
 
+        <br><br>
+        <div id="centerContainer"><h2> Valitse tarkasteltava oppilaitos: </h2><br><br>
+            <!-- Buttons to select which visualization to show -->
+            <div style="text-align: center; margin-bottom: 25px;">
+                <button onclick="showVisualization('visual1')">Salpaus</button>
+                <button onclick="showVisualization('visual2')">Kiipula</button>
+                <button onclick="showVisualization('visual3')">Hyria</button>
+                <button onclick="showVisualization('visual4')">HAMK</button>
+                <button onclick="showVisualization('visual5')">LAB</button>
+                <button onclick="showVisualization('visual6')">Tavastia</button>
+                <button onclick="showVisualization('visual6')">LHKK</button>
+            </div>
+
+            <!-- Visualization 1 salpaus -->
+            <div id="visual1" class="visualization" style="display: none;">
+                <iframe src='https://flo.uri.sh/story/2982272/embed' title='Visualization 1'
+                    class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;'
+                    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+            </div>
+
+            <!-- Visualization 2 kiipula -->
+            <div id="visual2" class="visualization" style="display: none;">
+                <iframe src='https://flo.uri.sh/story/2998165/embed' title='Interactive or visual content' 
+                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;' 
+                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+            </div>
+
+            <!-- Visualization 3 -->
+            <div id="visual3" class="visualization" style="display: none;"> 
+                <h2>TULOSSA</h2>   </div>
+        </div>
+        <script>
+            // Function to show the selected visualization and hide others
+            function showVisualization(visualId) {
+                // Hide all visualizations
+                const visualizations = document.querySelectorAll('.visualization');
+                visualizations.forEach(visual => {
+                    visual.style.display = 'none';
+                });
+
+                // Show the selected visualization
+                const selectedVisual = document.getElementById(visualId);
+                if (selectedVisual) {
+                    selectedVisual.style.display = 'block';
+                }
+            }
+
+            // Show the first visualization by default
+            showVisualization('visual1');
+        </script>
+        <br><br>
+
+<!-- 
+        <div id="centerContainer">
+            <iframe src='https://flo.uri.sh/story/2982272/embed' title='Interactive or visual content'
+                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:80%;height:800px;'
+                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+        </div>
+
+ -->
 
         <!--opiskelu-->
         <p align="center">Hämeen 2. asteen ammattioppilaitosten opiskelijamäärät opintolinjoittain.</p>
@@ -89,12 +147,12 @@
 
         <p align="center">Vieraskieliset opiskelijat Hämeessä.</p>
         <div id="centerContainer">
-            <iframe title="Vieraskieliset_opiskelijat_stat" width="80%" height="650" 
-            src="https://app.powerbi.com/view?r=eyJrIjoiMzFhOTkwZjUtNWQzYy00YWYwLTgyMzEtZDMxYWQ1ZTZjZGEzIiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9" 
-            frameborder="0" allowFullScreen="true"></iframe>
+            <iframe title="Vieraskieliset_opiskelijat_stat" width="80%" height="650"
+                src="https://app.powerbi.com/view?r=eyJrIjoiMzFhOTkwZjUtNWQzYy00YWYwLTgyMzEtZDMxYWQ1ZTZjZGEzIiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9"
+                frameborder="0" allowFullScreen="true"></iframe>
 
         </div>
-        
+
 
 
         <div class="footer center">
