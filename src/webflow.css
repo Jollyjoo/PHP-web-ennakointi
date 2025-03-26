@@ -1,31 +1,44 @@
 /* Yleinen laatikon tyyli */
 .tilastobox {
-  border: 2px solid #000; /* Reunan väri ja paksuus */
-  border-radius: 10px; /* Pyöristetyt kulmat */
-  padding: 10px; /* Sisätyhjä */
-  margin: 10px; /* Ulkoinen tyhjä */
-  background-color: #e7e2e6; /* Taustaväri */
-  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1); /* Varjo */
-  flex: 1; /* Laatikot venyvät tasaisesti */
+  border: 2px solid #000;
+  /* Reunan väri ja paksuus */
+  border-radius: 10px;
+  /* Pyöristetyt kulmat */
+  padding: 10px;
+  /* Sisätyhjä */
+  margin: 10px;
+  /* Ulkoinen tyhjä */
+  background-color: #e7e2e6;
+  /* Taustaväri */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  /* Varjo */
+  flex: 1;
+  /* Laatikot venyvät tasaisesti */
 }
 
 /* Tekstin tyyli */
 .tilastobox h2 {
-  font-size: 32px; /* Otsikon fonttikoko */
+  font-size: 32px;
+  /* Otsikon fonttikoko */
   font-weight: bold;
-  color: #714ea4; /* Otsikon väri */
+  color: #714ea4;
+  /* Otsikon väri */
 }
 
 .tilastobox p {
-  font-size: 18px; /* Tekstin fonttikoko */
-  color: #714ea4; /* Tekstin väri */
+  font-size: 18px;
+  /* Tekstin fonttikoko */
+  color: #714ea4;
+  /* Tekstin väri */
 }
 
 /* Kontainerin tyyli */
 .container {
   display: flex;
-  flex-wrap: wrap; /* Laatikot menevät seuraavalle riville, jos eivät mahdu */
-  gap: 10px; /* Välit laatikoiden välillä */
+  flex-wrap: wrap;
+  /* Laatikot menevät seuraavalle riville, jos eivät mahdu */
+  gap: 10px;
+  /* Välit laatikoiden välillä */
 }
 
 
@@ -137,9 +150,36 @@
   font-style: italic;
 }
 
-/* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins */
-/* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins */
-/* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins *//* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
+/* poppins */
 
 
 
@@ -194,7 +234,11 @@ html {
 }
 
 
-#centerContainer { max-width: 1500px; text-align: center; margin: 0px auto; }
+#centerContainer {
+  max-width: 1500px;
+  text-align: center;
+  margin: 0px auto;
+}
 
 body {
   margin: 0;
@@ -2620,7 +2664,7 @@ p {
 .hero-section.centered {
   text-align: center;
   /* background-image: linear-gradient(rgba(46, 157, 255, 0.5), rgba(46, 157, 255, .22)), url("https://assets-global.website-files.com/663b57613daa22b24eb91975/663b57623daa22b24eb91a20_photo-1416359658663-73a3834895eb.jpg");*/
- /*  background-image: linear-gradient(#0063aaa4, #0063aac0), url("img/bg-original.jpg"); */
+  /*  background-image: linear-gradient(#0063aaa4, #0063aac0), url("img/bg-original.jpg"); */
   background-image: linear-gradient(#714ea4a4, #714ea4c0), url("img/bg-original.jpg");
   background-position: 0 0, 50%;
   background-size: auto, cover;
@@ -2638,6 +2682,7 @@ p {
   font-weight: 300;
   line-height: 60px;
 }
+
 
 .hero-subheading {
   color: #85c8ef;
@@ -2886,9 +2931,14 @@ p {
     padding-bottom: 119px;
   }
 
-  .hero-heading {
+/*   .hero-heading {
     margin-bottom: 15px;
     font-size: 50px;
+  } */
+
+  .hero-heading {
+    margin-bottom: 15px;
+    font-size: 40px;
   }
 
   .hero-subheading {
