@@ -2961,7 +2961,9 @@ p {
 
   .hero-heading {
     margin-bottom: 15px;
-    font-size: 40px;
+   /*  font-size: 40px; */
+   
+     font-size: 5vw;
   }
 
   .hero-subheading {
@@ -2993,7 +2995,8 @@ p {
 
   .hero-heading {
     margin-bottom: 15px;
-    font-size: 25px;
+   /*  font-size: 18px; */
+   font-size: 5vw;
   }
 
   .hero-section.centered {
