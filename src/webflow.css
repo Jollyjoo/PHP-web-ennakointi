@@ -2357,6 +2357,11 @@ textarea.w-select {
   .w-nav[data-collapse="tiny"] .w-nav-button {
     display: block;
   }
+  .hero-section.centered {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
 }
 
 .w-tabs {
@@ -2421,6 +2426,11 @@ textarea.w-select {
     margin-bottom: 15px;
     font-size: 20px;
   }
+  .hero-section.centered {
+    padding-top: 60px;
+    padding-bottom: 60px;
+  }
+
 }
 
 .w-ix-emptyfix:after {
@@ -2911,9 +2921,13 @@ p {
     background-color: #3b99d9;
   }
 
-  .hero-section.centered {
+/*   .hero-section.centered {
     padding-top: 144px;
     padding-bottom: 144px;
+  } */
+  .hero-section.centered {
+    padding-top: 60px;
+    padding-bottom: 60px;
   }
 
   .grid-image {
@@ -2936,9 +2950,13 @@ p {
     margin-bottom: 30px;
   }
 
-  .hero-section.centered {
+/*   .hero-section.centered {
     padding-top: 119px;
     padding-bottom: 119px;
+  } */
+  .hero-section.centered {
+    padding-top: 60px;
+    padding-bottom: 60px;
   }
 
   .hero-heading {
@@ -2975,12 +2993,12 @@ p {
 
   .hero-heading {
     margin-bottom: 15px;
-    font-size: 28px;
+    font-size: 25px;
   }
 
   .hero-section.centered {
-    padding-top: 60px;
-    padding-bottom: 60px;
+    padding-top: 40px;
+    padding-bottom: 40px;
   }
 
   .section-subheading.center {
@@ -2989,5 +3007,16 @@ p {
 
   .grid-image {
     width: 35%;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .button {
+    margin-bottom: 25px;
+  }
+
+  .hero-heading {
+    margin-bottom: 15px;
+    font-size: 18px;
   }
 }
