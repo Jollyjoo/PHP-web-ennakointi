@@ -19,7 +19,7 @@ $conn->set_charset("utf8");
 $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
-$sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Url 
+$sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url 
         FROM catbxjbt_ennakointi.Mediaseuranta
         WHERE Uutinen LIKE '%" . $q . "%'
         ORDER BY uutisen_pvm DESC
@@ -35,14 +35,17 @@ if ($result->num_rows > 0) {
         // Replace '-?' with '-' in the 'Uutinen' field
         $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
 
+        // Truncate 'Hankkeen_luokitus' to 15 characters
+        $truncatedLuokitus = mb_substr($row["Hankkeen_luokitus"], 0, 15);
+        if (mb_strlen($row["Hankkeen_luokitus"]) > 15) {
+            $truncatedLuokitus .= "..."; // Add ellipsis if text is truncated
+        }
+        
         echo "<div class='record'>";
-        echo "" . $formattedDate . ", "; // Display the formatted date
-        /*   echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
-          echo "Teema: " . $row["Teema"] . ", "; */
-    /*     echo "Uutinen: " . $row["Uutinen"] . ", "; */
+        echo "<b> " . $formattedDate . "  </b> "; // Display the formatted date
+        echo "<b> " . $truncatedLuokitus . "</b>  "; // Display the truncated 'Hankkeen_luokitus'
         echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a>, ";        
-/*         echo "Url: <a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $row["Url"] . "</a>";
- */        echo "</div><br>";
+        echo "</div><br>";
     }
 } else {
     echo "0 results";
