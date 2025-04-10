@@ -29,12 +29,15 @@ $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
+        // Convert 'aika' to Finnish date format
+        $formattedDate = (new DateTime($row["aika"]))->format('d.m.Y');
+
         echo "<div class='record'>";
-        echo "Aika: " . $row["aika"] . ", ";
-        echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
-        echo "Teema: " . $row["Teema"] . ", ";
+         echo "" . $formattedDate . ", "; // Display the formatted date
+      /*   echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
+        echo "Teema: " . $row["Teema"] . ", "; */
         echo "Uutinen: " . $row["Uutinen"] . ", ";
-        echo "Url: <a href='" . $row["Url"] . "' target='_blank'>" . $row["Url"] . "</a>";
+        echo "Url: <a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $row["Url"] . "</a>";
         echo "</div><br>";
     }
 } else {

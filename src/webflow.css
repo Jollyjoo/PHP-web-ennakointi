@@ -2,7 +2,7 @@
 .styled-link {
   text-decoration: none; /* Remove underline */
   color: #353d42; /* Set link color (adjust as needed) */
-  font-weight: bold; /* Make the text bold */
+  /* font-weight: bold;  */
   font-size: 16px; /* Adjust font size */
   transition: color 0.3s ease; /* Smooth color transition on hover */
 }
@@ -10,7 +10,7 @@
 /* Hover effect for links MEDIASEURANTA */
 .styled-link:hover {
   text-decoration: none; /* Remove underline */
-  color: #2b3236; /* Darker color on hover */
+  color: #34424b; /* Darker color on hover */
 }
 
 
