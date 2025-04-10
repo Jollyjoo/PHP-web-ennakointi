@@ -50,7 +50,7 @@ if ($result->num_rows > 0) {
         }
 
         echo "<div class='record'>";
-        echo "<b> " . $formattedDate . "   "; // Display the formatted date
+        echo "<b> " . $formattedDate . "  </b> "; // Display the formatted date
         echo "<b> " . $truncatedLuokitus . "</b>  "; // Display the truncated 'Hankkeen_luokitus'
         echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a> ";
         echo "</div><br>";
