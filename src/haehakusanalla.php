@@ -32,13 +32,17 @@ if ($result->num_rows > 0) {
         // Convert 'aika' to Finnish date format
         $formattedDate = (new DateTime($row["aika"]))->format('d.m.Y');
 
+        // Replace '-?' with '-' in the 'Uutinen' field
+        $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
+
         echo "<div class='record'>";
-         echo "" . $formattedDate . ", "; // Display the formatted date
-      /*   echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
-        echo "Teema: " . $row["Teema"] . ", "; */
-        echo "Uutinen: " . $row["Uutinen"] . ", ";
-        echo "Url: <a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $row["Url"] . "</a>";
-        echo "</div><br>";
+        echo "" . $formattedDate . ", "; // Display the formatted date
+        /*   echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
+          echo "Teema: " . $row["Teema"] . ", "; */
+    /*     echo "Uutinen: " . $row["Uutinen"] . ", "; */
+        echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a>, ";        
+/*         echo "Url: <a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $row["Url"] . "</a>";
+ */        echo "</div><br>";
     }
 } else {
     echo "0 results";

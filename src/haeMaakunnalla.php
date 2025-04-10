@@ -30,11 +30,13 @@ if ($result->num_rows > 0) {
         // Convert 'aika' to Finnish date format
         $formattedDate = (new DateTime($row["aika"]))->format('d.m.Y');
 
+        // Replace '-?' with '-' in the 'Uutinen' field
+        $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
+
         echo "<div class='record'>";
         echo "" . $formattedDate . ", "; // Display the formatted date
-      /*   echo "Maakunta ID: " . $row["Maakunta_ID"] . ", "; */
-      /*   echo "Teema: " . $row["Teema"] . ", "; */
-        echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $row["Uutinen"] . "</a>, ";
+     /*    echo "Teema: " . $row["Teema"] . ", "; */
+        echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a>, ";
         echo "</div><br>";
     }
 } else {
