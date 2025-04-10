@@ -14,6 +14,7 @@ deployment:
     - /bin/cp src/tyollisyys.html $DEPLOYPATH
     - /bin/cp src/opiskelu.html $DEPLOYPATH
     - /bin/cp src/aluekehitys.html $DEPLOYPATH
+    - /bin/cp src/mediaseuranta.html $DEPLOYPATH
     - /bin/cp src/toimialaennakointi.html $DEPLOYPATH
     - /bin/cp src/tyomarkkinasignaalit.html $DEPLOYPATH
     - /bin/cp src/webflow-contact.html $DEPLOYPATH
