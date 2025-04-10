@@ -17,44 +17,29 @@ if ($conn->connect_error) {
 $conn->set_charset("utf8");
 
 $q = $_GET['q'];
+$start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
-/* $sql = "SELECT CONVERT(CHAR(8),[uutisen_pvm],112) as aika, Maakunta_ID, Teema, Uutinen, Url 
-                FROM Mediaseuranta
-                where Uutinen LIKE '%" . $q . "%'
-                order by uutisen_pvm DESC;"; */
-
-            $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Url 
-                FROM catbxjbt_ennakointi.Mediaseuranta
-                where Uutinen LIKE '%" . $q . "%'
-                order by uutisen_pvm DESC;";
-                
+$sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Url 
+        FROM catbxjbt_ennakointi.Mediaseuranta
+        WHERE Uutinen LIKE '%" . $q . "%'
+        ORDER BY uutisen_pvm DESC
+        LIMIT $start, 20;";
 
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
+    while ($row = $result->fetch_assoc()) {
+        echo "<div class='record'>";
         echo "Aika: " . $row["aika"] . ", ";
         echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
         echo "Teema: " . $row["Teema"] . ", ";
         echo "Uutinen: " . $row["Uutinen"] . ", ";
-        echo "Url: " . $row["Url"] . "<br>";
+        echo "Url: <a href='" . $row["Url"] . "' target='_blank'>" . $row["Url"] . "</a>";
+        echo "</div><br>";
     }
 } else {
     echo "0 results";
 }
 $conn->close();
-
-function FormatErrors( $errors )
-{
-    /* Display errors. */
-    echo "Error information: ";
-
-    foreach ( $errors as $error )
-    {
-        echo "SQLSTATE: ".$error['SQLSTATE']."";
-        echo "Code: ".$error['code']."";
-        echo "Message: ".$error['message']."";
-    }
-}
 
 ?>

@@ -276,6 +276,34 @@
     <div id="txtHint"></div>
     </p>
 
+    <div id="results-container">
+        <!-- Initial results will be loaded here -->
+    </div>
+
+    <button id="load-more" onclick="loadMore()">Load 20 More</button>
+
+    <script>
+        let start = 0; // Tracks the starting point for the next batch of records
+        const query = "your_search_query"; // Replace with the actual query or dynamically set it
+
+        function loadMore() {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `haehakusanalla.php?q=${query}&start=${start}`, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const resultsContainer = document.getElementById("results-container");
+                    resultsContainer.innerHTML += xhr.responseText; // Append new results
+                    start += 20; // Increment the starting point for the next batch
+                } else {
+                    console.error("Failed to load more results.");
+                }
+            };
+            xhr.send();
+        }
+
+        // Load the first 20 records on page load
+        document.addEventListener("DOMContentLoaded", loadMore);
+    </script>
 
     <script>
         function showHint(str) {
