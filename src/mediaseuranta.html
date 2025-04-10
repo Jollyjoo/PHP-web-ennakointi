@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hämeen ELY - Mediaseuranta</title>
+    
     <script type="text/javascript">
         // Ladataan tuo header.html (head) tiedostosta, kun sitä samaa käytetään niin monessa paikassa
         // muokkaile sitä jos haluat joka sivun yläosaan muutoksia
@@ -29,12 +29,22 @@
     <!-- ******************************** UUTISVIRTA -->
     <!-- ******************************** UUTISVIRTA -->
     <!-- ******************************** UUTISVIRTA -->
+
+
+
+
     <div class="section">
         <div class="centerContainer">
+            <p>
+                <a href="index.html">
+                    <img src="./img/logo-tulevaisuusluotain.png" width="170"></a>
+            </p>
+
+
             <div id="demo">
                 <h2>HÄMEEN ELY - Mediaseuranta</h2>
 
-<h5>Hämeen alueen merkittävimpiä elinvoiman uutisia</h5>
+                <h5>Hämeen alueen merkittävimpiä elinvoiman uutisia</h5>
             </div>
 
             <div class="newsContainer">
@@ -44,7 +54,7 @@
                         <option value="">Alue:</option>
                         <option value="koko-häme">KOKO-HÄME</option>
                         <option value="Päijät-Häme">Päijät-Häme</option>
-                        <option value="Kanta-Häme">Kanta-Häme</option>                                          
+                        <option value="Kanta-Häme">Kanta-Häme</option>
                     </select>
                 </form>
             </div>
@@ -58,7 +68,7 @@
                 <p>
                 <div id="txtHint" align="left"></div>
                 </p>
-
+                <br><br>
                 <div id="results-container" align="left">
                     <!-- Initial results will be loaded here -->
                 </div>
@@ -66,78 +76,79 @@
                 <button id="load-more" onclick="loadMore()">Lataa lisää</button><br><br>
             </div>
         </div>
+    </div>
 
-        <script>
-            let start = 0; // Tracks the starting point for the next batch of records
-            let selectedQuery = ""; // Stores the dynamically selected query
+    <script>
+        let start = 0; // Tracks the starting point for the next batch of records
+        let selectedQuery = ""; // Stores the dynamically selected query
 
-            function loadMore() {
-                if (selectedQuery === "") {
-                    console.error("No query selected. Please select a region first.");
-                    return;
-                }
-
-                const xhr = new XMLHttpRequest();
-                xhr.open("GET", `haeMaakunnalla.php?q=${selectedQuery}&start=${start}`, true);
-                xhr.onload = function () {
-                    if (xhr.status === 200) {
-                        const resultsContainer = document.getElementById("results-container");
-                        if (xhr.responseText.trim() === "0 results") {
-                            console.log("No more results to load.");
-                            document.getElementById("load-more").disabled = true; // Disable the button if no more results
-                        } else {
-                            resultsContainer.innerHTML += xhr.responseText; // Append new results
-                            start += 20; // Increment the starting point for the next batch
-                        }
-                    } else {
-                        console.error("Failed to load more results.");
-                    }
-                };
-                xhr.send();
+        function loadMore() {
+            if (selectedQuery === "") {
+                console.error("No query selected. Please select a region first.");
+                return;
             }
 
-            function haeMaakunnalla(str) {
-                if (str === "") {
-                    document.getElementById("txtHint").innerHTML = "";
-                    return;
-                }
-
-                // Reset the start counter and results container when a new region is selected
-                start = 0;
-                selectedQuery = str; // Update the global query variable
-                document.getElementById("results-container").innerHTML = ""; // Clear previous results
-
-                const xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function () {
-                    if (this.readyState === 4 && this.status === 200) {
-                        const resultsContainer = document.getElementById("txtHint");
-                        resultsContainer.innerHTML = this.responseText; // Load initial results
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `haeMaakunnalla.php?q=${selectedQuery}&start=${start}`, true);
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    const resultsContainer = document.getElementById("results-container");
+                    if (xhr.responseText.trim() === "0 results") {
+                        console.log("No more results to load.");
+                        document.getElementById("load-more").disabled = true; // Disable the button if no more results
+                    } else {
+                        resultsContainer.innerHTML += xhr.responseText; // Append new results
                         start += 20; // Increment the starting point for the next batch
                     }
-                };
-                xhttp.open("GET", `haeMaakunnalla.php?q=${str}&start=0`, true);
-                xhttp.send();
-            }
-        </script>
-
-
-        <script>
-            function HaeHakusanalla(str) {
-                var xhttp;
-                if (str == "") {
-                    document.getElementById("txtHint").innerHTML = "";
-                    return;
+                } else {
+                    console.error("Failed to load more results.");
                 }
-                xhttp = new XMLHttpRequest();
-                xhttp.onreadystatechange = function () {
-                    if (this.readyState == 4 && this.status == 200) {
-                        document.getElementById("txtHint").innerHTML = this.responseText;
-                    }
-                };
-                xhttp.open("GET", "./haehakusanalla.php?q=" + str, true);
-                xhttp.send();
+            };
+            xhr.send();
+        }
+
+        function haeMaakunnalla(str) {
+            if (str === "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
             }
-        </script>
+
+            // Reset the start counter and results container when a new region is selected
+            start = 0;
+            selectedQuery = str; // Update the global query variable
+            document.getElementById("results-container").innerHTML = ""; // Clear previous results
+
+            const xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState === 4 && this.status === 200) {
+                    const resultsContainer = document.getElementById("txtHint");
+                    resultsContainer.innerHTML = this.responseText; // Load initial results
+                    start += 20; // Increment the starting point for the next batch
+                }
+            };
+            xhttp.open("GET", `haeMaakunnalla.php?q=${str}&start=0`, true);
+            xhttp.send();
+        }
+    </script>
+
+
+    <script>
+        function HaeHakusanalla(str) {
+            var xhttp;
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("txtHint").innerHTML = this.responseText;
+                }
+            };
+            xhttp.open("GET", "./haehakusanalla.php?q=" + str, true);
+            xhttp.send();
+        }
+    </script>
 
 
 </body>
