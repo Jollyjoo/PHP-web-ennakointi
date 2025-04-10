@@ -293,16 +293,26 @@
 
         <script>
             let start = 0; // Tracks the starting point for the next batch of records
-            const query = "your_search_query"; // Replace with the actual query or dynamically set it
+            let selectedQuery = ""; // Stores the dynamically selected query
 
             function loadMore() {
+                if (selectedQuery === "") {
+                    console.error("No query selected. Please select a region first.");
+                    return;
+                }
+
                 const xhr = new XMLHttpRequest();
-                xhr.open("GET", `haeMaakunnalla.php?q=${query}&start=${start}`, true);
+                xhr.open("GET", `haeMaakunnalla.php?q=${selectedQuery}&start=${start}`, true);
                 xhr.onload = function () {
                     if (xhr.status === 200) {
                         const resultsContainer = document.getElementById("results-container");
-                        resultsContainer.innerHTML += xhr.responseText; // Append new results
-                        start += 20; // Increment the starting point for the next batch
+                        if (xhr.responseText.trim() === "0 results") {
+                            console.log("No more results to load.");
+                            document.getElementById("load-more").disabled = true; // Disable the button if no more results
+                        } else {
+                            resultsContainer.innerHTML += xhr.responseText; // Append new results
+                            start += 20; // Increment the starting point for the next batch
+                        }
                     } else {
                         console.error("Failed to load more results.");
                     }
@@ -310,29 +320,26 @@
                 xhr.send();
             }
 
-            // Load the first 20 records on page load
-            /*    document.addEventListener("DOMContentLoaded", loadMore); */
-        </script>
-
-
-        <script>
-            let hintStart = 0; // Tracks the starting point for the next batch of records in haeMaakunnalla
-
             function haeMaakunnalla(str) {
                 if (str === "") {
                     document.getElementById("txtHint").innerHTML = "";
                     return;
                 }
 
+                // Reset the start counter and results container when a new region is selected
+                start = 0;
+                selectedQuery = str; // Update the global query variable
+                document.getElementById("results-container").innerHTML = ""; // Clear previous results
+
                 const xhttp = new XMLHttpRequest();
                 xhttp.onreadystatechange = function () {
                     if (this.readyState === 4 && this.status === 200) {
                         const resultsContainer = document.getElementById("txtHint");
-                        resultsContainer.innerHTML += this.responseText; // Append new results
-                        hintStart += 20; // Increment the starting point for the next batch
+                        resultsContainer.innerHTML = this.responseText; // Load initial results
+                        start += 20; // Increment the starting point for the next batch
                     }
                 };
-                xhttp.open("GET", `haeMaakunnalla.php?q=${str}&start=${hintStart}`, true);
+                xhttp.open("GET", `haeMaakunnalla.php?q=${str}&start=0`, true);
                 xhttp.send();
             }
         </script>
