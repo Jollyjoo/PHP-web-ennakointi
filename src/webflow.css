@@ -1,3 +1,19 @@
+/* Style for links MEDIASEURANTA */
+.styled-link {
+  text-decoration: none; /* Remove underline */
+  color: #0070c0; /* Set link color (adjust as needed) */
+  font-weight: bold; /* Make the text bold */
+  font-size: 16px; /* Adjust font size */
+  transition: color 0.3s ease; /* Smooth color transition on hover */
+}
+
+/* Hover effect for links MEDIASEURANTA */
+.styled-link:hover {
+  color: #0056a3; /* Darker color on hover */
+  text-decoration: underline; /* Optional: Add underline on hover */
+}
+
+
 .swiper {
   width: 80%;
  /*  height: 750px; */

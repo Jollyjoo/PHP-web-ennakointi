@@ -31,10 +31,10 @@ if ($result->num_rows > 0) {
         $formattedDate = (new DateTime($row["aika"]))->format('d.m.Y');
 
         echo "<div class='record'>";
-        echo "Aika: " . $formattedDate . ", "; // Display the formatted date
+        echo "" . $formattedDate . ", "; // Display the formatted date
       /*   echo "Maakunta ID: " . $row["Maakunta_ID"] . ", "; */
         echo "Teema: " . $row["Teema"] . ", ";
-        echo "Uutinen: <a href='" . $row["Url"] . "' target='_blank'>" . $row["Uutinen"] . "</a>, ";
+        echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $row["Uutinen"] . "</a>, ";
         echo "</div><br>";
     }
 } else {
