@@ -3,10 +3,14 @@
   text-decoration: none; /* Remove underline */
   color: #353d42; /* Set link color (adjust as needed) */
   /* font-weight: bold;  */
-  font-size: 16px; /* Adjust font size */
-  transition: color 0.3s ease; /* Smooth color transition on hover */
+  font-size: 17px; /* Adjust font size */
+  transition: color 0.4s ease; /* Smooth color transition on hover */
 }
-
+.newsContainer {
+  max-width: 900px;
+  text-align: center;
+  margin: 0px auto;
+}
 /* Hover effect for links MEDIASEURANTA */
 .styled-link:hover {
   text-decoration: none; /* Remove underline */
@@ -260,11 +264,7 @@ html {
   text-align: center;
   margin: 0px auto;
 }
-.newsContainer {
-  max-width: 800px;
-  text-align: center;
-  margin: 0px auto;
-}
+
 .textContainer {
   max-width: 800px;
   text-align: center;
