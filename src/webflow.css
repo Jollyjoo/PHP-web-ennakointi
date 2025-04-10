@@ -260,6 +260,11 @@ html {
   text-align: center;
   margin: 0px auto;
 }
+.newsContainer {
+  max-width: 800px;
+  text-align: center;
+  margin: 0px auto;
+}
 .textContainer {
   max-width: 800px;
   text-align: center;
