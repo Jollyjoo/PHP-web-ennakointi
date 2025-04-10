@@ -297,7 +297,7 @@
 
             function loadMore() {
                 const xhr = new XMLHttpRequest();
-                xhr.open("GET", `haehakusanalla.php?q=${query}&start=${start}`, true);
+                xhr.open("GET", `haeMaakunnalla.php?q=${query}&start=${start}`, true);
                 xhr.onload = function () {
                     if (xhr.status === 200) {
                         const resultsContainer = document.getElementById("results-container");
