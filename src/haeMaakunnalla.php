@@ -38,14 +38,14 @@ if ($result->num_rows > 0) {
         echo "</div><br>";
     }
 } else {
-    echo "0 results";
+    echo "Ei tuloksia";
 }
 $conn->close();
 
 function FormatErrors($errors)
 {
     /* Display errors. */
-    echo "Error information: ";
+    echo "Virhe: ";
 
     foreach ($errors as $error) {
         echo "SQLSTATE: " . $error['SQLSTATE'] . "";
