@@ -263,7 +263,7 @@
 
         <p align="center"><b>Valitse maakunta..</b></p>
         <form align="center">
-            <select name="customers" onchange="showHint(this.value)">
+            <select name="customers" onchange="haeMaakunnalla(this.value)">
                 <option value="">Maakunta:</option>
                 <option value="Päijät-Häme">Päijät-Häme</option>
                 <option value="Kanta-Häme ">Kanta-Häme</option>
@@ -314,10 +314,11 @@
             /*    document.addEventListener("DOMContentLoaded", loadMore); */
         </script>
 
-        <script>
-            let hintStart = 0; // Tracks the starting point for the next batch of records in showHint
 
-            function showHint(str) {
+        <script>
+            let hintStart = 0; // Tracks the starting point for the next batch of records in haeMaakunnalla
+
+            function haeMaakunnalla(str) {
                 if (str === "") {
                     document.getElementById("txtHint").innerHTML = "";
                     return;
@@ -331,7 +332,7 @@
                         hintStart += 20; // Increment the starting point for the next batch
                     }
                 };
-                xhttp.open("GET", `sqltest.php?q=${str}&start=${hintStart}`, true);
+                xhttp.open("GET", `haeMaakunnalla.php?q=${str}&start=${hintStart}`, true);
                 xhttp.send();
             }
         </script>
