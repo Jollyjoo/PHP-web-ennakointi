@@ -1,8 +1,4 @@
 <?php
-/* 
-$q = $_REQUEST["q"];
- */
-
 $servername = "tulevaisuusluotain.fi";
 $username = "catbxjbt_readonly";
 $password = "TamaonSalainen44";
@@ -19,29 +15,30 @@ if ($conn->connect_error) {
 $conn->set_charset("utf8");
 
 $q = $_GET['q'];
+$start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
 $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Url 
-FROM catbxjbt_ennakointi.Mediaseuranta
-where Maakunta_ID = (SELECT maakunta_id from catbxjbt_ennakointi.Maakunnat where maakunta LIKE '%" . $q . "%')
-                order by uutisen_pvm DESC;";
-
+        FROM catbxjbt_ennakointi.Mediaseuranta
+        WHERE Maakunta_ID = (SELECT maakunta_id FROM catbxjbt_ennakointi.Maakunnat WHERE maakunta LIKE '%" . $q . "%')
+        ORDER BY uutisen_pvm DESC
+        LIMIT $start, 20;";
 
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
+        echo "<div class='record'>";
         echo "Aika: " . $row["aika"] . ", ";
         echo "Maakunta ID: " . $row["Maakunta_ID"] . ", ";
         echo "Teema: " . $row["Teema"] . ", ";
         echo "Uutinen: " . $row["Uutinen"] . ", ";
-        echo "Url: " . $row["Url"] . "<br>";
+        echo "Url: <a href='" . $row["Url"] . "' target='_blank'>" . $row["Url"] . "</a>";
+        echo "</div><br>";
     }
 } else {
     echo "0 results";
 }
 $conn->close();
-
-
 
 function FormatErrors($errors)
 {
@@ -54,8 +51,4 @@ function FormatErrors($errors)
         echo "Message: " . $error['message'] . "";
     }
 }
-
-
-
-
 ?>
