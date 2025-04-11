@@ -5,7 +5,7 @@ body {
     align-items: center;
     height: 100vh;
     margin: 0;
-    background-color: #f0f0f0;
+    background-color: #7a7373;
 }
 
 .carousel {
@@ -54,6 +54,6 @@ body {
 }
 
 .swiper {
-    width: 800px;
+    width: 60%;
     height: 600px;
   }

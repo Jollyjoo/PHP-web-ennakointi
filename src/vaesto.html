@@ -60,14 +60,94 @@
             </b>
         </div>
 
+
+
         <div class="centerContainer">
 
-            <iframe src='https://flo.uri.sh/visualisation/21349102/embed' title='Interactive or visual content'
+
+
+            <!-- swiper ************* -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+            <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+            <script type="module">
+                import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs'
+
+                const swiper = new Swiper('.swiper', {
+                    // Optional parameters
+                    direction: 'horizontal',
+                    loop: true,
+
+                    // If we need pagination
+                    pagination: {
+                        el: '.swiper-pagination',
+                    },
+
+                    // Navigation arrows
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+
+                    // And if we need scrollbar
+                    scrollbar: {
+                        el: '.swiper-scrollbar',
+                    },
+                    coverflow: true,
+                    effect: 'coverflow',
+                    grabCursor: true,
+
+                });
+            </script>
+                        <div align="center"><br><br>... Väestökuvaajassa ...<br><br></div>
+            <!-- Slider main container -->
+            <div class="swiper">
+                <!-- Additional required wrapper -->
+                <div class="swiper-wrapper">
+                    <!-- Slides -->
+                    <div class="swiper-slide" align="center">
+                        <iframe src='https://flo.uri.sh/story/3034880/embed' title='Interactive or visual content'
+                            class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:50%;height:900px;'
+                            sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+                    </div>
+                    <div class="swiper-slide">
+                        <iframe src='https://flo.uri.sh/story/3035319/embed' title='Interactive or visual content'
+                            class='flourish-embed-iframe' frameborder='0' scrolling='no'
+                            style='width:50%;height:900px;'
+                            sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+                        
+                        <!-- <div class="flourish-embed" data-src="story/3035319">
+                            <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
+                                    src="https://public.flourish.studio/story/3035319/thumbnail" width="100%"
+                                    alt="visualization" /></noscript>
+                        </div> -->
+                    </div>
+
+                </div>
+                <!-- If we need pagination -->
+                <div class="swiper-pagination"></div>
+
+                <!-- If we need navigation buttons -->
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+
+                <!-- If we need scrollbar -->
+                <div class="swiper-scrollbar"></div>
+            </div>
+
+            <!--           <iframe src='https://flo.uri.sh/visualisation/21349102/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:35%;height:700px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-            <iframe src='https://flo.uri.sh/visualisation/21349486/embed' title='Interactive or visual content'
+   --> <!--   <iframe src='https://flo.uri.sh/visualisation/21349486/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:35%;height:700px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+  -->
+            <div align="center"><br><br>... Väestökuvaajassa ...<br><br><br><br></div>
+
+<!--             <iframe src='https://flo.uri.sh/story/3034880/embed' title='Interactive or visual content'
+                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:50%;height:900px;'
+                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+
+ -->
         </div>
 
 

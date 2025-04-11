@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carousel Slider</title>
+    <title>Swiper</title>
     <link rel="stylesheet" href="styles.css">
 
 
@@ -19,6 +19,8 @@
             // Optional parameters
             direction: 'horizontal',
             loop: true,
+            slidesPerView: '2',
+            grabCursor: true,
 
             // If we need pagination
             pagination: {
@@ -32,10 +34,14 @@
             },
 
             // And if we need scrollbar
-            scrollbar: {
+  /*           scrollbar: {
                 el: '.swiper-scrollbar',
-            },
+            }, */
+            
         });
+        swiper.on("slideChangeTransitionStart", swiper.zoom.out);
+// And when transition has finished scale it up.
+swiper.on("slideChangeTransitionEnd", swiper.zoom.in);
     </script>
 
 </head>
