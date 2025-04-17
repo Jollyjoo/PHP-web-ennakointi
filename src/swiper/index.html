@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swiper</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <link rel="stylesheet" href="./effect-carousel.min.css" />
+
+  <style>
+    /** Demo styles **/
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      position: relative;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    body {
+      background: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      overflow: hidden;
+    }
+
+    /** Swiper styles **/
+
+    :root {
+      --swiper-navigation-color: rgba(188, 195, 202, 1);
+    }
+
+    .swiper {
+      user-select: none;
+      box-sizing: border-box;
+      overflow: hidden;
+      width: 100%;
+
+      height: 300px;
+
+      padding: 0px 0px;
+    }
+
+    .swiper-slide {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .swiper-slide-bg-image {
+      position: absolute;
+      left: 0%;
+      top: 0%;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+
+    .swiper-slide-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      position: relative;
+      z-index: 1;
+      box-sizing: border-box;
+      position: absolute;
+      left: 0;
+
+      bottom: 0;
+
+      background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, .70));
+      border-radius: 0 0 8px 8px
+    }
+
+    .swiper-slide-83d0 {
+      background-color: rgba(0, 0, 0, 1);
+      border-radius: 8px;
+    }
+
+    .swiper-slide-bg-image-7cef {
+      object-fit: contain;
+    }
+
+    .swiper-slide-content-7bb6 {
+      padding: 24px 24px;
+      flex-direction: column;
+      gap: 0px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .swiper-slide-text-3464 {
+      color: rgba(151, 145, 145, 1);
+      text-align: center;
+      font-size: 16px;
+      line-height: 1;
+      font-weight: bold;
+    }
+
+    .swiper-slide-bg-image-c61b {
+      object-fit: cover;
+      border-radius: inherit;
+    }
+
+    .swiper-slide-text-e6ad {
+      color: rgba(173, 157, 157, 1);
+      text-align: center;
+      font-size: 11px;
+      line-height: 1.5;
+      font-weight: bold;
+    }
+
+    .swiper-slide-text-de0f {
+      color: rgba(255, 255, 255, 1);
+      text-align: center;
+      font-size: 24px;
+      line-height: 1.5;
+      font-weight: bold;
+    }
+
+    .swiper-slide-text-2a0e {
+      color: rgb(209, 206, 206);
+      text-align: center;
+      font-size: 22px;
+      line-height: 1;
+      font-weight: bold;
+    }
+
+    .swiper-slide-text-73b1 {
+      color: rgb(209, 206, 206);
+      text-align: center;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    @media (min-width: 768px) {
+      .swiper {
+        width: 100%;
+
+        height: 370px;
+
+        padding: 0px 0px;
+      }
+
+      .swiper-slide {
+        width: 35%;
+        height: 100%;
+      }
+
+      :root {
+        --swiper-navigation-top-offset: 50%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide swiper-slide-83d0">
+        <div class="flourish-embed flourish-chart" data-src="visualisation/22517240">
+          <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
+              src="https://public.flourish.studio/visualisation/22517240/thumbnail"
+              alt="chart visualization" /></noscript>
+        </div>
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+
+          <div class="swiper-slide-text swiper-slide-text-2a0e">
+            Avoimet työpaikat
+          </div>
+
+          <div class="swiper-slide-text swiper-slide-text-73b1">
+            Avoimien työpaikkojen määrän kehittyminen toimialoittain
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-c61b swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/ff3afdda24f99a61ef61.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-e6ad">
+            Opiskelijoiden sijoittuminen 1 v. valmistumisen jälkeen
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-c61b swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/4e5fe0648639072efe14.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-de0f">
+            Uudet avoimet työpaikat
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-c61b swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/ac3f61f6a5a00e9aa04f.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-de0f">
+            Avoimet paikat toimialoittain Kanta-Hämeessä-
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-c61b swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/345d54a13a58c9c91df1.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-de0f">
+            Sijoittuminen 1 v. valmistumisen jälkeen
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-7cef swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/3edbf01fbdbad5109ad5.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-de0f">
+            Opintolinjat eriteltynä
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-c61b swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/064f3ecf5789b6d6306c.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-de0f">
+            Opiskelijamäärät
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-83d0">
+        <img class="swiper-slide-bg-image swiper-slide-bg-image-c61b swiper-carousel-animate-opacity"
+          src="https://cdn.studio.swiperjs.com/green-gregar-typho-355/ef67a7bb8d11040c1eb4.png" />
+
+        <div class="swiper-slide-content swiper-carousel-animate-opacity swiper-slide-content-7bb6">
+          <div class="swiper-slide-text swiper-slide-text-de0f">
+            Väestökehityksen aikasarjat
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="swiper-pagination"></div>
+  </div>
+
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-button-next"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script src="./effect-carousel.min.js"></script>
+
+  <script>
+    var swiper = new Swiper(".swiper", {
+      modules: [EffectCarousel],
+      slidesPerView: 3,
+      centeredSlides: true,
+      grabCursor: true,
+      loop: true,
+      effect: "carousel",
+      carouselEffect: { opacityStep: 0.29, scaleStep: 0.29 },
+      speed: 1100,
+      navigation: {
+        enabled: true,
+        prevEl: ".swiper-button-prev",
+        nextEl: ".swiper-button-next",
+      },
+      pagination: { el: ".swiper-pagination", enabled: false },
+      autoplay: { enabled: true, delay: 3100, pauseOnMouseEnter: true },
+      keyboard: { enabled: true },
+      mousewheel: { enabled: true },
+      breakpoints: {
+        768: {
+          slidesPerView: "auto",
+          initialSlide: 2,
+          carouselEffect: { opacityStep: 0.33, scaleStep: 0.2 },
+          speed: 300,
+          pagination: { enabled: true },
+        },
+      },
+    });
+  </script>
+</body>
+
+</html>
