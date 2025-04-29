@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Swiper</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+  <style>
+    /** Demo styles **/
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+      position: relative;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+
+    body {
+      background: #ffffff;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+        Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+      overflow: hidden;
+    }
+
+    /** Swiper styles **/
+
+    :root {
+      --swiper-pagination-color: rgba(174, 183, 193, 1);
+      --swiper-pagination-bullet-inactive-color: rgba(174, 183, 193, 1);
+
+      --swiper-pagination-fraction-color: rgba(174, 183, 193, 1);
+    }
+
+    .swiper {
+      user-select: none;
+      box-sizing: border-box;
+      overflow: visible;
+      width: 320px;
+
+      height: 480px;
+
+      padding: 0px 0px;
+    }
+
+    .swiper-slide {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      box-sizing: border-box;
+    }
+
+    .swiper-slide-content {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      position: relative;
+      z-index: 1;
+      box-sizing: border-box;
+    }
+
+    .swiper-slide-828e {
+      background-color: rgb(112, 109, 109);
+      border-radius: 8px;
+    }
+
+    .swiper-slide-content-2f5e {
+      padding: 48px 48px;
+      flex-direction: column;
+      gap: 0px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swiper-slide-text-f887 {
+      color: rgba(255, 255, 255, 1);
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.5;
+      font-weight: bold;
+    }
+
+    .swiper-slide-text-dd26 {
+      color: rgba(255, 255, 255, 1);
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: bold;
+    }
+
+    .swiper-slide-text-5e13 {
+      color: rgba(255, 255, 255, 1);
+      text-align: left;
+      font-size: 16px;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-f887">
+            Talouden arvoketjuja kehitetään kestävämmiksi<br />Koronapandemia
+            ja geopolitiikan käänteet ovat nostaneet näkyviin riippuvuutemme
+            globaaleista arvoketjuista ja niiden haavoittuvuuden. Kriisit ovat
+            lisänneet tarvetta kestäville arvoketjuille ja huoltovarmuudesta
+            huolehtimiselle. Samaan aikaan ymmärryksemme globaalin talouden
+            ympäristö- ja ihmisoikeusvaikutuksista on kasvanut ja vahvistanut
+            tarvetta kestäville ja joustaville arvoketjuille sekä
+            kiertotalouden ratkaisuille.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-dd26">
+            Uusiutuva energia yleistyy<br />Geopoliittiset jännitteet ja
+            ilmastotavoitteet vauhdittavat energiamurrosta ja siirtymistä
+            uusiutuviin energialähteisiin. Aurinko- ja tuulivoiman käyttö
+            yleistyy ja niiden varastointiin liittyvä akkuteknologia kehittyy
+            vauhdilla. Paljon odotuksia kohdistuu vetytalouteen. Samalla
+            energiantuotanto hajautuu, kun yhä useampi kansalainen tuottaa
+            itse energiaa ja myy itseltään ylijäävään osan muille.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-dd26">
+            Resurssien saatavuus muuttuu yhä epävarmemmaksi<br />Kasvavan
+            kulutuksen takia monet resurssit käyvät yhä niukemmiksi tai niiden
+            hankintakustannukset kasvavat. Teollisuudessa tarvittavien
+            kriittisten materiaalien saatavuudessa voi olla haasteita, jotka
+            heijastuvat kuluttajille saakka. Resursseihin liittyvää
+            epävarmuutta voidaan lievittää kehittämällä korvaavia materiaaleja
+            ja tehostamalla materiaalien kierrätystä ja uusiokäyttöä.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-f887">
+            Teknologia luo eriarvoisuutta<br />Teknologian nopea kehitys luo
+            toisistaan erillään olevia teknologisia todellisuuksia. Eri ikä-
+            ja väestöryhmät käyttävät teknologiaa eri tavoin. Yhteiskunnan
+            palveluiden ja toimintojen siirtyessä verkkoon vaarana on, että
+            ihmisten yhteiskunnallinen toimijuus eriytyy. Teknologian
+            hyödyntäminen vaatii uusia taitoja ja laitteita, joihin kaikilla
+            ei ole varaa. Palveluiden kehittämisessä onkin kiinnitettävä
+            erityistä huomiota saavutettavuuteen ja siihen, että kehitys
+            tapahtuu ihmisten, ei teknologian ehdoilla.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Ymmärrys talouden pääomista monipuolistuu<br />Talouteen
+            liittyvien resurssi- ja tulovirtojen ohella huomiota kiinnitetään
+            yhä enemmän talouden toiminnalle elintärkeään luontopääomaan,
+            esimerkiksi luonnonvaroihin ja ympäristön laatuun, ja sosiaaliseen
+            pääomaan, esimerkiksi osaamiseen ja yhteiskunnalliseen
+            luottamukseen. Samaan aikaan pandemia, energiakriisi ja ekologinen
+            kriisi ovat nostaneet rahoituksen ja velan roolin taloudessa
+            uuteen tarkasteluun.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Työ ja osaamistarpeet uudistuvat<br />Ekologinen jälleenrakennus
+            uudistaa työmarkkinoita. Fossiilisiin energiamuotoihin suoraan tai
+            välillisesti kytköksissä olevia työpaikkoja katoaa. Työtä syntyy
+            uusille aloille ja uusia työnkuvia kehittyy. Ekologisen
+            kestävyyden näkökulmat vahvistuvat lähes kaikissa ammateissa.
+            Reilu siirtymä edellyttää yhteiskunnalta tukea työn ja osaamisen
+            uudelleen suuntaamiseen.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Uudenlainen talousajattelu yleistyy<br />Ihmiset haluavat edistää
+            uudenlaista talousajattelua käytännössä. Yhteisomistaminen,
+            tavaroiden vaihtaminen ja erilaiset lainauspalvelut muuttavat
+            markkinoiden toimintaa. Yhteispellot ja lähiruuan suorajakelu
+            tuottajilta kuluttajille yleistyvät.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Talouden uusia mittareita otetaan käyttöön<br />Vaihtoehtoisista
+            talouden mittareista, kuten ekosysteemitilinpito, aidon kehityksen
+            mittari ja onnellisen planeetan indeksi, ollaan yhä
+            kiinnostuneempia. Talouden kehityksen lisäksi uudet mittarit
+            tuottavat tietoa ihmisten ja ympäristön hyvinvoinnista ja
+            kuvastavat muutosta arvoissa ja tavoitteissa talousajattelun
+            taustalla.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Talouden arvoketjuja kehitetään kestävämmiksi<br />Koronapandemia
+            ja geopolitiikan käänteet ovat nostaneet näkyviin riippuvuutemme
+            globaaleista arvoketjuista ja niiden haavoittuvuuden. Kriisit ovat
+            lisänneet tarvetta kestäville arvoketjuille ja huoltovarmuudesta
+            huolehtimiselle. Samaan aikaan ymmärryksemme globaalin talouden
+            ympäristö- ja ihmisoikeusvaikutuksista on kasvanut ja vahvistanut
+            tarvetta kestäville ja joustaville arvoketjuille sekä
+            kiertotalouden ratkaisuille.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Yritysvastuu laajenee<br />Yritykset etsivät aktiivisesti keinoja
+            lisätä toimintansa positiivisia vaikutuksia (kädenjälki) haittojen
+            minimoinnin (jalanjälki) lisäksi. Monen yrityksen liiketoiminta
+            pyrkii osaltaan ratkomaan aikamme kestävyyshaasteita.
+            Vastuullisuusajattelussa voimistuu myös ylisukupolvinen ajattelu.
+            Kansalaisjärjestöt, media, sijoittajat, viranomaiset ja päättäjät
+            edellyttävät yrityksiltä vastuunkantoa ja läpinäkyvyyttä.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Kuluttajat vaikuttajina
+            Kuluttajuus - tai kuluttamatta jättäminen - nähdään yhä enemmän keinona vaikuttaa yhteiskunnassa.
+            Taloudellisen vaikuttavuuden näkökulmasta naisten ja seniorikansalaisten merkitys kulutuspäätösten tekijöinä
+            kasvaa.
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Vauraus keskittyy ja eriarvoisuus kasvaa
+            Varallisuuserot kasvavat niin Suomessa kuin globaalisti. Suomessa vaurain kymmenys omistaa jo liki puolet
+            nettovarallisuudesta, globaalisti vaurain kymmenys pitää hallussaan 75 prosenttia varallisuudesta.
+            Erilaisten yhteiskunnallisten ja globaalien kriisien vaikutukset kasvattavat eriarvoisuutta entisestään.
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Keskustelu talouden suunnasta kiihtyy
+            Talouden rakenteiden ja ajatusmallien uudistamisen tarpeesta on kasvava yksimielisyys, mutta uudistamisen
+            laajuudesta on erilaisia näkemyksiä. Keskustelu talouden uudesta suunnasta kiihtyy. Onko tavoitteena talous
+            luonnon kantokyvyn rajoissa vai luontopositiivinen ja ihmisen hyvinvointia lisäävä uusintava talous?
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Kiertotaloudesta tulee välttämättömyys
+            Kiertotaloudessa ei tuoteta jatkuvasti uusia tuotteita, vaan hyödynnetään olemassa olevaa mahdollisimman
+            tehokkaasti esimerkiksi pitämällä tuotteet ja materiaalit tehokkaassa käytössä mahdollisimman pitkään.
+            Kiertotalous ei ole vain kierrätystä, vaan myös talouden uusia toimintamalleja ja palveluita, kuten
+            jakamista, vuokraamista, korjaamista ja uudelleenkäyttöä, joiden mahdollistamisessa uusi teknologia on
+            avainasemassa.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Kvanttitietokoneet moninkertaistavat laskentatehon
+            Kvanttitietokoneiden kehittyminen mahdollistaa monimutkaisten laskennallisten ongelmien ratkomisen paljon
+            nykyisiä tietokoneita tehokkaammin. Niitä voidaan hyödyntää esimerkiksi lääkekehitykseen ja uusien
+            materiaalien suunnitteluun. Kvanttikoneiden avulla voidaan myös murtaa nopeasti monet tällä hetkellä
+            internetissä käytössä olevat salausmenetelmät.
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Digitalisoituva maailma on entistä haavoittuvampi
+            Yhteiskuntien teknistyminen tekee niistä aikaisempaa haavoittuvampia sähkönsyötön ja tietoverkkojen
+            häiriöille, kuten sähkökatkoille. Lisäksi erilaiset kyberhyökkäykset voivat halvaannuttaa yritysten tai koko
+            yhteiskunnan toimintoja. Siksi kyberturvasta huolehtiminen liittyy myös huoltovarmuuteen, eli yhteiskunnan
+            toimintakyvyn varmistamiseen kriisioloissa.
+
+
+          </div>
+        </div>
+      </div>
+
+      <div class="swiper-slide swiper-slide-828e">
+        <div class="swiper-slide-content swiper-slide-content-2f5e">
+          <div class="swiper-slide-text swiper-slide-text-5e13">
+            Fyysisen ja virtuaalisen maailman rajat hämärtyvät
+            Ihminen on jatkuvassa vuorovaikutuksessa digitaalisen ympäristön kanssa, kun virtuaalisia sisältöjä voidaan
+            yhdistellä ei-digitaalisiin ympäristöihin eri tavoilla. Aikaisemmin tietokoneen tai puhelimen ruudulta
+            nähdyt asiat muovautuvat osaksi kokemusten maailmaa, kun esimerkiksi puettavat linssit lisäävät virtuaalisen
+            todellisuuden niin sanotun oikean maailman päälle. Jos käyttökokemusta personoidaan voimakkaasti, voi syntyä
+            hyvinkin erilaisia kokemuksia todellisuudesta.
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+  <script>
+    var swiper = new Swiper(".swiper", {
+      grabCursor: true,
+      effect: "cards",
+      pagination: { type: "fraction", el: ".swiper-pagination" },
+      keyboard: { enabled: true },
+      mousewheel: { enabled: true },
+      watchSlidesProgress: true,
+      observer: true,
+      observeParents: true,
+    });
+  </script>
+</body>
+</html>

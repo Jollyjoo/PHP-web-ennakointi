@@ -24,3 +24,4 @@ deployment:
     - /bin/cp src/swiper/effect-carousel.min.css $DEPLOYPATHSWIPER
     - /bin/cp src/swiper/effect-carousel.min.js $DEPLOYPATHSWIPER
     - /bin/cp src/swiper/swiper.html $DEPLOYPATHSWIPER
+    - /bin/cp src/swiper/megatrendit.html $DEPLOYPATHSWIPER
