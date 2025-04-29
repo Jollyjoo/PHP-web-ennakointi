@@ -92,9 +92,9 @@
                     </p>
                 </div> -->
                 <div class="tilastobox">
-                    <p>Laadullisen ennakoinnin työpajaan</p>
+                    <p>Alustan julkaisuun aikaa</p>
                     <h2 id="ennakointipaja"></h2>
-                    (02.04.2025)
+                    (04.06.2025 klo. 10.00)
 
                 </div>
                 <div class="tilastobox">
@@ -158,14 +158,14 @@
     <script>
         function updateennakointipaja() {
             // Määritetään tapahtuman päivämäärä
-            const eventDate = new Date('2025-04-02T00:00:00+02:00');
+            const eventDate = new Date('2025-06-04T10:00:00+02:00');
             // Haetaan nykyinen päivämäärä ja aika
             const currentDate = new Date(new Date().toLocaleString("en-US", { timeZone: "Europe/Helsinki" }));
             // Lasketaan aikojen erotus millisekunneissa
             const timeDifference = eventDate - currentDate;
 
             // Lasketaan tuntien määrä
-            const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(2);
+            const hoursDifference = (timeDifference / (1000 * 60 * 60)).toFixed(3);
 
             // Näytetään tulos
             document.getElementById('ennakointipaja').innerText = `${hoursDifference} tuntia`;
