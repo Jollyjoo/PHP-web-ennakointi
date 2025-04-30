@@ -21,6 +21,7 @@ deployment:
     - /bin/cp src/webflow-contact.html $DEPLOYPATH
     - /bin/cp src/otsikot.html $DEPLOYPATH
     - /bin/cp src/info.html $DEPLOYPATH
+    - /bin/cp src/analyysit.html $DEPLOYPATH
     - /bin/cp src/swiper/effect-carousel.min.css $DEPLOYPATHSWIPER
     - /bin/cp src/swiper/effect-carousel.min.js $DEPLOYPATHSWIPER
     - /bin/cp src/swiper/swiper.html $DEPLOYPATHSWIPER
