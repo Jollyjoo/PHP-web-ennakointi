@@ -265,6 +265,12 @@ html {
   margin: 0px auto;
 }
 
+.swiperContainer {
+  max-width: 1400px;
+  text-align: center;
+  margin: 0px auto;
+}
+
 .textContainer {
   max-width: 800px;
   text-align: center;
