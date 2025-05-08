@@ -1,3 +1,5 @@
+<!-- Tämä tiedosto sisältää Tulevaisuusluotain-sivuston "Tietoa meistä" -sivun HTML-rakenteen -->
+
 <!DOCTYPE html>
 <html lang="en">
 <meta charset="UTF-8">
@@ -8,9 +10,8 @@
     data-wf-site="663b57613daa22b24eb91975" data-wf-status="1" lang="fi">
 
 <head>
+    <!-- Ladataan header.html-tiedosto, joka sisältää sivuston yläosan -->
     <script type="text/javascript">
-        // Ladataan tuo header.html (head) tiedostosta, kun sitä samaa käytetään niin monessa paikassa
-        // muokkaile sitä jos haluat joka sivun yläosaan muutoksia
         function header() {
             fetch('./header.html')
                 .then(response => response.text())
@@ -29,6 +30,7 @@
 
 <body>
 
+    <!-- Navigaatiopalkki -->
     <div data-collapse="medium" data-animation="default" data-duration="400" data-easing="ease" data-easing2="ease"
         role="banner" class="navigation-bar w-nav">
         <div class="w-container">
@@ -46,6 +48,7 @@
 
     </div>
 
+    <!-- Sivun otsikko ja aloitusteksti -->
     <div class="hero-section centered">
         <div data-w-id="e464d218-f801-55d1-1f50-7da00b5bfb8f" style="opacity:0" class="w-container">
             <h1 data-ix="fade-in-bottom-page-loads" class="hero-heading">Tulevaisuusluotain</h1>
@@ -63,7 +66,7 @@
                 Sivustolle tuotetaan verkostoyhteistyönä tietoa myös alueen koulutus- ja osaamistarpeista.
             </div>
             <div data-ix="fade-in-bottom-page-loads" id="otsikot-placeholder">
-                <!-- Placeholder for otsikot.html content -->
+                <!-- Linkit eri osioihin -->
                 <a href="opiskelu.html" class="hollow-button all-caps">Tilannekuva</a>
                 <a href="ennakointi.html" class="hollow-button all-caps">Osaamisen tulevaisuuskuva</a>
                 <a href="info.html" class="button">Tietoa meistä</a>
@@ -71,9 +74,7 @@
         </div>
     </div>
 
-
-
-
+    <!-- Tilastot ja laskurit -->
     <div class="section">
         <div class="centerContainer">
             <div class="container">
@@ -84,7 +85,7 @@
                     (Hankkeen kestosta)
                     </p>
                 </div>
- <!--                <div class="tilastobox">
+                <!-- <div class="tilastobox">
                     <p>Salpausselän kisoihin</p>
                     <h2 id=hoursCount></h2>
                     (20.03.2025)
@@ -106,6 +107,7 @@
             </div>
         </div>
     </div>
+    <!-- JavaScript-funktiot laskureille -->
     <script>
         function updateTime() {
             // Määritetään aloituspäivä ja lopetuspäivä
@@ -176,51 +178,52 @@
     </script>
 
 
+    <!-- Tulossa olevaa sisältöä -->
     <div class="section">
         <div class="w-container">
-
-
             <h4> Tulossa olevaa sisältöä: <br>
-           
                 <li> MITEN OSAAMISTARPEET TULEVAT MUUTTUMAAN TULEVAISUUDESSA
-                
                 <li> MITKÄ ON TYÖIKÄISTEN ENITEN TARVITSEMAT UUDET OSAAMISET
-                  
                 <li> MILLAISTA OSAAMISTA ALUEILLA HALUTAAN KEHITTÄÄ JA MIKSI
-              
                 <li> MITKÄ OSAAMISTARPEET TULEVAT KASVAMAAN ENITEN YLI ALOJEN
-
                 <li> TYÖELÄMÄN MUUTOKSET YLEISESTI
-
                 <li> TOIMINTAYMPÄRISTÖN MUUTOKSET TYÖELÄMÄSSÄ
-
                 <li> ALUEELLINEN TIETO TYÖPAIKOISTA NYT JA ENNAKOITU TULEVAISUUDESSA vs. koulutustarjonta ja kohtaanto
-
                 <li> MILLÄ ALOILLA TARVITAAN ENITEN UUTTA OSAAMISTA
-
                 <li> PUUTTEET ALUEEN KOULUTUSTARJONNASSA
-
                 <li> ERI ALUEIDEN ELINKEINORAKENTEEN VAIKUTUS OSAAMISEN KYSYNTÄÄN JA TARJONTAAN.
-
                 <li> OPISKELIJOIDEN/VALMISTUNEIDEN TYÖLLISTYMINEN aloittain
             </h4>
+        </div><br><br>
+
+        <iframe width="1200" height="800"
+            src="https://miro.com/app/embed/uXjVKLUDPho=/?pres=1&frameId=3458764627501796583&embedId=77704877653"
+            frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
 
 
-
-                    <div class="section-title-group">
-                        <div class="section-subheading center">
-                            <div class="w-row">
-                                <br><br>
-                                <a href="https://www.linkedin.com/company/tulevaisuusluotain/">
-                                    <img src="img/LinkedIn-Blue.png" alt="Tulevaisuusluotain LinkedIn" width="90"></a>
-                                <p> Seuraa meitä LinkedInissä ja pysyt kuulolla ajankohtaisista uutisista!
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+    </div>
+    <!-- Ennakointiverkoston vuosikello -->
+    <div class="section">
+        <h4>Ennakointiverkoston vuosikello </h4>
+        <li><a href="https://create.plandisc.com/tK9OSVx" target="_blank"> Avaa uuteen ikkunaan</a></li><br>
+        <iframe width="1200" height="800" src="https://create.plandisc.com/tK9OSVx" frameborder="0" scrolling="no"
+            allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>
+        <div class="section-title-group">
+            <div class="section-subheading center">
+                <div class="w-row">
+                    <br><br>
+                    <a href="https://www.linkedin.com/company/tulevaisuusluotain/">
+                        <img src="img/LinkedIn-Blue.png" alt="Tulevaisuusluotain LinkedIn" width="90"></a>
+                    <p> Seuraa meitä LinkedInissä ja pysyt kuulolla ajankohtaisista uutisista!
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 
+
+
+    <!-- Footer ja lisätiedot -->
     <div class="footer">
         <div class="w-container">
             <div class="w-row">
@@ -240,12 +243,13 @@
                         class="footer-link">Työvoiman saatavuus ja kohtaanto</a>
                     <a href="https://vipunen.fi/fi-fi/ennakointi" class="footer-link" target="_blank">Vipunen /
                         Ennakointi</a>
-                        <a href="https://app.powerbi.com/view?r=eyJrIjoiODFkNGVlMDAtMzMxZi00MWI0LWE3YTEtMzM0ZGQzMzliOGNjIiwidCI6ImI0MjZhNDVlLTBiMjYtNGE0MC05MWUxLTVhYjdlODc4OThlYyIsImMiOjh9" class="footer-link" target="_blank"">
+                    <a href="https://app.powerbi.com/view?r=eyJrIjoiODFkNGVlMDAtMzMxZi00MWI0LWE3YTEtMzM0ZGQzMzliOGNjIiwidCI6ImI0MjZhNDVlLTBiMjYtNGE0MC05MWUxLTVhYjdlODc4OThlYyIsImMiOjh9"
+                        class="footer-link" target="_blank"">
                         Hämeen elinvoimakatsaus</a>
                 </div>
 
-                <div class="w-col w-col-4">
-                    <h5> Muuta sisältöä</h5>
+                <div class=" w-col w-col-4">
+                        <h5> Muuta sisältöä</h5>
                 </div>
 
             </div>
