@@ -41,6 +41,23 @@
   /* Laatikot venyvät tasaisesti */
 }
 
+.tilastobox_paijatHäme {
+  border: 2px solid #000;
+  /* Reunan väri ja paksuus */
+  border-radius: 10px;
+  /* Pyöristetyt kulmat */
+  padding: 10px;
+  /* Sisätyhjä */
+  margin: 10px;
+  /* Ulkoinen tyhjä */
+  background-color: #cfccce;
+  /* Taustaväri */
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+  /* Varjo */
+  flex: 1;
+  /* Laatikot venyvät tasaisesti */
+}
+
 /* Tekstin tyyli */
 .tilastobox h2 {
   font-size: 32px;
