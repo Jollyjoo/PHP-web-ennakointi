@@ -19,8 +19,29 @@
 
 
 .swiper {
-  width: 80%;
+  width: 90%;
  /*  height: 750px; */
+}
+
+.swiper-slide {
+  width: 40%;
+/*   height: 100%; */
+}
+
+@media (min-width: 768px) {
+  .swiper {
+    width: 90%;
+    padding: 0px 0px;
+  }
+
+  .swiper-slide {
+    width: 40%;
+    height: 100%;
+  }
+
+  :root {
+    --swiper-navigation-top-offset: 50%;
+  }
 }
 
 /* Yleinen laatikon tyyli */
@@ -192,23 +213,7 @@
   font-style: italic;
 }
 
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
-/* poppins */
+
 /* poppins */
 /* poppins */
 /* poppins */
