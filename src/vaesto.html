@@ -66,44 +66,14 @@
 
 
 
-            <!-- swiper ************* -->
-            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-            <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-            <script type="module">
-                import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs'
 
-                const swiper = new Swiper('.swiper', {
-                    // Optional parameters
-                    direction: 'horizontal',
-                    loop: true,
-
-                    // If we need pagination
-                    pagination: {
-                        el: '.swiper-pagination',
-                    },
-
-                    // Navigation arrows
-                    navigation: {
-                        nextEl: '.swiper-button-next',
-                        prevEl: '.swiper-button-prev',
-                    },
-
-                    // And if we need scrollbar
-                    scrollbar: {
-                        el: '.swiper-scrollbar',
-                    },
-                    coverflow: true,
-                    effect: 'coverflow',
-                    grabCursor: true,
-                    speed: 600,
-                });
-            </script>
             <div align="center" class="newsContainer"><br><br>
                 <h3>Väestö</h3> <br>
 
                 Väestömäärä sekä Kanta-Hämeessä että Päijät-Hämeessä on kasvanut tarkastelujaksolla vuodesta 1972
                 lähtien vuoteen 2013 saakka, jonka jälkeen väkiluku molemmissa maakunnissa kääntyi laskuun. Poikkeuksena
-                Kanta-Hämeessä vuosi 2023, jolloin väestön määrä kasvoi hieman. Myös Päijät-Hämeessä vuonna 2024 väestön
+                Kanta-Hämeessä vuosi 2023, jolloin väestön määrä kasvoi hieman (maahanmuuton vaikutus). Myös
+                Päijät-Hämeessä vuonna 2024 väestön
                 määrässä oli hienoista kasvua.
                 <img src="img/napking-väestö.png" alt="">
             </div>
@@ -143,13 +113,13 @@
                     </div>
                     <div class="container">
                         <div class="tilastobox"><b>Kanta-Häme</b>
-                            <p>Yli 64-vuotiaita vuoden 2024 lopussa  </p>
+                            <p>Yli 64-vuotiaita vuoden 2024 lopussa </p>
                             <h2> 46 673</h2>
                             (muutos 2013: + 9 578/ + 25,8 %) <br>
-                            (muutos 1972: + 29 384 / + 170,0 %  )
+                            (muutos 1972: + 29 384 / + 170,0 % )
                         </div>
                         <div class="tilastobox_paijatHäme"><b>Päijät-Häme</b>
-                            <p>Yli 64-vuotiaita vuoden 2024 lopussa  </p>
+                            <p>Yli 64-vuotiaita vuoden 2024 lopussa </p>
                             <h2> 58 515</h2>
                             (muutos 2013: + 11 630/ + 24,8 %) <br>
                             (muutos 1972: + 39 624 / + 209,8 % )
@@ -160,6 +130,38 @@
             </div>
 
 
+            <!-- swiper ************* -->
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+            <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+            <script type="module">
+                import Swiper from 'https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.mjs'
+
+                const swiper = new Swiper('.swiper', {
+                    // Optional parameters
+                    direction: 'horizontal',
+                    loop: true,
+
+                    // If we need pagination
+                    pagination: {
+                        el: '.swiper-pagination',
+                    },
+
+                    // Navigation arrows
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+
+                    // And if we need scrollbar
+                    scrollbar: {
+                        el: '.swiper-scrollbar',
+                    },
+                    coverflow: true,
+                    effect: 'coverflow',
+                    grabCursor: true,
+                    speed: 600,
+                });
+            </script>
             <!-- Slider main container -->
             <div class="swiper">
                 <!-- Additional required wrapper -->
