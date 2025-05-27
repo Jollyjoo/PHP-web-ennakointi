@@ -2623,7 +2623,10 @@ h3 {
 h4 {
   margin-top: 0;
   margin-bottom: 10px;
-  font-size: 18px;
+/*   font-size: 18px; 
+Otsikon koot mitkä muutettiin
+*/
+font-size: 26px;
   font-weight: 700;
   line-height: 24px;
 }
