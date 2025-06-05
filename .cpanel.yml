@@ -1,8 +1,8 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/catbxjbt/public_html/red/
-    - export DEPLOYPATHSWIPER=/home/catbxjbt/public_html/red/swiper/
+    - export DEPLOYPATH=/home/catbxjbt/public_html/
+    - export DEPLOYPATHSWIPER=/home/catbxjbt/public_html/swiper/
     - /bin/cp src/header.html $DEPLOYPATH    
     - /bin/cp src/ennakointi.html $DEPLOYPATH
     - /bin/cp src/footer.html $DEPLOYPATH    
