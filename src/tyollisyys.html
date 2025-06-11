@@ -80,33 +80,33 @@
                         </p>
                     </div> -->
                     <div class="tilastobox">
-                        <p>Työttömien osuus työvoimasta 04/25</p>
-                        <h2>14,1 %</h2>
-                        <p> Päijät-Häme</p>
-                        <h2>10,6 %</h2>
+                        <p>Työttömien osuus työvoimasta <span id="stat-aika"></span></p>
+                        <h2><span id="ph-osuus">...</span> %</h2>
+                        <p>Päijät-Häme</p>
+                        <h2><span id="kh-osuus">...</span> %</h2>
                         <p>Kanta-Häme</p>
 
                         </p>
                     </div>
                     <div class="tilastobox">
-                        <p>Uudet avoimet työpaikat 04/25</p>
-                        <h2>1023</h2>
+                        <p>Uudet avoimet työpaikat <span id="stat-aika2"></span></p>
+                        <h2><span id="ph-avoimet">...</span></h2>
                         <p>Päijät-Häme</p>
-                        <h2>1011</h2>
+                        <h2><span id="kh-avoimet">...</span></h2>
                         <p>Kanta-Häme</p>
 
                         </p>
                     </div>
                     <div class="tilastobox">
-                        <p>Työttömät työnhakijat 04/25</p>
-                        <h2>13 083</h2>
+                        <p>Työttömät työnhakijat <span id="stat-aika3"></span></p>
+                        <h2><span id="ph-tyottomat">...</span></h2>
                         <p>Päijät-Häme</p>
-                        <h2>8 362</h2>
+                        <h2><span id="kh-tyottomat">...</span></h2>
                         <p>Kanta-Häme</p>
                         </p>
                     </div>
                 </div>
-                <p>Lähde: Tilastokeskus 12r5
+                <p>Lähde: Tilastokeskus 12r5, viimeisin tilasto tarkistettu lähteestä <span id="stat-paivitys">...</span>
             </div>
         </div>
 
@@ -276,6 +276,33 @@
             }
             otsikot();
         </script>
+
+        <script>
+// Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot
+fetch('tyollisyys.php')
+  .then(resp => resp.json())
+  .then(data => {
+    if (data.maakunnat && data.maakunnat['MK07'] && data.maakunnat['MK05']) {
+      // Päivitetään aikaleimat
+      document.getElementById('stat-aika').textContent = data.aika;
+      document.getElementById('stat-aika2').textContent = data.aika;
+      document.getElementById('stat-aika3').textContent = data.aika;
+      // Päivitetään päivitysaika
+      if (data.paivitys) {
+        document.getElementById('stat-paivitys').textContent = data.paivitys;
+      }
+      // Päijät-Häme
+      document.getElementById('ph-osuus').textContent = data.maakunnat['MK07'].tyottomien_osuus;
+      document.getElementById('ph-avoimet').textContent = data.maakunnat['MK07'].uudet_avopaikat;
+      document.getElementById('ph-tyottomat').textContent = data.maakunnat['MK07'].tyottomat_yht;
+      // Kanta-Häme
+      document.getElementById('kh-osuus').textContent = data.maakunnat['MK05'].tyottomien_osuus;
+      document.getElementById('kh-avoimet').textContent = data.maakunnat['MK05'].uudet_avopaikat;
+      document.getElementById('kh-tyottomat').textContent = data.maakunnat['MK05'].tyottomat_yht;
+    }
+  })
+  .catch(e => { /* virheenkäsittely, esim. näytä virheilmoitus */ });
+</script>
 
 </body>
 
