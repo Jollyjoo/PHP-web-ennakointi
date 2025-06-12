@@ -83,24 +83,26 @@
                 </div>
                 <div class="container">
                     <div class="tilastobox">
-                        <p>Toisen asteen tutkinnon suorittaneet<br> (koko maa 40,1 %) </p>
-                        <h2>42,4 %</h2>
+                        <p>Toisen asteen tutkinnon suorittaneet<br> (koko maa: <span id="toinen-sss">...</span> %)</p>
+                        <h2><span id="toinen-mk07">...</span> %</h2>
                         <p> Päijät-Häme</p>
-                        <h2>42,8 %</h2>
+                        <h2><span id="toinen-mk05">...</span> %</h2>
                         <p>Kanta-Häme</p>
 
                         </p>
                     </div>
                     <div class="tilastobox">
-                        <p>Korkea-asteen tutkinnon suorittaneet<br>(koko maa 33,8 %)</p>
-                        <h2>28,6 %</h2>
+                        <p>Korkea-asteen tutkinnon suorittaneet<br>(koko maa: <span id="korkea-sss">...</span> %)</p>
+                        <h2><span id="korkea-mk07">...</span> %</h2>
                         <p>Päijät-Häme</p>
-                        <h2>29,8 %</h2>
+                        <h2><span id="korkea-mk05">...</span> %</h2>
                         <p>Kanta-Häme</p>
                         </p>
                     </div>
                 </div>
-                <p>Lähde: 12bs -- 15 vuotta täyttänyt väestö koulutusasteen, maakunnan, kunnan, sukupuolen ja ikäryhmän mukaan, 2007-2023
+                <p>Lähde: <a href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__vkour/statfin_vkour_pxt_12bs.px" target="_blank">Tilastokeskus 12bs</a>, viimeisin tilasto tarkistettu lähteestä <b><span id="koulutus-paivitys">...</span></b>
+             <!--    <p></p>Lähde: Tilastokeskus 12bs -- 15 vuotta täyttänyt väestö koulutusasteen, maakunnan, kunnan, sukupuolen ja ikäryhmän mukaan
+                <p id="koulutus-paivitys" style="text-align:center; font-size: 0.9em; color: #555;"></p> -->
             </div>
         </div>
 
@@ -310,6 +312,34 @@ Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset j
                     .catch(error => console.error('Error loading otsikot.html:', error));
             }
             otsikot();
+        </script>
+        <script>
+            // Fetch education stats dynamically
+            fetch('opiskelu.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.maakunnat) {
+                        // Päijät-Häme = MK07, Kanta-Häme = MK05, Koko maa = SSS
+                        document.getElementById('toinen-mk07').textContent = data.maakunnat.MK07?.toisen_aste ?? '-';
+                        document.getElementById('toinen-mk05').textContent = data.maakunnat.MK05?.toisen_aste ?? '-';
+                        document.getElementById('korkea-mk07').textContent = data.maakunnat.MK07?.korkea_aste ?? '-';
+                        document.getElementById('korkea-mk05').textContent = data.maakunnat.MK05?.korkea_aste ?? '-';
+                        document.getElementById('toinen-sss').textContent = data.maakunnat.SSS?.toisen_aste ?? '-';
+                        document.getElementById('korkea-sss').textContent = data.maakunnat.SSS?.korkea_aste ?? '-';
+                    }
+                    if (data.paivitys) {
+                        document.getElementById('koulutus-paivitys').textContent =  data.paivitys;
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('toinen-mk07').textContent = '-';
+                    document.getElementById('toinen-mk05').textContent = '-';
+                    document.getElementById('korkea-mk07').textContent = '-';
+                    document.getElementById('korkea-mk05').textContent = '-';
+                    document.getElementById('toinen-sss').textContent = '-';
+                    document.getElementById('korkea-sss').textContent = '-';
+                    document.getElementById('koulutus-paivitys').textContent = 'Tilastojen haku epäonnistui.';
+                });
         </script>
 </body>
 
