@@ -15,7 +15,7 @@ deployment:
     - /bin/cp src/tyollisyys.html $DEPLOYPATH
     - /bin/cp src/tyollisyys.php $DEPLOYPATH    
     - /bin/cp src/opiskelu.html $DEPLOYPATH
-   - /bin/cp src/opiskelu.php $DEPLOYPATH    
+    - /bin/cp src/opiskelu.php $DEPLOYPATH    
     - /bin/cp src/aluekehitys.html $DEPLOYPATH
     - /bin/cp src/mediaseuranta.html $DEPLOYPATH
     - /bin/cp src/toimialaennakointi.html $DEPLOYPATH
