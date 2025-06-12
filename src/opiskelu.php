@@ -27,6 +27,7 @@ if ($res && $row = $res->fetch_assoc()) {
     echo json_encode(["error" => "Ei koulutustilastoja saatavilla"]);
     $conn->close();
     exit;
+    
 }
 
 // Haetaan tilastot molemmille maakunnille ja koko maalle
