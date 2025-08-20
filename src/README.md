@@ -18,12 +18,14 @@ Tämä projekti on Hämeen osaamistarpeiden ennakointialusta, joka tarjoaa tilan
 
 - **opiskelu.php**  
   Backend-PHP, joka hakee koulutustilastot tietokannasta ja palauttaa ne JSON-muodossa frontendille.
+  Asennetaan palvelimen /cgi-bin -kansioon ja ajastetaan linuxin crontab ajamaan tämä vaikka kerran päivässä 
 
 - **tyollisyys.php**  
   Backend-PHP, joka hakee työllisyystilastot tietokannasta ja palauttaa ne JSON-muodossa frontendille.
+  Asennetaan palvelimen /cgi-bin -kansioon ja ajastetaan linuxin crontab ajamaan tämä vaikka kerran päivässä 
 
-- **haeMaakunnalla.php, haehakusanalla.php, haehakusanalla sql-server.php, sqltest sql-server.php, ajax_lista.php**  
-  Erilaisia PHP-skriptejä tiedonhakuun ja hakutoimintoihin.
+- **haeMaakunnalla.php, haehakusanalla.php, haehakusanalla sql-server.php, sqltest sql-server.php**  
+  Erilaisia PHP-skriptejä tiedonhakuun ja hakutoimintoihin. Käytetään mediaseurannat tietojen hakuun kannasta.
 
 - **header.html, footer.html, otsikot.html**  
   Sivuston yhteiset osat (ylä- ja alatunnisteet, otsikot).
@@ -38,7 +40,7 @@ Tämä projekti on Hämeen osaamistarpeiden ennakointialusta, joka tarjoaa tilan
   Kuvakansio (logot, taustakuvat, visualisoinnit).
 
 - **SQL/**  
-  Tietokannan varmuuskopiot ja rakenteet (.sql-tiedostot).
+  Tietokannan mediaseurannan varmuuskopiot ja rakenteet (.sql-tiedostot).
 
 - **react/**  
   Mahdolliset React-komponentit tai kehityskokeilut.
