@@ -18,7 +18,6 @@ Tämä projekti on Hämeen osaamistarpeiden ennakointialusta, joka tarjoaa tilan
 
 - **opiskelu.php**  
   Backend-PHP, joka hakee koulutustilastot tietokannasta ja palauttaa ne JSON-muodossa frontendille.
-  Asennetaan palvelimen /cgi-bin -kansioon ja ajastetaan linuxin crontab ajamaan tämä vaikka kerran päivässä 
 
 - **tyollisyys.php**  
   Backend-PHP, joka hakee työllisyystilastot tietokannasta ja palauttaa ne JSON-muodossa frontendille.
