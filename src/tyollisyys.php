@@ -34,8 +34,8 @@ if ($res && $row = $res->fetch_assoc()) {
     exit;
 }
 
-// Haetaan tilastot kyseiseltä kuukaudelta molemmille maakunnille
-$sql = "SELECT stat_code, stat_label, tyotosuus, uudetavp, tyottomatlopussa FROM Tyonhakijat WHERE aika = ? AND stat_code IN ('MK05','MK07')";
+// Haetaan tilastot kyseiseltä kuukaudelta kaikille tarvittaville stat_codeille
+$sql = "SELECT stat_code, stat_label, tyotosuus, uudetavp, tyottomatlopussa FROM Tyonhakijat WHERE aika = ? AND stat_code IN ('MK05','MK07','ELY04','SSS')";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     log_debug('Prepare epäonnistui: ' . $conn->error);

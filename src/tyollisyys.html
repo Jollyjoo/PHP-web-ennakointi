@@ -65,11 +65,7 @@
             <div class="centerContainer">
                 <div align="center" class="newsContainer">
                     <h3>Hämeen työllisyyden avaintilastot</h3><br>
-
-                    Hämeen ELY-alueella työttömyysaste oli huhtikuun lopussa 12,5 %, (koko maa 11,5 %).
-                    <br>Työttömiä työnhakijoita oli 21445, mikä on 4312 enemmän kuin vuotta aiemmin.
-                    Pitkäaikaistyöttömiä oli 7924.<br>
-                    <br><br>
+                    <span id="tyollisyys-summary">...</span>
                 </div>
                 <div class="container">
                     <!--    <div class="tilastobox">
@@ -278,7 +274,7 @@
         </script>
 
         <script>
-// Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot
+// Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot sekä summary
 fetch('tyollisyys.php')
   .then(resp => resp.json())
   .then(data => {
@@ -299,6 +295,14 @@ fetch('tyollisyys.php')
       document.getElementById('kh-osuus').textContent = data.maakunnat['MK05'].tyottomien_osuus;
       document.getElementById('kh-avoimet').textContent = data.maakunnat['MK05'].uudet_avopaikat;
       document.getElementById('kh-tyottomat').textContent = data.maakunnat['MK05'].tyottomat_yht;
+      // Rakennetaan summary dynaamisesti ELY04 ja SSS arvoilla
+      if (data.maakunnat['ELY04'] && data.maakunnat['SSS']) {
+        const ely = data.maakunnat['ELY04'];
+        const sss = data.maakunnat['SSS'];
+        document.getElementById('tyollisyys-summary').textContent =
+          `Hämeen ELY-alueella työttömyysaste oli ${ely.tyottomien_osuus} %, (koko maa ${sss.tyottomien_osuus} %).\n` +
+          `Työttömiä työnhakijoita oli ${ely.tyottomat_yht}.`;
+      }
     }
   })
   .catch(e => { /* virheenkäsittely, esim. näytä virheilmoitus */ });
