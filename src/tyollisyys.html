@@ -336,24 +336,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sample historical data (replace with AJAX/database fetch for real data)
     const phOsuusHistory = {
         labels: ['2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06'],
-        data: [10.2, 10.0, 9.8, 9.7, 9.9, 10.1]
+        data: [14.1, 13.0, 11.8, 9.7, 9.9, 10.1]
     };
 
 
-            function positionChartPopup(e) {
-                const popupWidth = 320;
-                const popupHeight = 170;
-                // Center above mouse pointer, minimal offset
-                let x = e.clientX - popupWidth / 2;
-                let y = e.clientY - popupHeight - 12;
-                // Adjust if near left/top/right/bottom edge
-                if (x < 8) x = 8;
-                if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
-                if (y < 8) y = e.clientY + 16; // show below if not enough space above
-                if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
-                chartPopup.style.left = x + window.scrollX + 'px';
-                chartPopup.style.top = y + window.scrollY + 'px';
-            }
+                function positionChartPopup(e) {
+                    const popupWidth = 320;
+                    const popupHeight = 170;
+                    // Use pageX/pageY for multi-monitor and Edge browser compatibility
+                    let x = e.pageX - popupWidth / 2;
+                    let y = e.pageY - popupHeight - 12;
+                    // If not enough space above, show below pointer
+                    if (y < window.scrollY + 8) y = e.pageY + 16;
+                    // Clamp to viewport horizontally
+                    if (x < window.scrollX + 8) x = window.scrollX + 8;
+                    if (x + popupWidth > window.scrollX + window.innerWidth) x = window.scrollX + window.innerWidth - popupWidth - 8;
+                    // Clamp to viewport vertically
+                    if (y + popupHeight > window.scrollY + window.innerHeight) y = window.scrollY + window.innerHeight - popupHeight - 8;
+                    chartPopup.style.left = x + 'px';
+                    chartPopup.style.top = y + 'px';
+                }
 
         phOsuusSpan.addEventListener('mouseover', function(e) {
             chartPopup.style.display = 'block';
