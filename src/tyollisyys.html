@@ -336,67 +336,73 @@ document.addEventListener('DOMContentLoaded', function() {
     const chartPopup = document.getElementById('ph-osuus-chart-popup');
     let chartInstance = null;
 
-    // Sample historical data (replace with AJAX/database fetch for real data)
-    const phOsuusHistory = {
-        labels: ['2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06'],
-        data: [12.1, 11.0, 11.8, 9.7, 9.9, 10.1]
-    };
+    // Use fixed positioning for popup so it always appears next to mouse pointer, regardless of scroll/zoom/monitor
+    chartPopup.style.position = 'fixed';
+    function positionChartPopup(e) {
+        const popupWidth = 400;
+        const popupHeight = 220;
+        let x = e.clientX + 40;
+        let y = e.clientY - popupHeight / 2;
+        // Clamp to viewport horizontally
+        if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+        if (x < 8) x = 8;
+        // Clamp to viewport vertically
+        if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+        if (y < 8) y = 8;
+        chartPopup.style.left = x + 'px';
+        chartPopup.style.top = y + 'px';
+    }
 
+    let chartDataLoaded = false;
+    let chartLabels = [];
+    let chartData = [];
 
-                    // Use fixed positioning for popup so it always appears next to mouse pointer, regardless of scroll/zoom/monitor
-                    chartPopup.style.position = 'fixed';
-                    function positionChartPopup(e) {
-                        const popupWidth = 400;
-                        const popupHeight = 220;
-                        let x = e.clientX + 40;
-                        let y = e.clientY - popupHeight ;
-                        // Clamp to viewport horizontally
-                        if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
-                        if (x < 8) x = 8;
-                        // Clamp to viewport vertically
-                        if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
-                        if (y < 8) y = 8;
-                        chartPopup.style.left = x + 'px';
-                        chartPopup.style.top = y + 'px';
-                    }
-
-        phOsuusSpan.addEventListener('mouseover', function(e) {
-            chartPopup.style.display = 'block';
-            positionChartPopup(e);
-            if (!chartInstance) {
-                const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
-                chartInstance = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: phOsuusHistory.labels.map(l => l.replace(/M(\d{2})/, m => {
-                            const kk = parseInt(m.slice(1),10);
-                            const kuukausiNimet = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
-                            return ' ' + (kuukausiNimet[kk-1] || m);
-                        })),
-                        datasets: [{
-                            label: 'Työttömien osuus (%)',
-                            data: phOsuusHistory.data,
-                            borderColor: '#0077cc',
-                            backgroundColor: 'rgba(0,119,204,0.1)',
-                            fill: true,
-                            pointRadius: 3
-                        }]
-                    },
-                    options: {
-                        responsive: false,
-                        plugins: { legend: { display: false } },
-                        scales: {
-                            x: { title: { display: true, text: 'Kuukausi' } },
-                            y: { title: { display: true, text: '%' }, min: 9, max: 14 }
+    phOsuusSpan.addEventListener('mouseover', function(e) {
+        chartPopup.style.display = 'block';
+        positionChartPopup(e);
+        // Fetch real data only once
+        if (!chartDataLoaded) {
+            fetch('tyollisyys_historia.php')
+                .then(resp => resp.json())
+                .then(hist => {
+                    chartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                        const kk = parseInt(m.slice(1),10);
+                        const kuukausiNimet = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
+                        return ' ' + (kuukausiNimet[kk-1] || m);
+                    }));
+                    chartData = hist.data;
+                    chartDataLoaded = true;
+                    // Draw chart
+                    const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
+                    chartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: 'Työttömien osuus (%)',
+                                data: chartData,
+                                borderColor: '#0077cc',
+                                backgroundColor: 'rgba(0,119,204,0.1)',
+                                fill: true,
+                                pointRadius: 3
+                            }]
+                        },
+                        options: {
+                            responsive: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { title: { display: true, text: 'Kuukausi' } },
+                                y: { title: { display: true, text: '%' }, min: 9, max: 14 }
+                            }
                         }
-                    }
+                    });
                 });
-            }
-        });
+        }
+    });
 
-        phOsuusSpan.addEventListener('mousemove', function(e) {
-            positionChartPopup(e);
-        });
+    phOsuusSpan.addEventListener('mousemove', function(e) {
+        positionChartPopup(e);
+    });
 
     phOsuusSpan.addEventListener('mouseout', function() {
         chartPopup.style.display = 'none';
