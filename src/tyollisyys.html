@@ -80,7 +80,7 @@
                                                 <h2 style="position:relative;"><span id="ph-osuus" style="cursor:pointer;">...</span> %
                                                 <!-- Chart.js popup for history -->
                                                 <div id="ph-osuus-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                                                    <canvas id="ph-osuus-chart" width="300" height="150"></canvas>
+                                                      <canvas id="ph-osuus-chart" width="300" height="150"></canvas>
                                                 </div>
                                                 </h2>
                         <p>Päijät-Häme</p>
@@ -336,26 +336,26 @@ document.addEventListener('DOMContentLoaded', function() {
     // Sample historical data (replace with AJAX/database fetch for real data)
     const phOsuusHistory = {
         labels: ['2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06'],
-        data: [14.1, 13.0, 11.8, 9.7, 9.9, 10.1]
+        data: [12.1, 11.0, 11.8, 9.7, 9.9, 10.1]
     };
 
 
-                function positionChartPopup(e) {
-                    const popupWidth = 320;
-                    const popupHeight = 170;
-                    // Use pageX/pageY for multi-monitor and Edge browser compatibility
-                    let x = e.pageX - popupWidth / 2;
-                    let y = e.pageY - popupHeight - 12;
-                    // If not enough space above, show below pointer
-                    if (y < window.scrollY + 8) y = e.pageY + 16;
-                    // Clamp to viewport horizontally
-                    if (x < window.scrollX + 8) x = window.scrollX + 8;
-                    if (x + popupWidth > window.scrollX + window.innerWidth) x = window.scrollX + window.innerWidth - popupWidth - 8;
-                    // Clamp to viewport vertically
-                    if (y + popupHeight > window.scrollY + window.innerHeight) y = window.scrollY + window.innerHeight - popupHeight - 8;
-                    chartPopup.style.left = x + 'px';
-                    chartPopup.style.top = y + 'px';
-                }
+                    // Use fixed positioning for popup so it always appears next to mouse pointer, regardless of scroll/zoom/monitor
+                    chartPopup.style.position = 'fixed';
+                    function positionChartPopup(e) {
+                        const popupWidth = 320;
+                        const popupHeight = 170;
+                        let x = e.clientX + 12;
+                        let y = e.clientY - popupHeight / 2;
+                        // Clamp to viewport horizontally
+                        if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+                        if (x < 8) x = 8;
+                        // Clamp to viewport vertically
+                        if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+                        if (y < 8) y = 8;
+                        chartPopup.style.left = x + 'px';
+                        chartPopup.style.top = y + 'px';
+                    }
 
         phOsuusSpan.addEventListener('mouseover', function(e) {
             chartPopup.style.display = 'block';
