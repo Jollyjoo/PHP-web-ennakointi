@@ -66,7 +66,7 @@
                 <div align="center" class="newsContainer">
                     <h3>Hämeen työllisyyden avaintilastot</h3><br>
                     <span id="tyollisyys-summary">...</span>
-                </div>
+                </div><br>
                 <div class="container">
                     <!--    <div class="tilastobox">
                         <p>Työllisyysaste</p>
@@ -299,9 +299,22 @@ fetch('tyollisyys.php')
       if (data.maakunnat['ELY04'] && data.maakunnat['SSS']) {
         const ely = data.maakunnat['ELY04'];
         const sss = data.maakunnat['SSS'];
+        // Muunna aika (esim. 2025M06 -> kesäkuu 2025)
+        function formatAika(aika) {
+          const kuukausiNimet = ['tammikuu', 'helmikuu', 'maaliskuu', 'huhtikuu', 'toukokuu', 'kesäkuu', 'heinäkuu', 'elokuu', 'syyskuu', 'lokakuu', 'marraskuu', 'joulukuu'];
+          const match = aika.match(/(\d{4})M(\d{2})/);
+          if (match) {
+            const vuosi = match[1];
+            const kk = parseInt(match[2], 10);
+            const kuukausi = kuukausiNimet[kk-1] || kk;
+            return `${kuukausi} ${vuosi}`;
+          }
+          return aika;
+        }
+        const aikaTeksti = formatAika(data.aika);
         document.getElementById('tyollisyys-summary').textContent =
-          `Hämeen ELY-alueella työttömyysaste oli ${ely.tyottomien_osuus} %, (koko maa ${sss.tyottomien_osuus} %).\n` +
-          `Työttömiä työnhakijoita oli ${ely.tyottomat_yht}.`;
+          `Hämeen ELY-alueella työttömyysaste oli ${ely.tyottomien_osuus} %, (koko maa ${sss.tyottomien_osuus} %). ` +
+          `Työttömiä työnhakijoita oli ${ely.tyottomat_yht}. <b> (${aikaTeksti}) </b>`;
       }
     }
   })
