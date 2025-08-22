@@ -88,7 +88,12 @@
                                                 </h2>
                         <p>Päijät-Häme</p>
                         <h2><span id="kh-osuus">...</span> %</h2>
-                        <p>Kanta-Häme</p>
+                <!-- Chart.js popup for Kanta-Häme history -->
+                <div id="kh-osuus-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                    <canvas id="kh-osuus-chart" width="400" height="180"></canvas>
+                    <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Työttömien osuus työvoimasta - historia</div>
+                </div>
+                <p>Kanta-Häme</p>
 
                         </p>
                     </div>
@@ -332,6 +337,72 @@ fetch('tyollisyys.php')
 
 // Chart popup logic for ph-osuus
 document.addEventListener('DOMContentLoaded', function() {
+    // Kanta-Häme chart popup logic
+    const khOsuusSpan = document.getElementById('kh-osuus');
+    const khChartPopup = document.getElementById('kh-osuus-chart-popup');
+    let khChartInstance = null;
+    khChartPopup.style.position = 'fixed';
+    function positionKhChartPopup(e) {
+        const popupWidth = 400;
+        const popupHeight = 220;
+        let x = e.clientX + 40;
+        let y = e.clientY - popupHeight;
+        if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+        if (x < 8) x = 8;
+        if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+        if (y < 8) y = 8;
+        khChartPopup.style.left = x + 'px';
+        khChartPopup.style.top = y + 'px';
+    }
+    let khChartDataLoaded = false;
+    let khChartLabels = [];
+    let khChartData = [];
+    khOsuusSpan.addEventListener('mouseover', function(e) {
+        khChartPopup.style.display = 'block';
+        positionKhChartPopup(e);
+        if (!khChartDataLoaded) {
+            fetch('tyollisyys_historia.php?stat_code=MK05')
+                .then(resp => resp.json())
+                .then(hist => {
+                    khChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                        const kk = parseInt(m.slice(1),10);
+                        const kuukausiNimet = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
+                        return ' ' + (kuukausiNimet[kk-1] || m);
+                    }));
+                    khChartData = hist.data;
+                    khChartDataLoaded = true;
+                    const ctx = document.getElementById('kh-osuus-chart').getContext('2d');
+                    khChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: khChartLabels,
+                            datasets: [{
+                                label: 'Työttömien osuus (%)',
+                                data: khChartData,
+                                borderColor: '#0077cc',
+                                backgroundColor: 'rgba(0,119,204,0.1)',
+                                fill: true,
+                                pointRadius: 3
+                            }]
+                        },
+                        options: {
+                            responsive: false,
+                            plugins: { legend: { display: false } },
+                            scales: {
+                                x: { title: { display: true, text: 'Kuukausi' } },
+                                y: { title: { display: true, text: '%' }, min: 10, max: 16 }
+                            }
+                        }
+                    });
+                });
+        }
+    });
+    khOsuusSpan.addEventListener('mousemove', function(e) {
+        positionKhChartPopup(e);
+    });
+    khOsuusSpan.addEventListener('mouseout', function() {
+        khChartPopup.style.display = 'none';
+    });
     const phOsuusSpan = document.getElementById('ph-osuus');
     const chartPopup = document.getElementById('ph-osuus-chart-popup');
     let chartInstance = null;
