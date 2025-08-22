@@ -67,6 +67,8 @@
                     <h3>Hämeen työllisyyden avaintilastot</h3><br>
                     <span id="tyollisyys-summary">...</span>
                 </div><br>
+                 <p><b> Vie hiiren osoitin alla olevien lukujen päälle, niin näet kuvaajan </p></b> 
+           
                 <div class="container">
                     <!--    <div class="tilastobox">
                         <p>Työllisyysaste</p>
@@ -347,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const popupWidth = 400;
                         const popupHeight = 220;
                         let x = e.clientX + 40;
-                        let y = e.clientY - popupHeight / 2;
+                        let y = e.clientY - popupHeight ;
                         // Clamp to viewport horizontally
                         if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
                         if (x < 8) x = 8;
