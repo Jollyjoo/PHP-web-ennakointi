@@ -311,10 +311,10 @@ fetch('tyollisyys.php')
           }
           return aika;
         }
-        const aikaTeksti = formatAika(data.aika);
-        document.getElementById('tyollisyys-summary').textContent =
-          `Hämeen ELY-alueella työttömyysaste oli ${ely.tyottomien_osuus} %, (koko maa ${sss.tyottomien_osuus} %). ` +
-          `Työttömiä työnhakijoita oli ${ely.tyottomat_yht}. <b> (${aikaTeksti}) </b>`;
+                const aikaTeksti = formatAika(data.aika);
+                document.getElementById('tyollisyys-summary').innerHTML =
+                    `<b>${aikaTeksti}</b>: Hämeen ELY-alueella työttömyysaste oli ${ely.tyottomien_osuus} %, (koko maa ${sss.tyottomien_osuus} %). ` +
+                    `Työttömiä työnhakijoita oli ${ely.tyottomat_yht}.`;
       }
     }
   })
