@@ -339,47 +339,56 @@ document.addEventListener('DOMContentLoaded', function() {
         data: [10.2, 10.0, 9.8, 9.7, 9.9, 10.1]
     };
 
-    phOsuusSpan.addEventListener('mouseover', function(e) {
-        // Position popup near mouse
-        chartPopup.style.display = 'block';
-        chartPopup.style.left = (e.pageX + 10) + 'px';
-        chartPopup.style.top = (e.pageY - 10) + 'px';
-        // Draw chart
-        if (!chartInstance) {
-            const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
-            chartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: phOsuusHistory.labels.map(l => l.replace(/M(\d{2})/, m => {
-                        const kk = parseInt(m.slice(1),10);
-                        const kuukausiNimet = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
-                        return ' ' + (kuukausiNimet[kk-1] || m);
-                    })),
-                    datasets: [{
-                        label: 'Työttömien osuus (%)',
-                        data: phOsuusHistory.data,
-                        borderColor: '#0077cc',
-                        backgroundColor: 'rgba(0,119,204,0.1)',
-                        fill: true,
-                        pointRadius: 3
-                    }]
-                },
-                options: {
-                    responsive: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        x: { title: { display: true, text: 'Kuukausi' } },
-                        y: { title: { display: true, text: '%' }, min: 9, max: 11 }
-                    }
-                }
-            });
-        }
-    });
 
-    phOsuusSpan.addEventListener('mousemove', function(e) {
-        chartPopup.style.left = (e.pageX + 10) + 'px';
-        chartPopup.style.top = (e.pageY - 10) + 'px';
-    });
+        function positionChartPopup(e) {
+            const popupWidth = 320; // chart + padding
+            const popupHeight = 170;
+            let x = e.clientX + 12;
+            let y = e.clientY + 12;
+            // Adjust if near right/bottom edge
+            if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+            if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+            chartPopup.style.left = x + window.scrollX + 'px';
+            chartPopup.style.top = y + window.scrollY + 'px';
+        }
+
+        phOsuusSpan.addEventListener('mouseover', function(e) {
+            chartPopup.style.display = 'block';
+            positionChartPopup(e);
+            if (!chartInstance) {
+                const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: phOsuusHistory.labels.map(l => l.replace(/M(\d{2})/, m => {
+                            const kk = parseInt(m.slice(1),10);
+                            const kuukausiNimet = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
+                            return ' ' + (kuukausiNimet[kk-1] || m);
+                        })),
+                        datasets: [{
+                            label: 'Työttömien osuus (%)',
+                            data: phOsuusHistory.data,
+                            borderColor: '#0077cc',
+                            backgroundColor: 'rgba(0,119,204,0.1)',
+                            fill: true,
+                            pointRadius: 3
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { title: { display: true, text: 'Kuukausi' } },
+                            y: { title: { display: true, text: '%' }, min: 9, max: 11 }
+                        }
+                    }
+                });
+            }
+        });
+
+        phOsuusSpan.addEventListener('mousemove', function(e) {
+            positionChartPopup(e);
+        });
 
     phOsuusSpan.addEventListener('mouseout', function() {
         chartPopup.style.display = 'none';
