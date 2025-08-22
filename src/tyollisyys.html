@@ -76,8 +76,13 @@
                         </p>
                     </div> -->
                     <div class="tilastobox">
-                        <p>Työttömien osuus työvoimasta <span id="stat-aika"></span></p>
-                        <h2><span id="ph-osuus">...</span> %</h2>
+                                                <p>Työttömien osuus työvoimasta <span id="stat-aika"></span></p>
+                                                <h2 style="position:relative;"><span id="ph-osuus" style="cursor:pointer;">...</span> %
+                                                <!-- Chart.js popup for history -->
+                                                <div id="ph-osuus-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                                                    <canvas id="ph-osuus-chart" width="300" height="150"></canvas>
+                                                </div>
+                                                </h2>
                         <p>Päijät-Häme</p>
                         <h2><span id="kh-osuus">...</span> %</h2>
                         <p>Kanta-Häme</p>
@@ -257,7 +262,9 @@
             crossorigin="anonymous"></script>
 
 
-        <script src="webflow.js" type="text/javascript"></script>
+    <script src="webflow.js" type="text/javascript"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
         <script type="text/javascript">
             // Ladataan tuo otsikot.html tiedostosta, kun sitä samaa käytetään niin monessa paikassa
@@ -319,6 +326,65 @@ fetch('tyollisyys.php')
     }
   })
   .catch(e => { /* virheenkäsittely, esim. näytä virheilmoitus */ });
+
+// Chart popup logic for ph-osuus
+document.addEventListener('DOMContentLoaded', function() {
+    const phOsuusSpan = document.getElementById('ph-osuus');
+    const chartPopup = document.getElementById('ph-osuus-chart-popup');
+    let chartInstance = null;
+
+    // Sample historical data (replace with AJAX/database fetch for real data)
+    const phOsuusHistory = {
+        labels: ['2025M01', '2025M02', '2025M03', '2025M04', '2025M05', '2025M06'],
+        data: [10.2, 10.0, 9.8, 9.7, 9.9, 10.1]
+    };
+
+    phOsuusSpan.addEventListener('mouseover', function(e) {
+        // Position popup near mouse
+        chartPopup.style.display = 'block';
+        chartPopup.style.left = (e.pageX + 10) + 'px';
+        chartPopup.style.top = (e.pageY - 10) + 'px';
+        // Draw chart
+        if (!chartInstance) {
+            const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: phOsuusHistory.labels.map(l => l.replace(/M(\d{2})/, m => {
+                        const kk = parseInt(m.slice(1),10);
+                        const kuukausiNimet = ['Tammi','Helmi','Maalis','Huhti','Touko','Kesä','Heinä','Elo','Syys','Loka','Marras','Joulu'];
+                        return ' ' + (kuukausiNimet[kk-1] || m);
+                    })),
+                    datasets: [{
+                        label: 'Työttömien osuus (%)',
+                        data: phOsuusHistory.data,
+                        borderColor: '#0077cc',
+                        backgroundColor: 'rgba(0,119,204,0.1)',
+                        fill: true,
+                        pointRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { title: { display: true, text: 'Kuukausi' } },
+                        y: { title: { display: true, text: '%' }, min: 9, max: 11 }
+                    }
+                }
+            });
+        }
+    });
+
+    phOsuusSpan.addEventListener('mousemove', function(e) {
+        chartPopup.style.left = (e.pageX + 10) + 'px';
+        chartPopup.style.top = (e.pageY - 10) + 'px';
+    });
+
+    phOsuusSpan.addEventListener('mouseout', function() {
+        chartPopup.style.display = 'none';
+    });
+});
 </script>
 
 </body>
