@@ -371,6 +371,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }));
                     khChartData = hist.data;
                     khChartDataLoaded = true;
+                    // Dynamic scale
+                    const minY = Math.floor(Math.min(...khChartData) - 1);
+                    const maxY = Math.ceil(Math.max(...khChartData) + 1);
                     const ctx = document.getElementById('kh-osuus-chart').getContext('2d');
                     khChartInstance = new Chart(ctx, {
                         type: 'line',
@@ -390,7 +393,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             plugins: { legend: { display: false } },
                             scales: {
                                 x: { title: { display: true, text: 'Kuukausi' } },
-                                y: { title: { display: true, text: '%' }, min: 10, max: 16 }
+                                y: { title: { display: true, text: '%' }, min: minY, max: maxY }
                             }
                         }
                     });
@@ -443,6 +446,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     }));
                     chartData = hist.data;
                     chartDataLoaded = true;
+                    // Dynamic scale
+                    const minY = Math.floor(Math.min(...chartData) - 1);
+                    const maxY = Math.ceil(Math.max(...chartData) + 1);
                     // Draw chart
                     const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
                     chartInstance = new Chart(ctx, {
@@ -463,7 +469,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             plugins: { legend: { display: false } },
                             scales: {
                                 x: { title: { display: true, text: 'Kuukausi' } },
-                                y: { title: { display: true, text: '%' }, min: 10, max: 16 }
+                                y: { title: { display: true, text: '%' }, min: minY, max: maxY }
                             }
                         }
                     });
