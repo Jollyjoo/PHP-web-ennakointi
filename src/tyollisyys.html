@@ -340,17 +340,20 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
 
-        function positionChartPopup(e) {
-            const popupWidth = 320; // chart + padding
-            const popupHeight = 170;
-            let x = e.clientX + 12;
-            let y = e.clientY + 12;
-            // Adjust if near right/bottom edge
-            if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
-            if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
-            chartPopup.style.left = x + window.scrollX + 'px';
-            chartPopup.style.top = y + window.scrollY + 'px';
-        }
+            function positionChartPopup(e) {
+                const popupWidth = 320;
+                const popupHeight = 170;
+                // Center above mouse pointer, minimal offset
+                let x = e.clientX - popupWidth / 2;
+                let y = e.clientY - popupHeight - 12;
+                // Adjust if near left/top/right/bottom edge
+                if (x < 8) x = 8;
+                if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+                if (y < 8) y = e.clientY + 16; // show below if not enough space above
+                if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+                chartPopup.style.left = x + window.scrollX + 'px';
+                chartPopup.style.top = y + window.scrollY + 'px';
+            }
 
         phOsuusSpan.addEventListener('mouseover', function(e) {
             chartPopup.style.display = 'block';
