@@ -80,7 +80,8 @@
                                                 <h2 style="position:relative;"><span id="ph-osuus" style="cursor:pointer;">...</span> %
                                                 <!-- Chart.js popup for history -->
                                                 <div id="ph-osuus-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                                                      <canvas id="ph-osuus-chart" width="300" height="150"></canvas>
+                                                      <canvas id="ph-osuus-chart" width="400" height="180"></canvas>
+                                                      <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Työttömien osuus työvoimasta - historia</div>
                                                 </div>
                                                 </h2>
                         <p>Päijät-Häme</p>
@@ -343,9 +344,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     // Use fixed positioning for popup so it always appears next to mouse pointer, regardless of scroll/zoom/monitor
                     chartPopup.style.position = 'fixed';
                     function positionChartPopup(e) {
-                        const popupWidth = 320;
-                        const popupHeight = 170;
-                        let x = e.clientX + 12;
+                        const popupWidth = 400;
+                        const popupHeight = 220;
+                        let x = e.clientX + 40;
                         let y = e.clientY - popupHeight / 2;
                         // Clamp to viewport horizontally
                         if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
@@ -384,7 +385,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         plugins: { legend: { display: false } },
                         scales: {
                             x: { title: { display: true, text: 'Kuukausi' } },
-                            y: { title: { display: true, text: '%' }, min: 9, max: 11 }
+                            y: { title: { display: true, text: '%' }, min: 9, max: 14 }
                         }
                     }
                 });
