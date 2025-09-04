@@ -373,8 +373,8 @@
     function positionPhTyottomatChartPopup(e) {
         const popupWidth = 400;
         const popupHeight = 220;
-        let x = e.clientX + 40;
-        let y = e.clientY - popupHeight;
+    let x = e.clientX - 300;
+    let y = e.clientY - popupHeight - 30;
         if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
         if (x < 8) x = 8;
         if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
@@ -442,8 +442,8 @@
     function positionKhTyottomatChartPopup(e) {
         const popupWidth = 400;
         const popupHeight = 220;
-        let x = e.clientX + 40;
-        let y = e.clientY - popupHeight;
+        let x = e.clientX - 300;
+        let y = e.clientY - popupHeight - 30;
         if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
         if (x < 8) x = 8;
         if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
