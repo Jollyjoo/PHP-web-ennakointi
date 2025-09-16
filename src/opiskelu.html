@@ -85,8 +85,18 @@
                     <div class="tilastobox">
                         <p>Toisen asteen tutkinnon suorittaneet<br> (koko maa: <span id="toinen-sss">...</span> %)</p>
                         <h2><span id="toinen-mk07">...</span> %</h2>
+                        <!-- Chart.js popup for Päijät-Häme toisen asteen tutkinnon suorittaneet -->
+                        <div id="toinen-mk07-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                            <canvas id="toinen-mk07-chart" width="400" height="180"></canvas>
+                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Toisen asteen tutkinnon suorittaneet - historia</div>
+                        </div>
                         <p> Päijät-Häme</p>
                         <h2><span id="toinen-mk05">...</span> %</h2>
+                        <!-- Chart.js popup for Kanta-Häme toisen asteen tutkinnon suorittaneet -->
+                        <div id="toinen-mk05-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                            <canvas id="toinen-mk05-chart" width="400" height="180"></canvas>
+                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Toisen asteen tutkinnon suorittaneet - historia</div>
+                        </div>
                         <p>Kanta-Häme</p>
 
                         </p>
@@ -94,8 +104,18 @@
                     <div class="tilastobox">
                         <p>Korkea-asteen tutkinnon suorittaneet<br>(koko maa: <span id="korkea-sss">...</span> %)</p>
                         <h2><span id="korkea-mk07">...</span> %</h2>
+                        <!-- Chart.js popup for Päijät-Häme korkea-asteen tutkinnon suorittaneet -->
+                        <div id="korkea-mk07-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                            <canvas id="korkea-mk07-chart" width="400" height="180"></canvas>
+                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Korkea-asteen tutkinnon suorittaneet - historia</div>
+                        </div>
                         <p>Päijät-Häme</p>
                         <h2><span id="korkea-mk05">...</span> %</h2>
+                        <!-- Chart.js popup for Kanta-Häme korkea-asteen tutkinnon suorittaneet -->
+                        <div id="korkea-mk05-chart-popup" style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                            <canvas id="korkea-mk05-chart" width="400" height="180"></canvas>
+                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Korkea-asteen tutkinnon suorittaneet - historia</div>
+                        </div>
                         <p>Kanta-Häme</p>
                         </p>
                     </div>
@@ -198,6 +218,98 @@
         </div>
 
         <script>
+// Chart.js popup logic for education stats
+document.addEventListener('DOMContentLoaded', function () {
+    // Helper for positioning
+    function positionChartPopup(popup, e) {
+        const popupWidth = 400;
+        const popupHeight = 220;
+        let x = e.clientX + 20;
+        let y = e.clientY - popupHeight - 20;
+        if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+        if (x < 8) x = 8;
+        if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+        if (y < 8) y = 8;
+        popup.style.left = x + 'px';
+        popup.style.top = y + 'px';
+    }
+    // Chart configs
+    const chartConfigs = [
+        {
+            spanId: 'toinen-mk07', popupId: 'toinen-mk07-chart-popup', canvasId: 'toinen-mk07-chart',
+            endpoint: 'opiskelu_historia.php?stat_code=MK07&field=toisen_aste', label: 'Toisen asteen tutkinnon suorittaneet', color: '#0077cc'
+        },
+        {
+            spanId: 'toinen-mk05', popupId: 'toinen-mk05-chart-popup', canvasId: 'toinen-mk05-chart',
+            endpoint: 'opiskelu_historia.php?stat_code=MK05&field=toisen_aste', label: 'Toisen asteen tutkinnon suorittaneet', color: '#cc3300'
+        },
+        {
+            spanId: 'korkea-mk07', popupId: 'korkea-mk07-chart-popup', canvasId: 'korkea-mk07-chart',
+            endpoint: 'opiskelu_historia.php?stat_code=MK07&field=korkea_aste', label: 'Korkea-asteen tutkinnon suorittaneet', color: '#0077cc'
+        },
+        {
+            spanId: 'korkea-mk05', popupId: 'korkea-mk05-chart-popup', canvasId: 'korkea-mk05-chart',
+            endpoint: 'opiskelu_historia.php?stat_code=MK05&field=korkea_aste', label: 'Korkea-asteen tutkinnon suorittaneet', color: '#cc3300'
+        }
+    ];
+    chartConfigs.forEach(cfg => {
+        const span = document.getElementById(cfg.spanId);
+        const popup = document.getElementById(cfg.popupId);
+        let chartInstance = null;
+        popup.style.position = 'fixed';
+        let chartDataLoaded = false;
+        let chartLabels = [];
+        let chartData = [];
+        span.addEventListener('mouseover', function (e) {
+            popup.style.display = 'block';
+            positionChartPopup(popup, e);
+            if (!chartDataLoaded) {
+                fetch(cfg.endpoint)
+                    .then(resp => resp.json())
+                    .then(hist => {
+                        chartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                            const kk = parseInt(m.slice(1), 10);
+                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                        }));
+                        chartData = hist.data;
+                        chartDataLoaded = true;
+                        const minY = Math.floor(Math.min(...chartData) - 1);
+                        const maxY = Math.ceil(Math.max(...chartData) + 1);
+                        const ctx = document.getElementById(cfg.canvasId).getContext('2d');
+                        chartInstance = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: chartLabels,
+                                datasets: [{
+                                    label: cfg.label,
+                                    data: chartData,
+                                    borderColor: cfg.color,
+                                    backgroundColor: 'rgba(0,119,204,0.08)',
+                                    fill: true,
+                                    pointRadius: 3
+                                }]
+                            },
+                            options: {
+                                responsive: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                    y: { title: { display: true, text: '%' }, min: minY, max: maxY }
+                                }
+                            }
+                        });
+                    });
+            }
+        });
+        span.addEventListener('mousemove', function (e) {
+            positionChartPopup(popup, e);
+        });
+        span.addEventListener('mouseout', function () {
+            popup.style.display = 'none';
+        });
+    });
+});
             // Function to show the selected visualization and hide others
             function showVisualization(visualId) {
                 // Hide all visualizations
