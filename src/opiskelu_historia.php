@@ -1,39 +1,50 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-require_once 'info.php'; // Contains DB connection info
+// --- Opiskelu historian backend ---
+// Palauttaa JSON-muodossa opiskelun historian vuosittain
 
-// Connect to database
+$servername = "tulevaisuusluotain.fi";
+$username = "catbxjbt_readonly";
+$password = "TamaonSalainen44";
+$dbname = "catbxjbt_ennakointi";
+
+header('Content-Type: application/json; charset=utf-8');
+
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     http_response_code(500);
-    echo json_encode(["error" => "Database connection failed."]);
-    exit();
+    echo json_encode(["error" => "Tietokantayhteys epäonnistui"]);
+    exit;
 }
+$conn->set_charset("utf8");
 
-// Get the last 10 years (descending)
+// Haetaan viimeiset 10 vuotta
 $sql = "SELECT vuosi, toisen_aste, korkea_aste, amk, yo FROM Opiskelu ORDER BY vuosi DESC LIMIT 10";
-$result = $conn->query($sql);
-
-if (!$result) {
-    http_response_code(500);
-    echo json_encode(["error" => "Query failed."]);
-    $conn->close();
-    exit();
+$res = $conn->query($sql);
+$labels = [];
+$data = [
+    "toisen_aste" => [],
+    "korkea_aste" => [],
+    "amk" => [],
+    "yo" => []
+];
+if ($res) {
+    while ($row = $res->fetch_assoc()) {
+        $labels[] = $row['vuosi'];
+        $data["toisen_aste"][] = floatval($row["toisen_aste"]);
+        $data["korkea_aste"][] = floatval($row["korkea_aste"]);
+        $data["amk"][] = floatval($row["amk"]);
+        $data["yo"][] = floatval($row["yo"]);
+    }
 }
-
-$data = [];
-while ($row = $result->fetch_assoc()) {
-    $data[] = [
-        "vuosi" => $row["vuosi"],
-        "toisen_aste" => $row["toisen_aste"],
-        "korkea_aste" => $row["korkea_aste"],
-        "amk" => $row["amk"],
-        "yo" => $row["yo"]
-    ];
-}
-
 $conn->close();
-// Return in ascending order for charts
-$data = array_reverse($data);
-echo json_encode($data);
+// Palautetaan käännetyssä järjestyksessä (vanhin ensin)
+echo json_encode([
+    "labels" => array_reverse($labels),
+    "data" => [
+        "toisen_aste" => array_reverse($data["toisen_aste"]),
+        "korkea_aste" => array_reverse($data["korkea_aste"]),
+        "amk" => array_reverse($data["amk"]),
+        "yo" => array_reverse($data["yo"])
+    ]
+], JSON_UNESCAPED_UNICODE);
 ?>
