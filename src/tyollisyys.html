@@ -188,7 +188,7 @@
 
 
 
-<div id="bookmark3" style="display:flex;justify-content:center;align-items:flex-start;gap:36px;margin:40px auto 20px auto;max-width:1280px;">
+<div id="bookmark3" class="embedded-charts-flex">
     <div style="flex:1 1 0;min-width:340px;max-width:600px;background:#eaf6fb;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
         <h3 style="text-align:center;">Avoimet työpaikat (viimeiset 4 vuotta)</h3>
         <canvas id="avoimet-embedded-chart" width="560" height="260"></canvas>
@@ -211,98 +211,123 @@ document.addEventListener('DOMContentLoaded', function () {
         fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa&limit=48').then(r => r.json()),
         fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa&limit=48').then(r => r.json())
     ]).then(([phAvoimet, khAvoimet, phTyottomat, khTyottomat]) => {
-        // Helper
         function lastN(arr, n) { return arr.slice(-n); }
         const N = 48;
-        // Avoimet työpaikat chart
-        const labelsAvoimet = lastN(phAvoimet.labels, N).map(l => l.replace(/M(\d{2})/, m => {
-            const kk = parseInt(m.slice(1), 10);
-            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-            return ' ' + (kuukausiNimet[kk - 1] || m);
-        }));
-        const phAvoimetData = lastN(phAvoimet.data, N);
-        const khAvoimetData = lastN(khAvoimet.data, N);
-        const minY1 = Math.floor(Math.min(...phAvoimetData.concat(khAvoimetData)) - 1);
-        const maxY1 = Math.ceil(Math.max(...phAvoimetData.concat(khAvoimetData)) + 1);
-        const ctx1 = document.getElementById('avoimet-embedded-chart').getContext('2d');
-        new Chart(ctx1, {
-            type: 'line',
-            data: {
-                labels: labelsAvoimet,
-                datasets: [
-                    {
-                        label: 'Päijät-Häme',
-                        data: phAvoimetData,
-                        borderColor: '#009933',
-                        backgroundColor: 'rgba(0,153,51,0.08)',
-                        fill: true,
-                        pointRadius: 2
-                    },
-                    {
-                        label: 'Kanta-Häme',
-                        data: khAvoimetData,
-                        borderColor: '#3366cc',
-                        backgroundColor: 'rgba(51,102,204,0.08)',
-                        fill: true,
-                        pointRadius: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: false,
-                plugins: { legend: { display: true, position: 'top' } },
-                scales: {
-                    x: { title: { display: true, text: 'Kuukausi' } },
-                    y: { title: { display: true, text: 'Lkm' }, min: minY1, max: maxY1 }
-                },
-                layout: { padding: 10 },
-                backgroundColor: '#eaf6fb'
+        // Helper to show error message in chart area
+        function showChartError(canvasId, msg) {
+            const canvas = document.getElementById(canvasId);
+            if (canvas) {
+                const parent = canvas.parentElement;
+                parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>${msg}</div>`;
             }
-        });
-
-        // Työttömät työnhakijat chart
-        const labelsTyottomat = lastN(phTyottomat.labels, N).map(l => l.replace(/M(\d{2})/, m => {
-            const kk = parseInt(m.slice(1), 10);
-            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-            return ' ' + (kuukausiNimet[kk - 1] || m);
-        }));
-        const phTyottomatData = lastN(phTyottomat.data, N);
-        const khTyottomatData = lastN(khTyottomat.data, N);
-        const minY2 = Math.floor(Math.min(...phTyottomatData.concat(khTyottomatData)) - 1);
-        const maxY2 = Math.ceil(Math.max(...phTyottomatData.concat(khTyottomatData)) + 1);
-        const ctx2 = document.getElementById('tyottomat-embedded-chart').getContext('2d');
-        new Chart(ctx2, {
-            type: 'line',
-            data: {
-                labels: labelsTyottomat,
-                datasets: [
-                    {
-                        label: 'Päijät-Häme',
-                        data: phTyottomatData,
-                        borderColor: '#cc3300',
-                        backgroundColor: 'rgba(204,51,0,0.08)',
-                        fill: true,
-                        pointRadius: 2
-                    },
-                    {
-                        label: 'Kanta-Häme',
-                        data: khTyottomatData,
-                        borderColor: '#3366cc',
-                        backgroundColor: 'rgba(51,102,204,0.08)',
-                        fill: true,
-                        pointRadius: 2
-                    }
-                ]
-            },
-            options: {
-                responsive: false,
-                plugins: { legend: { display: true, position: 'top' } },
-                scales: {
-                    x: { title: { display: true, text: 'Kuukausi' } },
-                    y: { title: { display: true, text: 'Lkm' }, min: minY2, max: maxY2 }
+        }
+        // Check for errors or missing data
+        if (phAvoimet.error || khAvoimet.error || !phAvoimet.labels || !khAvoimet.labels) {
+            showChartError('avoimet-embedded-chart', 'Ei tietokantayhteyttä');
+        } else {
+            // Avoimet työpaikat chart
+            const labelsAvoimet = lastN(phAvoimet.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+                const kk = parseInt(m.slice(1), 10);
+                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                return ' ' + (kuukausiNimet[kk - 1] || m);
+            }));
+            const phAvoimetData = lastN(phAvoimet.data, N);
+            const khAvoimetData = lastN(khAvoimet.data, N);
+            const minY1 = Math.floor(Math.min(...phAvoimetData.concat(khAvoimetData)) - 1);
+            const maxY1 = Math.ceil(Math.max(...phAvoimetData.concat(khAvoimetData)) + 1);
+            const ctx1 = document.getElementById('avoimet-embedded-chart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: labelsAvoimet,
+                    datasets: [
+                        {
+                            label: 'Päijät-Häme',
+                            data: phAvoimetData,
+                            borderColor: '#009933',
+                            backgroundColor: 'rgba(0,153,51,0.08)',
+                            fill: true,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'Kanta-Häme',
+                            data: khAvoimetData,
+                            borderColor: '#3366cc',
+                            backgroundColor: 'rgba(51,102,204,0.08)',
+                            fill: true,
+                            pointRadius: 2
+                        }
+                    ]
                 },
-                layout: { padding: 10 },
-                backgroundColor: '#eaf6fb'
+                options: {
+                    responsive: false,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: {
+                        x: { title: { display: true, text: 'Kuukausi' } },
+                        y: { title: { display: true, text: 'Lkm' }, min: minY1, max: maxY1 }
+                    },
+                    layout: { padding: 10 },
+                    backgroundColor: '#eaf6fb'
+                }
+            });
+        }
+        if (phTyottomat.error || khTyottomat.error || !phTyottomat.labels || !khTyottomat.labels) {
+            showChartError('tyottomat-embedded-chart', 'Ei tietokantayhteyttä');
+        } else {
+            // Työttömät työnhakijat chart
+            const labelsTyottomat = lastN(phTyottomat.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+                const kk = parseInt(m.slice(1), 10);
+                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                return ' ' + (kuukausiNimet[kk - 1] || m);
+            }));
+            const phTyottomatData = lastN(phTyottomat.data, N);
+            const khTyottomatData = lastN(khTyottomat.data, N);
+            const minY2 = Math.floor(Math.min(...phTyottomatData.concat(khTyottomatData)) - 1);
+            const maxY2 = Math.ceil(Math.max(...phTyottomatData.concat(khTyottomatData)) + 1);
+            const ctx2 = document.getElementById('tyottomat-embedded-chart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: labelsTyottomat,
+                    datasets: [
+                        {
+                            label: 'Päijät-Häme',
+                            data: phTyottomatData,
+                            borderColor: '#cc3300',
+                            backgroundColor: 'rgba(204,51,0,0.08)',
+                            fill: true,
+                            pointRadius: 2
+                        },
+                        {
+                            label: 'Kanta-Häme',
+                            data: khTyottomatData,
+                            borderColor: '#3366cc',
+                            backgroundColor: 'rgba(51,102,204,0.08)',
+                            fill: true,
+                            pointRadius: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: false,
+                    plugins: { legend: { display: true, position: 'top' } },
+                    scales: {
+                        x: { title: { display: true, text: 'Kuukausi' } },
+                        y: { title: { display: true, text: 'Lkm' }, min: minY2, max: maxY2 }
+                    },
+                    layout: { padding: 10 },
+                    backgroundColor: '#eaf6fb'
+                }
+            });
+        }
+    }).catch(() => {
+        // General error fallback
+        const ids = ['avoimet-embedded-chart', 'tyottomat-embedded-chart'];
+        ids.forEach(id => {
+            const canvas = document.getElementById(id);
+            if (canvas) {
+                const parent = canvas.parentElement;
+                parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>Ei tietokantayhteyttä</div>`;
             }
         });
     });

@@ -1,3 +1,20 @@
+/* Responsive flex for embedded charts */
+.embedded-charts-flex {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 36px;
+  margin: 40px auto 20px auto;
+  max-width: 1280px;
+}
+
+@media (max-width: 900px) {
+  .embedded-charts-flex {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+}
 /* Style for links MEDIASEURANTA */
 .styled-link {
   text-decoration: none;
