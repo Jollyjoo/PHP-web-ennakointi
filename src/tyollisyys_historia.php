@@ -18,14 +18,17 @@ $conn->set_charset("utf8");
 
 // Haetaan viimeiset 12 kuukautta MK07 (Päijät-Häme) työttömien osuus
 // Get stat_code and field
+// Get stat_code, field, and limit
 $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : 'MK07';
 $field = isset($_GET['field']) ? $_GET['field'] : 'tyotosuus';
+$limit = isset($_GET['limit']) ? intval($_GET['limit']) : 12;
+if ($limit < 1 || $limit > 120) { $limit = 12; } // sanity check
 // Validate field
 $allowed_fields = ['tyotosuus', 'uudetavp', 'tyottomatlopussa'];
 if (!in_array($field, $allowed_fields)) {
     $field = 'tyotosuus';
 }
-$sql = "SELECT aika, `$field` FROM Tyonhakijat WHERE stat_code = '" . $conn->real_escape_string($stat_code) . "' ORDER BY aika DESC LIMIT 12";
+$sql = "SELECT aika, `$field` FROM Tyonhakijat WHERE stat_code = '" . $conn->real_escape_string($stat_code) . "' ORDER BY aika DESC LIMIT $limit";
 $res = $conn->query($sql);
 $labels = [];
 $data = [];

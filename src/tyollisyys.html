@@ -195,8 +195,8 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Fetch data for both regions
     Promise.all([
-        fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp').then(r => r.json()),
-        fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp').then(r => r.json())
+        fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp&limit=48').then(r => r.json()),
+        fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp&limit=48').then(r => r.json())
     ]).then(([ph, kh]) => {
         // Filter last 48 months (4 years)
         function lastN(arr, n) { return arr.slice(-n); }
