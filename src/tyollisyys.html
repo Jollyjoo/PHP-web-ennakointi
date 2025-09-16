@@ -186,13 +186,75 @@
             });
         </script>
 
+ // here i need new chart
+<div style="max-width:600px;margin:40px auto 20px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+    <h3 style="text-align:center;">Avoimet työpaikat (viimeiset 4 vuotta)</h3>
+    <canvas id="avoimet-embedded-chart" width="560" height="260"></canvas>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Fetch data for both regions
+    Promise.all([
+        fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp').then(r => r.json()),
+        fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp').then(r => r.json())
+    ]).then(([ph, kh]) => {
+        // Filter last 48 months (4 years)
+        function lastN(arr, n) { return arr.slice(-n); }
+        const N = 48;
+        const labels = lastN(ph.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+            const kk = parseInt(m.slice(1), 10);
+            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+            return ' ' + (kuukausiNimet[kk - 1] || m);
+        }));
+        const phData = lastN(ph.data, N);
+        const khData = lastN(kh.data, N);
+        const minY = Math.floor(Math.min(...phData.concat(khData)) - 1);
+        const maxY = Math.ceil(Math.max(...phData.concat(khData)) + 1);
+        const ctx = document.getElementById('avoimet-embedded-chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Päijät-Häme',
+                        data: phData,
+                        borderColor: '#009933',
+                        backgroundColor: 'rgba(0,153,51,0.08)',
+                        fill: true,
+                        pointRadius: 2
+                    },
+                    {
+                        label: 'Kanta-Häme',
+                        data: khData,
+                        borderColor: '#3366cc',
+                        backgroundColor: 'rgba(51,102,204,0.08)',
+                        fill: true,
+                        pointRadius: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: false,
+                plugins: { legend: { display: true, position: 'top' } },
+                scales: {
+                    x: { title: { display: true, text: 'Kuukausi' } },
+                    y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
+                }
+            }
+        });
+    });
+});
+</script>
 
 
         <div class="centerContainer" id="bookmark3">
             <iframe src='https://flo.uri.sh/visualisation/21335132/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-            <iframe src='https://flo.uri.sh/visualisation/21459814/embed' title='Interactive or visual content'
+            
+            
+                <iframe src='https://flo.uri.sh/visualisation/21459814/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
 
