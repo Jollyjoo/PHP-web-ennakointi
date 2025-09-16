@@ -17,31 +17,24 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8");
 
-// Haetaan viimeiset 10 vuotta
+// Haetaan pyydetty kenttä
+$allowed_fields = ["perusjalk", "korkeajalk", "toisenjalk"];
+$field = isset($_GET['field']) && in_array($_GET['field'], $allowed_fields) ? $_GET['field'] : "toisenjalk";
+
 $sql = "SELECT vuosi, perusjalk, korkeajalk, toisenjalk FROM Opiskelu ORDER BY vuosi DESC LIMIT 10";
 $res = $conn->query($sql);
 $labels = [];
-$data = [
-    "perusjalk" => [],
-    "korkeajalk" => [],
-    "toisenjalk" => []
-];
+$data = [];
 if ($res) {
     while ($row = $res->fetch_assoc()) {
         $labels[] = $row['vuosi'];
-        $data["perusjalk"][] = floatval($row["perusjalk"]);
-        $data["korkeajalk"][] = floatval($row["korkeajalk"]);
-        $data["toisenjalk"][] = floatval($row["toisenjalk"]);
+        $data[] = floatval($row[$field]);
     }
 }
 $conn->close();
 // Palautetaan käännetyssä järjestyksessä (vanhin ensin)
 echo json_encode([
     "labels" => array_reverse($labels),
-    "data" => [
-        "perusjalk" => array_reverse($data["perusjalk"]),
-        "korkeajalk" => array_reverse($data["korkeajalk"]),
-        "toisenjalk" => array_reverse($data["toisenjalk"])
-    ]
+    "data" => array_reverse($data)
 ], JSON_UNESCAPED_UNICODE);
 ?>
