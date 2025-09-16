@@ -65,8 +65,8 @@ $count = 0;
 while ($row = $result->fetch_assoc()) {
     $data["maakunnat"][$row["stat_code"]] = [
         "nimi" => $row["stat_label"], // alueen nimi
-        "toisen_aste" => $row["toisenjalk"], // toisen asteen suorittaneet (%)
-        "korkea_aste" => $row["korkeajalk"] // korkea-asteen suorittaneet (%)
+        "toisenjalk" => $row["toisenjalk"], // toisen asteen suorittaneet (%)
+        "korkeajalk" => $row["korkeajalk"] // korkea-asteen suorittaneet (%)
     ];
     $count++;
 }
