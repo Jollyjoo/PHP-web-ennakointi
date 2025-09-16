@@ -187,7 +187,7 @@
         </script>
 
 
-<div style="max-width:600px;margin:40px auto 20px auto;padding:20px;background:#fff;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+<div style="max-width:600px;margin:40px auto 20px auto;padding:20px;background:#eaf6fb;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
     <h3 style="text-align:center;">Avoimet työpaikat (viimeiset 4 vuotta)</h3>
     <canvas id="avoimet-embedded-chart" width="560" height="260"></canvas>
 </div>
@@ -240,7 +240,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 scales: {
                     x: { title: { display: true, text: 'Kuukausi' } },
                     y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
-                }
+                },
+                layout: { padding: 10 },
+                backgroundColor: '#eaf6fb'
             }
         });
     });
