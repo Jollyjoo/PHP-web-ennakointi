@@ -237,19 +237,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const chartConfigs = [
         {
             spanId: 'toinen-mk07', popupId: 'toinen-mk07-chart-popup', canvasId: 'toinen-mk07-chart',
-            endpoint: 'opiskelu_historia.php?stat_code=MK07&field=toisen_aste', label: 'Toisen asteen tutkinnon suorittaneet', color: '#0077cc'
+            endpoint: 'opiskelu_historia.php?stat_code=MK07&field=toisenjalk', label: 'Toisen asteen tutkinnon suorittaneet', color: '#0077cc'
         },
         {
             spanId: 'toinen-mk05', popupId: 'toinen-mk05-chart-popup', canvasId: 'toinen-mk05-chart',
-            endpoint: 'opiskelu_historia.php?stat_code=MK05&field=toisen_aste', label: 'Toisen asteen tutkinnon suorittaneet', color: '#cc3300'
+            endpoint: 'opiskelu_historia.php?stat_code=MK05&field=toisenjalk', label: 'Toisen asteen tutkinnon suorittaneet', color: '#cc3300'
         },
         {
             spanId: 'korkea-mk07', popupId: 'korkea-mk07-chart-popup', canvasId: 'korkea-mk07-chart',
-            endpoint: 'opiskelu_historia.php?stat_code=MK07&field=korkea_aste', label: 'Korkea-asteen tutkinnon suorittaneet', color: '#0077cc'
+            endpoint: 'opiskelu_historia.php?stat_code=MK07&field=korkeajalk', label: 'Korkea-asteen tutkinnon suorittaneet', color: '#0077cc'
         },
         {
             spanId: 'korkea-mk05', popupId: 'korkea-mk05-chart-popup', canvasId: 'korkea-mk05-chart',
-            endpoint: 'opiskelu_historia.php?stat_code=MK05&field=korkea_aste', label: 'Korkea-asteen tutkinnon suorittaneet', color: '#cc3300'
+            endpoint: 'opiskelu_historia.php?stat_code=MK05&field=korkeajalk', label: 'Korkea-asteen tutkinnon suorittaneet', color: '#cc3300'
         }
     ];
     chartConfigs.forEach(cfg => {
@@ -432,12 +432,12 @@ Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset j
                 .then(data => {
                     if (data.maakunnat) {
                         // Päijät-Häme = MK07, Kanta-Häme = MK05, Koko maa = SSS
-                        document.getElementById('toinen-mk07').textContent = data.maakunnat.MK07?.toisen_aste ?? '-';
-                        document.getElementById('toinen-mk05').textContent = data.maakunnat.MK05?.toisen_aste ?? '-';
-                        document.getElementById('korkea-mk07').textContent = data.maakunnat.MK07?.korkea_aste ?? '-';
-                        document.getElementById('korkea-mk05').textContent = data.maakunnat.MK05?.korkea_aste ?? '-';
-                        document.getElementById('toinen-sss').textContent = data.maakunnat.SSS?.toisen_aste ?? '-';
-                        document.getElementById('korkea-sss').textContent = data.maakunnat.SSS?.korkea_aste ?? '-';
+                        document.getElementById('toinen-mk07').textContent = data.maakunnat.MK07?.toisenjalk ?? '-';
+                        document.getElementById('toinen-mk05').textContent = data.maakunnat.MK05?.toisenjalk ?? '-';
+                        document.getElementById('korkea-mk07').textContent = data.maakunnat.MK07?.korkeajalk ?? '-';
+                        document.getElementById('korkea-mk05').textContent = data.maakunnat.MK05?.korkeajalk ?? '-';
+                        document.getElementById('toinen-sss').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
+                        document.getElementById('korkea-sss').textContent = data.maakunnat.SSS?.korkeajalk ?? '-';
                     }
                     if (data.paivitys) {
                         document.getElementById('koulutus-paivitys').textContent =  data.paivitys;
