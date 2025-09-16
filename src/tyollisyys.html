@@ -187,38 +187,52 @@
         </script>
 
 
-<div style="max-width:600px;margin:40px auto 20px auto;padding:20px;background:#eaf6fb;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+<div class="centerContainer" id="bookmark3" style="max-width:600px;margin:40px auto 20px auto;padding:20px;background:#eaf6fb;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+<div style="max-width:600px;margin:40px auto 20px auto;padding:20px;background:#eaf6fb;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);display:flex;flex-wrap:wrap;gap:32px;justify-content:center;">
+    <div style="flex:1;min-width:320px;max-width:600px;">
     <h3 style="text-align:center;">Avoimet työpaikat (viimeiset 4 vuotta)</h3>
     <canvas id="avoimet-embedded-chart" width="560" height="260"></canvas>
+    </div>
+    <div style="flex:1;min-width:320px;max-width:600px;">
+        <h3 style="text-align:center;">Työttömät työnhakijat (viimeiset 4 vuotta)</h3>
+        <canvas id="tyottomat-embedded-chart" width="560" height="260"></canvas>
+    </div>
+</div>
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Fetch data for both regions
+    // Fetch data for both charts in parallel
     Promise.all([
+        // Avoimet työpaikat
         fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp&limit=48').then(r => r.json()),
-        fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp&limit=48').then(r => r.json())
-    ]).then(([ph, kh]) => {
-        // Filter last 48 months (4 years)
+        fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp&limit=48').then(r => r.json()),
+        // Työttömät työnhakijat
+        fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa&limit=48').then(r => r.json()),
+        fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa&limit=48').then(r => r.json())
+    ]).then(([phAvoimet, khAvoimet, phTyottomat, khTyottomat]) => {
+        // Helper
         function lastN(arr, n) { return arr.slice(-n); }
         const N = 48;
-        const labels = lastN(ph.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+        // Avoimet työpaikat chart
+        const labelsAvoimet = lastN(phAvoimet.labels, N).map(l => l.replace(/M(\d{2})/, m => {
             const kk = parseInt(m.slice(1), 10);
             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
             return ' ' + (kuukausiNimet[kk - 1] || m);
         }));
-        const phData = lastN(ph.data, N);
-        const khData = lastN(kh.data, N);
-        const minY = Math.floor(Math.min(...phData.concat(khData)) - 1);
-        const maxY = Math.ceil(Math.max(...phData.concat(khData)) + 1);
-        const ctx = document.getElementById('avoimet-embedded-chart').getContext('2d');
-        new Chart(ctx, {
+        const phAvoimetData = lastN(phAvoimet.data, N);
+        const khAvoimetData = lastN(khAvoimet.data, N);
+        const minY1 = Math.floor(Math.min(...phAvoimetData.concat(khAvoimetData)) - 1);
+        const maxY1 = Math.ceil(Math.max(...phAvoimetData.concat(khAvoimetData)) + 1);
+        const ctx1 = document.getElementById('avoimet-embedded-chart').getContext('2d');
+        new Chart(ctx1, {
             type: 'line',
             data: {
-                labels: labels,
+                labels: labelsAvoimet,
                 datasets: [
                     {
                         label: 'Päijät-Häme',
-                        data: phData,
+                        data: phAvoimetData,
                         borderColor: '#009933',
                         backgroundColor: 'rgba(0,153,51,0.08)',
                         fill: true,
@@ -226,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     },
                     {
                         label: 'Kanta-Häme',
-                        data: khData,
+                        data: khAvoimetData,
                         borderColor: '#3366cc',
                         backgroundColor: 'rgba(51,102,204,0.08)',
                         fill: true,
@@ -239,7 +253,53 @@ document.addEventListener('DOMContentLoaded', function () {
                 plugins: { legend: { display: true, position: 'top' } },
                 scales: {
                     x: { title: { display: true, text: 'Kuukausi' } },
-                    y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
+                    y: { title: { display: true, text: 'Lkm' }, min: minY1, max: maxY1 }
+                },
+                layout: { padding: 10 },
+                backgroundColor: '#eaf6fb'
+            }
+        });
+
+        // Työttömät työnhakijat chart
+        const labelsTyottomat = lastN(phTyottomat.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+            const kk = parseInt(m.slice(1), 10);
+            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+            return ' ' + (kuukausiNimet[kk - 1] || m);
+        }));
+        const phTyottomatData = lastN(phTyottomat.data, N);
+        const khTyottomatData = lastN(khTyottomat.data, N);
+        const minY2 = Math.floor(Math.min(...phTyottomatData.concat(khTyottomatData)) - 1);
+        const maxY2 = Math.ceil(Math.max(...phTyottomatData.concat(khTyottomatData)) + 1);
+        const ctx2 = document.getElementById('tyottomat-embedded-chart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'line',
+            data: {
+                labels: labelsTyottomat,
+                datasets: [
+                    {
+                        label: 'Päijät-Häme',
+                        data: phTyottomatData,
+                        borderColor: '#cc3300',
+                        backgroundColor: 'rgba(204,51,0,0.08)',
+                        fill: true,
+                        pointRadius: 2
+                    },
+                    {
+                        label: 'Kanta-Häme',
+                        data: khTyottomatData,
+                        borderColor: '#3366cc',
+                        backgroundColor: 'rgba(51,102,204,0.08)',
+                        fill: true,
+                        pointRadius: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: false,
+                plugins: { legend: { display: true, position: 'top' } },
+                scales: {
+                    x: { title: { display: true, text: 'Kuukausi' } },
+                    y: { title: { display: true, text: 'Lkm' }, min: minY2, max: maxY2 }
                 },
                 layout: { padding: 10 },
                 backgroundColor: '#eaf6fb'
