@@ -18,22 +18,20 @@ if ($conn->connect_error) {
 $conn->set_charset("utf8");
 
 // Haetaan viimeiset 10 vuotta
-$sql = "SELECT vuosi, toisen_aste, korkea_aste, amk, yo FROM Opiskelu ORDER BY vuosi DESC LIMIT 10";
+$sql = "SELECT vuosi, perusjalk, korkeajalk, toisenjalk FROM Opiskelu ORDER BY vuosi DESC LIMIT 10";
 $res = $conn->query($sql);
 $labels = [];
 $data = [
-    "toisen_aste" => [],
-    "korkea_aste" => [],
-    "amk" => [],
-    "yo" => []
+    "perusjalk" => [],
+    "korkeajalk" => [],
+    "toisenjalk" => []
 ];
 if ($res) {
     while ($row = $res->fetch_assoc()) {
         $labels[] = $row['vuosi'];
-        $data["toisen_aste"][] = floatval($row["toisen_aste"]);
-        $data["korkea_aste"][] = floatval($row["korkea_aste"]);
-        $data["amk"][] = floatval($row["amk"]);
-        $data["yo"][] = floatval($row["yo"]);
+        $data["perusjalk"][] = floatval($row["perusjalk"]);
+        $data["korkeajalk"][] = floatval($row["korkeajalk"]);
+        $data["toisenjalk"][] = floatval($row["toisenjalk"]);
     }
 }
 $conn->close();
@@ -41,10 +39,9 @@ $conn->close();
 echo json_encode([
     "labels" => array_reverse($labels),
     "data" => [
-        "toisen_aste" => array_reverse($data["toisen_aste"]),
-        "korkea_aste" => array_reverse($data["korkea_aste"]),
-        "amk" => array_reverse($data["amk"]),
-        "yo" => array_reverse($data["yo"])
+        "perusjalk" => array_reverse($data["perusjalk"]),
+        "korkeajalk" => array_reverse($data["korkeajalk"]),
+        "toisenjalk" => array_reverse($data["toisenjalk"])
     ]
 ], JSON_UNESCAPED_UNICODE);
 ?>
