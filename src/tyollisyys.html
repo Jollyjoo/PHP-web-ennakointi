@@ -56,6 +56,7 @@
                     Tietoa koulutustasosta,<br> opiskelijamääristä ja <br> opiskelijoiden sijoittumisesta
                     <br>valmistumisen jälkeen.</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <a href="tyollisyys.html" class="button"><b>TYÖLLISYYS</b> <br>Tietoa avoimista <br> työpaikoista ja
+                    
                     työttömistä <br> työnhakijoista.</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                 <a href="vaesto.html" class="sivut-button"> <b>VÄESTÖ</b> <br>Tarkastele Hämeen <br>väestörakennetta ja
                     <br> väestön kehitystä</a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -261,7 +262,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 options: {
                     responsive: false,
-                    plugins: { legend: { display: true, position: 'top' } },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
                     scales: {
                         x: { title: { display: true, text: 'Kuukausi' } },
                         y: { title: { display: true, text: 'Lkm' }, min: minY1, max: maxY1 }
@@ -310,7 +317,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 options: {
                     responsive: false,
-                    plugins: { legend: { display: true, position: 'top' } },
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
                     scales: {
                         x: { title: { display: true, text: 'Kuukausi' } },
                         y: { title: { display: true, text: 'Lkm' }, min: minY2, max: maxY2 }
