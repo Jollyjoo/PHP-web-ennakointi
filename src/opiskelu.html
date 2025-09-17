@@ -80,7 +80,7 @@
                     <span id="koulutus-summary">
                         Perusasteen jälkeisen tutkinnon suorittaneiden osuus 15 vuotta täyttäneestä väestöstä oli vuonna <span id="koulutus-vuosi">...</span>
                         koko maassa <span id="koulutus-kokomaa" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> %. Kanta-Hämeessä vastaava
-                        osuus oli <span id="koulutus-kantahame" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> % ja Päijät-Hämeessä <span id="koulutus-paijathame" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> %. Korkea-asteen suorittaneiden osuus tullee
+                                                osuus oli <span id="koulutus-kantahame" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> % ja Päijät-Hämeessä <span id="koulutus-paijathame" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> %. Korkea-asteen suorittaneiden osuus tullee
                         Päijät-Hämeessä kasvamaan LUT-yliopiston opiskelijamäärien kasvaessa voimakkaasti Lahdessa.
                     </span><br>
                     <br>
@@ -306,11 +306,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
     // Koko maa
-    createPopup('koulutus-kokomaa', 'koulutus-kokomaa-chart', 'Koko maa: Toisen asteen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=SSS&field=toisenjalk&limit=10', '%');
+        createPopup('koulutus-kokomaa', 'koulutus-kokomaa-chart', 'Koko maa: Perusasteen jälkeisen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=SSS&field=perusjalk&limit=10', '%');
     // Kanta-Häme
-    createPopup('koulutus-kantahame', 'koulutus-kantahame-chart', 'Kanta-Häme: Toisen asteen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=MK05&field=toisenjalk&limit=10', '%');
+        createPopup('koulutus-kantahame', 'koulutus-kantahame-chart', 'Kanta-Häme: Perusasteen jälkeisen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=MK05&field=perusjalk&limit=10', '%');
     // Päijät-Häme
-    createPopup('koulutus-paijathame', 'koulutus-paijathame-chart', 'Päijät-Häme: Toisen asteen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=MK07&field=toisenjalk&limit=10', '%');
+        createPopup('koulutus-paijathame', 'koulutus-paijathame-chart', 'Päijät-Häme: Perusasteen jälkeisen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=MK07&field=perusjalk&limit=10', '%');
 });
 // Chart.js popup logic for education stats
 document.addEventListener('DOMContentLoaded', function () {
@@ -533,10 +533,10 @@ Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset j
                         document.getElementById('toinen-sss').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
                         document.getElementById('korkea-sss').textContent = data.maakunnat.SSS?.korkeajalk ?? '-';
                         // Update summary sentence values
-                        document.getElementById('koulutus-vuosi').textContent = data.aika ?? '';
-                        document.getElementById('koulutus-kokomaa').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
-                        document.getElementById('koulutus-kantahame').textContent = data.maakunnat.MK05?.toisenjalk ?? '-';
-                        document.getElementById('koulutus-paijathame').textContent = data.maakunnat.MK07?.toisenjalk ?? '-';
+                            document.getElementById('koulutus-vuosi').textContent = data.aika ?? '';
+                            document.getElementById('koulutus-kokomaa').textContent = data.maakunnat.SSS?.perusjalk ?? '-';
+                            document.getElementById('koulutus-kantahame').textContent = data.maakunnat.MK05?.perusjalk ?? '-';
+                            document.getElementById('koulutus-paijathame').textContent = data.maakunnat.MK07?.perusjalk ?? '-';
                     }
                     if (data.paivitys) {
                         document.getElementById('koulutus-paivitys').textContent =  data.paivitys;
