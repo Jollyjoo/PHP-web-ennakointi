@@ -34,8 +34,8 @@ if ($res && $row = $res->fetch_assoc()) {
     exit;
 }
 
-// Haetaan tilastot kyseiseltä vuodelta kaikille kolmelle alueelle
-$sql = "SELECT stat_code, stat_label, toisenjalk, korkeajalk FROM Opiskelijat WHERE Vuosi = ? AND stat_code IN ('MK05','MK07','SSS')";
+// Haetaan tilastot kyseiseltä vuodelta kaikille kolmelle alueelle, mukaan myös perusjalk
+$sql = "SELECT stat_code, stat_label, perusjalk, toisenjalk, korkeajalk FROM Opiskelijat WHERE Vuosi = ? AND stat_code IN ('MK05','MK07','SSS')";
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
     log_debug('Prepare epäonnistui: ' . $conn->error);
@@ -65,6 +65,7 @@ $count = 0;
 while ($row = $result->fetch_assoc()) {
     $data["maakunnat"][$row["stat_code"]] = [
         "nimi" => $row["stat_label"], // alueen nimi
+        "perusjalk" => $row["perusjalk"], // perusasteen jälkeisen tutkinnon suorittaneet (%)
         "toisenjalk" => $row["toisenjalk"], // toisen asteen suorittaneet (%)
         "korkeajalk" => $row["korkeajalk"] // korkea-asteen suorittaneet (%)
     ];
