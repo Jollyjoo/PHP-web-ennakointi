@@ -79,8 +79,8 @@
 
                     <span id="koulutus-summary">
                         Perusasteen jälkeisen tutkinnon suorittaneiden osuus 15 vuotta täyttäneestä väestöstä oli vuonna <span id="koulutus-vuosi">...</span>
-                        koko maassa <span id="koulutus-kokomaa">...</span> %. Kanta-Hämeessä vastaava
-                        osuus oli <span id="koulutus-kantahame">...</span> % ja Päijät-Hämeessä <span id="koulutus-paijathame">...</span> %. Korkea-asteen suorittaneiden osuus tullee
+                        koko maassa <span id="koulutus-kokomaa" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> %. Kanta-Hämeessä vastaava
+                        osuus oli <span id="koulutus-kantahame" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> % ja Päijät-Hämeessä <span id="koulutus-paijathame" style="font-weight:bold;text-decoration:underline;cursor:pointer;">...</span> %. Korkea-asteen suorittaneiden osuus tullee
                         Päijät-Hämeessä kasvamaan LUT-yliopiston opiskelijamäärien kasvaessa voimakkaasti Lahdessa.
                     </span><br>
                     <br>
@@ -225,6 +225,91 @@
         </div>
 
         <script>
+// Popup chart logic for summary values (12 months)
+document.addEventListener('DOMContentLoaded', function () {
+    function createPopup(id, chartId, label, endpoint, yLabel) {
+        const span = document.getElementById(id);
+        if (!span) return;
+        let popup = document.createElement('div');
+        popup.id = id + '-popup';
+        popup.style.display = 'none';
+        popup.style.position = 'fixed';
+        popup.style.zIndex = '1000';
+        popup.style.background = '#fff';
+        popup.style.border = '1px solid #ccc';
+        popup.style.padding = '10px';
+        popup.style.borderRadius = '8px';
+        popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        popup.innerHTML = `<canvas id="${chartId}" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">${label} - 12kk</div>`;
+        document.body.appendChild(popup);
+        let chartInstance = null;
+        span.addEventListener('mouseover', function(e) {
+            popup.style.display = 'block';
+            let x = e.clientX + 40;
+            let y = e.clientY - 220;
+            if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
+            if (x < 8) x = 8;
+            if (y < 8) y = 8;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            if (!chartInstance) {
+                fetch(endpoint)
+                    .then(resp => resp.json())
+                    .then(hist => {
+                        const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                            const kk = parseInt(m.slice(1), 10);
+                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                        }));
+                        const data = hist.data;
+                        const minY = Math.floor(Math.min(...data) - 1);
+                        const maxY = Math.ceil(Math.max(...data) + 1);
+                        const ctx = document.getElementById(chartId).getContext('2d');
+                        chartInstance = new Chart(ctx, {
+                            type: 'line',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: yLabel,
+                                    data: data,
+                                    borderColor: '#0077cc',
+                                    backgroundColor: 'rgba(0,119,204,0.08)',
+                                    fill: true,
+                                    pointRadius: 3
+                                }]
+                            },
+                            options: {
+                                responsive: false,
+                                plugins: { legend: { display: false } },
+                                scales: {
+                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                    y: { title: { display: true, text: yLabel }, min: minY, max: maxY }
+                                }
+                            }
+                        });
+                    });
+            }
+        });
+        span.addEventListener('mousemove', function(e) {
+            let x = e.clientX + 40;
+            let y = e.clientY - 220;
+            if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
+            if (x < 8) x = 8;
+            if (y < 8) y = 8;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+        });
+        span.addEventListener('mouseout', function() {
+            popup.style.display = 'none';
+        });
+    }
+    // Koko maa
+    createPopup('koulutus-kokomaa', 'koulutus-kokomaa-chart', 'Koko maa: Toisen asteen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=SSS&field=toisenjalk&limit=10', '%');
+    // Kanta-Häme
+    createPopup('koulutus-kantahame', 'koulutus-kantahame-chart', 'Kanta-Häme: Toisen asteen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=MK05&field=toisenjalk&limit=10', '%');
+    // Päijät-Häme
+    createPopup('koulutus-paijathame', 'koulutus-paijathame-chart', 'Päijät-Häme: Toisen asteen tutkinnon suorittaneet (%)', 'opiskelu_historia.php?stat_code=MK07&field=toisenjalk&limit=10', '%');
+});
 // Chart.js popup logic for education stats
 document.addEventListener('DOMContentLoaded', function () {
     // Helper for positioning
@@ -446,7 +531,7 @@ Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset j
                         document.getElementById('toinen-sss').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
                         document.getElementById('korkea-sss').textContent = data.maakunnat.SSS?.korkeajalk ?? '-';
                         // Update summary sentence values
-                        document.getElementById('koulutus-vuosi').textContent = data.vuosi ?? '';
+                        document.getElementById('koulutus-vuosi').textContent = data.aika ?? '';
                         document.getElementById('koulutus-kokomaa').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
                         document.getElementById('koulutus-kantahame').textContent = data.maakunnat.MK05?.toisenjalk ?? '-';
                         document.getElementById('koulutus-paijathame').textContent = data.maakunnat.MK07?.toisenjalk ?? '-';
