@@ -77,14 +77,16 @@
                 <div align="center" class="newsContainer">
                     <h3>Hämeen koulutusasteen avaintilastot</h3><br>
 
-                    Perusasteen jäleisen tutkinnon suorittaneiden osuus 15 vuotta täyttäneestä väestöstä oli vuonna 2023
-                    koko maassa 75,1 %. Kanta-Hämeessä vastaava
-                    osuus oli 74,1 % ja Päijät-Hämeessä 72,3 %. Korkea-asteen suorittaneiden osuus tullee
-                    Päijät-Hämeessä kasvamaan LUT-yliopiston opiskelijamäärien kasvaessa voimakkaasti Lahdessa.<br>
+                    <span id="koulutus-summary">
+                        Perusasteen jälkeisen tutkinnon suorittaneiden osuus 15 vuotta täyttäneestä väestöstä oli vuonna <span id="koulutus-vuosi">...</span>
+                        koko maassa <span id="koulutus-kokomaa">...</span> %. Kanta-Hämeessä vastaava
+                        osuus oli <span id="koulutus-kantahame">...</span> % ja Päijät-Hämeessä <span id="koulutus-paijathame">...</span> %. Korkea-asteen suorittaneiden osuus tullee
+                        Päijät-Hämeessä kasvamaan LUT-yliopiston opiskelijamäärien kasvaessa voimakkaasti Lahdessa.
+                    </span><br>
                     <br>
                 </div>
 
-                <p><b> Vie hiiren osoitin alla olevien lukujen päälle, niin näet kuvaajan </p></b>
+                <p><b> Vie hiiren osoitin lukujen päälle, niin näet kuvaajan </p></b>
 
                 <div class="container">
                     <div class="tilastobox">
@@ -443,6 +445,11 @@ Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset j
                         document.getElementById('korkea-mk05').textContent = data.maakunnat.MK05?.korkeajalk ?? '-';
                         document.getElementById('toinen-sss').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
                         document.getElementById('korkea-sss').textContent = data.maakunnat.SSS?.korkeajalk ?? '-';
+                        // Update summary sentence values
+                        document.getElementById('koulutus-vuosi').textContent = data.vuosi ?? '';
+                        document.getElementById('koulutus-kokomaa').textContent = data.maakunnat.SSS?.toisenjalk ?? '-';
+                        document.getElementById('koulutus-kantahame').textContent = data.maakunnat.MK05?.toisenjalk ?? '-';
+                        document.getElementById('koulutus-paijathame').textContent = data.maakunnat.MK07?.toisenjalk ?? '-';
                     }
                     if (data.paivitys) {
                         document.getElementById('koulutus-paivitys').textContent =  data.paivitys;
@@ -456,6 +463,11 @@ Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset j
                     document.getElementById('toinen-sss').textContent = '-';
                     document.getElementById('korkea-sss').textContent = '-';
                     document.getElementById('koulutus-paivitys').textContent = 'Tilastojen haku epäonnistui.';
+                    document.getElementById('koulutus-vuosi').textContent = '-';
+                    document.getElementById('koulutus-kokomaa').textContent = '-';
+                    document.getElementById('koulutus-kantahame').textContent = '-';
+                    document.getElementById('koulutus-paijathame').textContent = '-';
+                   
                 });
         </script>
 </body>

@@ -72,7 +72,7 @@
                     <h3>Hämeen työllisyyden avaintilastot</h3><br>
                     <span id="tyollisyys-summary">...</span>
                 </div><br>
-                <p><b> Vie hiiren osoitin alla olevien lukujen päälle, niin näet kuvaajan </p></b>
+                <p><b> Vie hiiren osoitin lukujen päälle, niin näet kuvaajan </p></b>
 
                 <div class="container">
                     <div class="tilastobox">
@@ -518,9 +518,12 @@ document.addEventListener('DOMContentLoaded', function () {
                                     }
                                     const aikaTeksti = formatAika(data.aika);
                                     document.getElementById('tyollisyys-summary').innerHTML =
-                                        `<b>${aikaTeksti}</b>: Hämeen ELY-alueella työttömyysaste oli <span id="ely-tyottomyysaste" style="text-decoration:underline;cursor:pointer;">${ely.tyottomien_osuus} %</span>, (koko maa <span id="sss-tyottomyysaste" style="text-decoration:underline;cursor:pointer;">${sss.tyottomien_osuus} %</span>). ` +
-                                        `Työttömiä työnhakijoita oli <span id="ely-tyottomat" style="text-decoration:underline;cursor:pointer;">${ely.tyottomat_yht}</span>.`;
-// --- Popup chart logic for summary values ---
+                                        `<b>${aikaTeksti}</b>: Hämeen ELY-alueella työttömyysaste oli <span id="ely-tyottomyysaste" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${ely.tyottomien_osuus} %</span>, (koko maa <span id="sss-tyottomyysaste" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${sss.tyottomien_osuus} %</span>). ` +
+                                        `Työttömiä työnhakijoita oli <span id="ely-tyottomat" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${ely.tyottomat_yht}</span>.`;
+
+
+
+                                        // --- Popup chart logic for summary values ---
 setTimeout(function() {
     // ELY työttömyysaste
     const elyTyottomyysSpan = document.getElementById('ely-tyottomyysaste');
