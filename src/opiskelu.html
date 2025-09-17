@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         popup.style.padding = '10px';
         popup.style.borderRadius = '8px';
         popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-        popup.innerHTML = `<canvas id="${chartId}" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">${label} - 12kk</div>`;
+        popup.innerHTML = `<canvas id="${chartId}" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">${label} - 10v</div>`;
         document.body.appendChild(popup);
         let chartInstance = null;
         span.addEventListener('mouseover', function(e) {
@@ -256,12 +256,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch(endpoint)
                     .then(resp => resp.json())
                     .then(hist => {
-                        const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                            const kk = parseInt(m.slice(1), 10);
-                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                            return ' ' + (kuukausiNimet[kk - 1] || m);
-                        }));
-                        const data = hist.data;
+                        // Use only last 10 years
+                        let labels = hist.labels;
+                        let data = hist.data;
+                        if (labels.length > 10) {
+                            labels = labels.slice(-10);
+                            data = data.slice(-10);
+                        }
+                        // Labels are years, no month parsing
                         const minY = Math.floor(Math.min(...data) - 1);
                         const maxY = Math.ceil(Math.max(...data) + 1);
                         const ctx = document.getElementById(chartId).getContext('2d');
@@ -282,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 responsive: false,
                                 plugins: { legend: { display: false } },
                                 scales: {
-                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                    x: { title: { display: true, text: 'Vuosi' } },
                                     y: { title: { display: true, text: yLabel }, min: minY, max: maxY }
                                 }
                             }
