@@ -87,7 +87,10 @@ $data = [];
 while ($row = $result->fetch_assoc()) {
     // Convert Toimiala from latin1 to utf8 if not null
     if (isset($row['Toimiala'])) {
-        $row['Toimiala'] = mb_convert_encoding($row['Toimiala'], 'UTF-8', 'ISO-8859-1');
+        $rawToimiala = $row['Toimiala'];
+        $convertedToimiala = iconv('ISO-8859-1', 'UTF-8//IGNORE', $rawToimiala);
+        log_debug('Toimiala raw: ' . $rawToimiala . ' | converted: ' . $convertedToimiala);
+        $row['Toimiala'] = $convertedToimiala;
     }
     $data[] = $row;
 }
