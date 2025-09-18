@@ -20,7 +20,7 @@ if ($conn->connect_error) {
     log_debug('Tietokantayhteys epäonnistui: ' . $conn->connect_error);
     die(json_encode(["error" => "Tietokantayhteys epäonnistui"]));
 }
-$conn->set_charset("latin1");
+$conn->set_charset("utf8");
 
 // Parametrit: stat_code, limit, toimiala
 $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : null;
@@ -85,9 +85,7 @@ $result = $stmt->get_result();
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
-    if (isset($row['Toimiala'])) {
-        $row['Toimiala'] = utf8_encode($row['Toimiala']);
-    }
+    // No encoding conversion needed
     $data[] = $row;
 }
 log_debug('Rivejä haettu: ' . count($data));
