@@ -150,8 +150,7 @@
                         href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12r5.px"
                         target="_blank"
                         title="12r5 -- Työttömät työnhakijat eri ryhmissä, palveluissa olevat ja avoimet työpaikat kuukauden lopussa">
-                        Tilastokeskus 12r5</a>, viimeisin tilasto tarkistettu lähteestä <b> <span
-                            id="stat-paivitys">...</span></b>
+                        Tilastokeskus 12r5</a>, viimeisin tilasto tarkistettu lähteestä <b> <span id="stat-paivitys-2">...</span></b>
             </div>
         </div>
 
@@ -613,6 +612,8 @@
                                 // Päivitetään päivitysaika
                                 if (data.paivitys) {
                                     document.getElementById('stat-paivitys').textContent = data.paivitys;
+                                    var statPaivitys2 = document.getElementById('stat-paivitys-2');
+                                    if (statPaivitys2) statPaivitys2.textContent = data.paivitys;
                                 }
                                 // Päijät-Häme
                                 document.getElementById('ph-osuus').textContent = data.maakunnat['MK07'].tyottomien_osuus;
