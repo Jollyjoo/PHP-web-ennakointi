@@ -395,7 +395,7 @@
                         <button id="chart-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
                         <button id="toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki toimialat</button>
                     </div>
-                    <button id="toggle-disable" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:24px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Lukitse kaaviovalinnat</button>
+
                     </div>
                 </div>
                 <canvas id="avoimet-toimiala-chart" width="1100" height="600"></canvas>
@@ -411,21 +411,6 @@
                     let currentType = 'line';
                     const btnToggleDatasets = document.getElementById('toggle-datasets');
                     let allHidden = false;
-                    const btnToggle = document.getElementById('toggle-disable');
-                    let controlsDisabled = false;
-                    function setControlsDisabled(disabled) {
-                        select.disabled = disabled;
-                        btnLine.disabled = disabled;
-                        btnBar.disabled = disabled;
-                        btnLine.style.opacity = disabled ? 0.5 : 1;
-                        btnBar.style.opacity = disabled ? 0.5 : 1;
-                        select.style.opacity = disabled ? 0.5 : 1;
-                        btnToggle.textContent = disabled ? 'Avaa kaaviovalinnat' : 'Lukitse kaaviovalinnat';
-                    }
-                    btnToggle.addEventListener('click', function () {
-                        controlsDisabled = !controlsDisabled;
-                        setControlsDisabled(controlsDisabled);
-                    });
                     function fetchAndDraw(statCode, chartType = 'line') {
                         allHidden = false;
                         if (btnToggleDatasets) btnToggleDatasets.textContent = 'Piilota kaikki toimialat';
@@ -502,17 +487,15 @@
                             });
                     }
                     select.addEventListener('change', function () {
-                        if (!controlsDisabled) fetchAndDraw(this.value, currentType);
+                        fetchAndDraw(this.value, currentType);
                     });
                     btnLine.addEventListener('click', function () {
-                        if (controlsDisabled) return;
                         currentType = 'line';
                         fetchAndDraw(select.value, currentType);
                         btnLine.style.fontWeight = 'bold';
                         btnBar.style.fontWeight = 'normal';
                     });
                     btnBar.addEventListener('click', function () {
-                        if (controlsDisabled) return;
                         currentType = 'bar';
                         fetchAndDraw(select.value, currentType);
                         btnBar.style.fontWeight = 'bold';
@@ -521,7 +504,6 @@
                     // Initial state
                     btnLine.style.fontWeight = 'bold';
                     btnBar.style.fontWeight = 'normal';
-                    setControlsDisabled(false);
                     fetchAndDraw(select.value, currentType);
                 });
             </script>      <p align="center">Lähde: <a
