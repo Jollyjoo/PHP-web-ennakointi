@@ -150,7 +150,8 @@
                         href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12r5.px"
                         target="_blank"
                         title="12r5 -- Työttömät työnhakijat eri ryhmissä, palveluissa olevat ja avoimet työpaikat kuukauden lopussa">
-                        Tilastokeskus 12r5</a>, viimeisin tilasto tarkistettu lähteestä <b> <span id="stat-paivitys-2">...</span></b>
+                        Tilastokeskus 12r5</a>, viimeisin tilasto tarkistettu lähteestä <b> <span
+                            id="stat-paivitys-2">...</span></b>
             </div>
         </div>
 
@@ -217,152 +218,152 @@
                     id="stat-paivitys">...</span></b></p>
 
 
-            <script>
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Fetch data for both regions
-                    // Fetch data for both charts in parallel
-                    Promise.all([
-                        // Avoimet työpaikat
-                        fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp&limit=48').then(r => r.json()),
-                        fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp&limit=48').then(r => r.json()),
-                        // Työttömät työnhakijat
-                        fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa&limit=48').then(r => r.json()),
-                        fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa&limit=48').then(r => r.json())
-                    ]).then(([phAvoimet, khAvoimet, phTyottomat, khTyottomat]) => {
-                        function lastN(arr, n) { return arr.slice(-n); }
-                        const N = 48;
-                        // Helper to show error message in chart area
-                        function showChartError(canvasId, msg) {
-                            const canvas = document.getElementById(canvasId);
-                            if (canvas) {
-                                const parent = canvas.parentElement;
-                                parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>${msg}</div>`;
-                            }
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Fetch data for both regions
+                // Fetch data for both charts in parallel
+                Promise.all([
+                    // Avoimet työpaikat
+                    fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp&limit=48').then(r => r.json()),
+                    fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp&limit=48').then(r => r.json()),
+                    // Työttömät työnhakijat
+                    fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa&limit=48').then(r => r.json()),
+                    fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa&limit=48').then(r => r.json())
+                ]).then(([phAvoimet, khAvoimet, phTyottomat, khTyottomat]) => {
+                    function lastN(arr, n) { return arr.slice(-n); }
+                    const N = 48;
+                    // Helper to show error message in chart area
+                    function showChartError(canvasId, msg) {
+                        const canvas = document.getElementById(canvasId);
+                        if (canvas) {
+                            const parent = canvas.parentElement;
+                            parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>${msg}</div>`;
                         }
-                        // Check for errors or missing data
-                        if (phAvoimet.error || khAvoimet.error || !phAvoimet.labels || !khAvoimet.labels) {
-                            showChartError('avoimet-embedded-chart', 'Ei tietokantayhteyttä');
-                        } else {
-                            // Avoimet työpaikat chart
-                            const labelsAvoimet = lastN(phAvoimet.labels, N).map(l => l.replace(/M(\d{2})/, m => {
-                                const kk = parseInt(m.slice(1), 10);
-                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                            }));
-                            const phAvoimetData = lastN(phAvoimet.data, N);
-                            const khAvoimetData = lastN(khAvoimet.data, N);
-                            const minY1 = Math.floor(Math.min(...phAvoimetData.concat(khAvoimetData)) - 1);
-                            const maxY1 = Math.ceil(Math.max(...phAvoimetData.concat(khAvoimetData)) + 1);
-                            const ctx1 = document.getElementById('avoimet-embedded-chart').getContext('2d');
-                            new Chart(ctx1, {
-                                type: 'line',
-                                data: {
-                                    labels: labelsAvoimet,
-                                    datasets: [
-                                        {
-                                            label: 'Päijät-Häme',
-                                            data: phAvoimetData,
-                                            borderColor: '#009933',
-                                            backgroundColor: 'rgba(0,153,51,0.08)',
-                                            fill: true,
-                                            pointRadius: 2
-                                        },
-                                        {
-                                            label: 'Kanta-Häme',
-                                            data: khAvoimetData,
-                                            borderColor: '#3366cc',
-                                            backgroundColor: 'rgba(51,102,204,0.08)',
-                                            fill: true,
-                                            pointRadius: 2
-                                        }
-                                    ]
+                    }
+                    // Check for errors or missing data
+                    if (phAvoimet.error || khAvoimet.error || !phAvoimet.labels || !khAvoimet.labels) {
+                        showChartError('avoimet-embedded-chart', 'Ei tietokantayhteyttä');
+                    } else {
+                        // Avoimet työpaikat chart
+                        const labelsAvoimet = lastN(phAvoimet.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+                            const kk = parseInt(m.slice(1), 10);
+                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                        }));
+                        const phAvoimetData = lastN(phAvoimet.data, N);
+                        const khAvoimetData = lastN(khAvoimet.data, N);
+                        const minY1 = Math.floor(Math.min(...phAvoimetData.concat(khAvoimetData)) - 1);
+                        const maxY1 = Math.ceil(Math.max(...phAvoimetData.concat(khAvoimetData)) + 1);
+                        const ctx1 = document.getElementById('avoimet-embedded-chart').getContext('2d');
+                        new Chart(ctx1, {
+                            type: 'line',
+                            data: {
+                                labels: labelsAvoimet,
+                                datasets: [
+                                    {
+                                        label: 'Päijät-Häme',
+                                        data: phAvoimetData,
+                                        borderColor: '#009933',
+                                        backgroundColor: 'rgba(0,153,51,0.08)',
+                                        fill: true,
+                                        pointRadius: 2
+                                    },
+                                    {
+                                        label: 'Kanta-Häme',
+                                        data: khAvoimetData,
+                                        borderColor: '#3366cc',
+                                        backgroundColor: 'rgba(51,102,204,0.08)',
+                                        fill: true,
+                                        pointRadius: 2
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: false,
+                                plugins: {
+                                    legend: { display: true, position: 'top' },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false
+                                    }
                                 },
-                                options: {
-                                    responsive: false,
-                                    plugins: {
-                                        legend: { display: true, position: 'top' },
-                                        tooltip: {
-                                            mode: 'index',
-                                            intersect: false
-                                        }
-                                    },
-                                    scales: {
-                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                        y: { title: { display: true, text: 'Lkm' }, min: minY1, max: maxY1 }
-                                    },
-                                    layout: { padding: 10 },
-                                    backgroundColor: '#eaf6fb'
-                                }
-                            });
-                        }
-                        if (phTyottomat.error || khTyottomat.error || !phTyottomat.labels || !khTyottomat.labels) {
-                            showChartError('tyottomat-embedded-chart', 'Ei tietokantayhteyttä');
-                        } else {
-                            // Työttömät työnhakijat chart
-                            const labelsTyottomat = lastN(phTyottomat.labels, N).map(l => l.replace(/M(\d{2})/, m => {
-                                const kk = parseInt(m.slice(1), 10);
-                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                            }));
-                            const phTyottomatData = lastN(phTyottomat.data, N);
-                            const khTyottomatData = lastN(khTyottomat.data, N);
-                            const minY2 = Math.floor(Math.min(...phTyottomatData.concat(khTyottomatData)) - 1);
-                            const maxY2 = Math.ceil(Math.max(...phTyottomatData.concat(khTyottomatData)) + 1);
-                            const ctx2 = document.getElementById('tyottomat-embedded-chart').getContext('2d');
-                            new Chart(ctx2, {
-                                type: 'line',
-                                data: {
-                                    labels: labelsTyottomat,
-                                    datasets: [
-                                        {
-                                            label: 'Päijät-Häme',
-                                            data: phTyottomatData,
-                                            borderColor: '#cc3300',
-                                            backgroundColor: 'rgba(204,51,0,0.08)',
-                                            fill: true,
-                                            pointRadius: 2
-                                        },
-                                        {
-                                            label: 'Kanta-Häme',
-                                            data: khTyottomatData,
-                                            borderColor: '#3366cc',
-                                            backgroundColor: 'rgba(51,102,204,0.08)',
-                                            fill: true,
-                                            pointRadius: 2
-                                        }
-                                    ]
+                                scales: {
+                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                    y: { title: { display: true, text: 'Lkm' }, min: minY1, max: maxY1 }
                                 },
-                                options: {
-                                    responsive: false,
-                                    plugins: {
-                                        legend: { display: true, position: 'top' },
-                                        tooltip: {
-                                            mode: 'index',
-                                            intersect: false
-                                        }
-                                    },
-                                    scales: {
-                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                        y: { title: { display: true, text: 'Lkm' }, min: minY2, max: maxY2 }
-                                    },
-                                    layout: { padding: 10 },
-                                    backgroundColor: '#eaf6fb'
-                                }
-                            });
-                        }
-                    }).catch(() => {
-                        // General error fallback
-                        const ids = ['avoimet-embedded-chart', 'tyottomat-embedded-chart'];
-                        ids.forEach(id => {
-                            const canvas = document.getElementById(id);
-                            if (canvas) {
-                                const parent = canvas.parentElement;
-                                parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>Ei tietokantayhteyttä</div>`;
+                                layout: { padding: 10 },
+                                backgroundColor: '#eaf6fb'
                             }
                         });
+                    }
+                    if (phTyottomat.error || khTyottomat.error || !phTyottomat.labels || !khTyottomat.labels) {
+                        showChartError('tyottomat-embedded-chart', 'Ei tietokantayhteyttä');
+                    } else {
+                        // Työttömät työnhakijat chart
+                        const labelsTyottomat = lastN(phTyottomat.labels, N).map(l => l.replace(/M(\d{2})/, m => {
+                            const kk = parseInt(m.slice(1), 10);
+                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                        }));
+                        const phTyottomatData = lastN(phTyottomat.data, N);
+                        const khTyottomatData = lastN(khTyottomat.data, N);
+                        const minY2 = Math.floor(Math.min(...phTyottomatData.concat(khTyottomatData)) - 1);
+                        const maxY2 = Math.ceil(Math.max(...phTyottomatData.concat(khTyottomatData)) + 1);
+                        const ctx2 = document.getElementById('tyottomat-embedded-chart').getContext('2d');
+                        new Chart(ctx2, {
+                            type: 'line',
+                            data: {
+                                labels: labelsTyottomat,
+                                datasets: [
+                                    {
+                                        label: 'Päijät-Häme',
+                                        data: phTyottomatData,
+                                        borderColor: '#cc3300',
+                                        backgroundColor: 'rgba(204,51,0,0.08)',
+                                        fill: true,
+                                        pointRadius: 2
+                                    },
+                                    {
+                                        label: 'Kanta-Häme',
+                                        data: khTyottomatData,
+                                        borderColor: '#3366cc',
+                                        backgroundColor: 'rgba(51,102,204,0.08)',
+                                        fill: true,
+                                        pointRadius: 2
+                                    }
+                                ]
+                            },
+                            options: {
+                                responsive: false,
+                                plugins: {
+                                    legend: { display: true, position: 'top' },
+                                    tooltip: {
+                                        mode: 'index',
+                                        intersect: false
+                                    }
+                                },
+                                scales: {
+                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                    y: { title: { display: true, text: 'Lkm' }, min: minY2, max: maxY2 }
+                                },
+                                layout: { padding: 10 },
+                                backgroundColor: '#eaf6fb'
+                            }
+                        });
+                    }
+                }).catch(() => {
+                    // General error fallback
+                    const ids = ['avoimet-embedded-chart', 'tyottomat-embedded-chart'];
+                    ids.forEach(id => {
+                        const canvas = document.getElementById(id);
+                        if (canvas) {
+                            const parent = canvas.parentElement;
+                            parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>Ei tietokantayhteyttä</div>`;
+                        }
                     });
                 });
-            </script>
+            });
+        </script>
 
 
         <div class="centerContainer">
@@ -391,9 +392,14 @@
                         <option value="MK07">Päijät-Häme (MK07)</option>
                     </select>
                     <div style="display:inline-block;margin-left:24px;">
-                        <button id="chart-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
-                        <button id="chart-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
-                        <button id="toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki toimialat</button>
+                        <button id="chart-type-bar" type="button"
+                            style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu
+                            pylväs</button>
+                        <button id="chart-type-line" type="button"
+                            style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
+                        <button id="toggle-datasets" type="button"
+                            style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota
+                            kaikki toimialat</button>
                     </div>
                 </div>
                 <canvas id="avoimet-toimiala-chart" width="1100" height="600"></canvas>
@@ -514,22 +520,22 @@
                     btnLine.style.fontWeight = 'normal';
                     fetchAndDraw(select.value, currentType);
                 });
-            </script>      <p align="center">Lähde: <a
-                href="https://statfin.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12tw.px/"
-                target="_blank"
-                title="12tw -- Avoimet työpaikat kuukauden lopussa toimialan mukaan maakunnittain">
-                Tilastokeskus 12tw</a>, viimeisin tilasto tarkistettu lähteestä <b> <span
-                    id="avoimet-toimiala-update">...</span></b></p>
+            </script>
+            <p align="center">Lähde: <a
+                    href="https://statfin.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12tw.px/"
+                    target="_blank" title="12tw -- Avoimet työpaikat kuukauden lopussa toimialan mukaan maakunnittain">
+                    Tilastokeskus 12tw</a>, viimeisin tilasto tarkistettu lähteestä <b> <span
+                        id="avoimet-toimiala-update">...</span></b></p>
 
 
-
+<!-- 
             <br><br> <br>
             <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>
-            <!-- Slider main container -->
+           
             <div class="swiper">
-                <!-- Additional required wrapper -->
+               
                 <div class="swiper-wrapper">
-                    <!-- Slides -->
+                  
                     <div class="swiper-slide" align="center" max-width="50%">
                         <div class="flourish-embed flourish-chart" data-src="visualisation/22517240">
                             <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
@@ -546,18 +552,18 @@
                     </div>
                 </div>
 
-                <!-- If we need pagination -->
+               
                 <div class="swiper-pagination"></div>
 
-                <!-- If we need navigation buttons -->
+               
                 <div class="swiper-button-prev"></div>
                 <div class="swiper-button-next"></div>
 
-            </div>
+            </div> -->
 
 
             <p align="center"><br><br>
-            <h2>Tarkempi analyysi työllisyyden tilastoista kunnittain</h2><br>
+            <h2>Työllisyyslukuja kunnittain</h2><br>
             </p>
             <iframe title="Työllisyys_tunnusluvut" width="80%" height="400"
                 src="https://app.powerbi.com/view?r=eyJrIjoiN2VhZjEyMzAtZTY2Zi00ZDkzLWFiNDEtZmE3NjQwOWMzNzI0IiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9"
