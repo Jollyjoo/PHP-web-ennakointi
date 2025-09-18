@@ -368,7 +368,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </div>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    fetch('tyollisyys_historia.php?table=Avoimet_tyopaikat&limit=24')
+    fetch('avoimetpainat_historia.php?table=Avoimet_tyopaikat&limit=24')
         .then(resp => resp.json())
         .then(raw => {
             // Group data by Tilastokuukausi, stat_code, Toimiala
