@@ -28,28 +28,48 @@ $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 24;
 $toimiala = isset($_GET['toimiala']) ? $_GET['toimiala'] : null;
 
 // Rakennetaan SQL-kysely
-$sql = "SELECT Tilastokuukausi, stat_code, Toimiala, Maara FROM Avoimet_tyopaikat";
-$where = [];
-$params = [];
-$types = '';
-if ($stat_code) {
-    $where[] = "stat_code = ?";
-    $params[] = $stat_code;
+// Step 1: Get last N unique months for the selected stat_code
+$months_sql = "SELECT DISTINCT Tilastokuukausi FROM Avoimet_tyopaikat WHERE stat_code = ? ORDER BY Tilastokuukausi DESC LIMIT ?";
+$months_stmt = $conn->prepare($months_sql);
+if (!$months_stmt) {
+    log_debug('Prepare epäonnistui (months): ' . $conn->error);
+    echo json_encode(["error" => "Tietokantavirhe"]);
+    $conn->close();
+    exit;
+}
+$months_stmt->bind_param('si', $stat_code, $limit);
+$months_stmt->execute();
+$months_result = $months_stmt->get_result();
+$months = [];
+while ($row = $months_result->fetch_assoc()) {
+    $months[] = $row['Tilastokuukausi'];
+}
+$months_stmt->close();
+
+if (count($months) === 0) {
+    log_debug('Ei kuukausia löytynyt');
+    $conn->close();
+    echo json_encode([]);
+    exit;
+}
+
+// Step 2: Fetch all rows for those months
+$in_clause = implode(',', array_fill(0, count($months), '?'));
+$sql = "SELECT Tilastokuukausi, stat_code, Toimiala, Maara FROM Avoimet_tyopaikat WHERE stat_code = ? AND Tilastokuukausi IN ($in_clause)";
+if ($toimiala) {
+    $sql .= " AND Toimiala = ?";
+}
+$sql .= " ORDER BY Tilastokuukausi DESC, Toimiala ASC";
+
+$params = [$stat_code];
+$types = 's';
+foreach ($months as $m) {
+    $params[] = $m;
     $types .= 's';
 }
 if ($toimiala) {
-    $where[] = "Toimiala = ?";
     $params[] = $toimiala;
     $types .= 's';
-}
-if ($where) {
-    $sql .= " WHERE " . implode(' AND ', $where);
-}
-$sql .= " ORDER BY Tilastokuukausi DESC";
-if ($limit) {
-    $sql .= " LIMIT ?";
-    $params[] = $limit;
-    $types .= 'i';
 }
 
 $stmt = $conn->prepare($sql);
@@ -59,9 +79,7 @@ if (!$stmt) {
     $conn->close();
     exit;
 }
-if ($params) {
-    $stmt->bind_param($types, ...$params);
-}
+$stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
