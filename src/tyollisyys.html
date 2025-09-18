@@ -363,7 +363,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <!-- Avoimet työpaikat toimialoittain Chart.js embedded chart -->
 
-<div style="max-width:900px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+<div style="max-width:1200px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
     <h3 style="text-align:center;">Avoimet työpaikat toimialoittain (viimeiset 24kk)</h3>
     <div style="text-align:center;margin-bottom:12px;">
         <label for="avoimet-statcode-select"><b>Valitse alue:</b></label>
@@ -401,7 +401,8 @@ document.addEventListener('DOMContentLoaded', function () {
                         borderColor: colors[colorIdx % colors.length],
                         backgroundColor: colors[colorIdx % colors.length]+'22',
                         fill: false,
-                        pointRadius: 2
+                        pointRadius: 2,
+                        tension: 0.45 // cubic interpolation
                     };
                     colorIdx++;
                     return ds;
@@ -424,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         responsive: false,
                         plugins: {
                             legend: { display: true, position: 'top' },
-                            tooltip: { mode: 'index', intersect: false }
+                            tooltip: { mode: 'nearest', intersect: true }
                         },
                         scales: {
                             x: { title: { display: true, text: 'Kuukausi' } },
