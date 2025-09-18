@@ -390,6 +390,10 @@
                         <option value="MK05">Kanta-Häme (MK05)</option>
                         <option value="MK07">Päijät-Häme (MK07)</option>
                     </select>
+                    <div style="display:inline-block;margin-left:24px;">
+                        <button id="chart-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
+                        <button id="chart-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
+                    </div>
                 </div>
                 <canvas id="avoimet-toimiala-chart" width="1100" height="600"></canvas>
                 <div style="text-align:center;margin-top:8px;font-size:15px;color:#333;">
@@ -400,8 +404,11 @@
                 document.addEventListener('DOMContentLoaded', function () {
                     const select = document.getElementById('avoimet-statcode-select');
                     const canvas = document.getElementById('avoimet-toimiala-chart');
+                    const btnLine = document.getElementById('chart-type-line');
+                    const btnBar = document.getElementById('chart-type-bar');
                     let chartInstance = null;
-                    function fetchAndDraw(statCode) {
+                    let currentType = 'line';
+                    function fetchAndDraw(statCode, chartType = 'line') {
                         fetch(`avoimetpainat_historia.php?stat_code=${statCode}&limit=24`)
                             .then(resp => resp.json())
                             .then(response => {
@@ -423,10 +430,10 @@
                                         label,
                                         data,
                                         borderColor: colors[colorIdx % colors.length],
-                                        backgroundColor: colors[colorIdx % colors.length] + '22',
-                                        fill: false,
+                                        backgroundColor: colors[colorIdx % colors.length] + (chartType === 'bar' ? 'cc' : '22'),
+                                        fill: chartType === 'line' ? false : true,
                                         pointRadius: 2,
-                                        tension: 0.45 // cubic interpolation
+                                        tension: chartType === 'line' ? 0.45 : undefined
                                     };
                                     colorIdx++;
                                     return ds;
@@ -443,7 +450,7 @@
                                     chartInstance.destroy();
                                 }
                                 chartInstance = new Chart(canvas.getContext('2d'), {
-                                    type: 'line',
+                                    type: chartType,
                                     data: { labels, datasets },
                                     options: {
                                         responsive: false,
@@ -452,8 +459,8 @@
                                             tooltip: { mode: 'nearest', intersect: true }
                                         },
                                         scales: {
-                                            x: { title: { display: true, text: 'Kuukausi' } },
-                                            y: { title: { display: true, text: 'Avoimet työpaikat' } }
+                                            x: { title: { display: true, text: 'Kuukausi' }, stacked: chartType === 'bar' },
+                                            y: { title: { display: true, text: 'Avoimet työpaikat' }, stacked: chartType === 'bar' }
                                         },
                                         layout: { padding: 10 },
                                         backgroundColor: '#f7fbfc'
@@ -466,9 +473,24 @@
                             });
                     }
                     select.addEventListener('change', function () {
-                        fetchAndDraw(this.value);
+                        fetchAndDraw(this.value, currentType);
                     });
-                    fetchAndDraw(select.value);
+                    btnLine.addEventListener('click', function () {
+                        currentType = 'line';
+                        fetchAndDraw(select.value, currentType);
+                        btnLine.style.fontWeight = 'bold';
+                        btnBar.style.fontWeight = 'normal';
+                    });
+                    btnBar.addEventListener('click', function () {
+                        currentType = 'bar';
+                        fetchAndDraw(select.value, currentType);
+                        btnBar.style.fontWeight = 'bold';
+                        btnLine.style.fontWeight = 'normal';
+                    });
+                    // Initial state
+                    btnLine.style.fontWeight = 'bold';
+                    btnBar.style.fontWeight = 'normal';
+                    fetchAndDraw(select.value, currentType);
                 });
             </script>      <p align="center">Lähde: <a
                 href="https://statfin.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12tw.px/"
