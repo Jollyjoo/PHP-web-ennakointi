@@ -83,15 +83,34 @@ $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
+// Build data array
 $data = [];
 while ($row = $result->fetch_assoc()) {
-    // No encoding conversion needed
     $data[] = $row;
 }
 log_debug('Rivejä haettu: ' . count($data));
 $stmt->close();
+
+// Get latest update time from Aika field for the latest Tilastokuukausi for this stat_code
+$update_sql = "SELECT Aika FROM Avoimet_tyopaikat WHERE stat_code = ? ORDER BY Tilastokuukausi DESC LIMIT 1";
+$update_stmt = $conn->prepare($update_sql);
+if ($update_stmt) {
+    $update_stmt->bind_param('s', $stat_code);
+    $update_stmt->execute();
+    $update_result = $update_stmt->get_result();
+    $latest_update = null;
+    if ($row = $update_result->fetch_assoc()) {
+        $latest_update = $row['Aika'];
+    }
+    $update_stmt->close();
+} else {
+    $latest_update = null;
+}
 $conn->close();
 
-echo json_encode($data, JSON_UNESCAPED_UNICODE);
+echo json_encode([
+    'data' => $data,
+    'latest_update' => $latest_update
+], JSON_UNESCAPED_UNICODE);
 // EOF
 ?>
