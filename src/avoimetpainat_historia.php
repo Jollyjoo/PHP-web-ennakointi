@@ -20,7 +20,7 @@ if ($conn->connect_error) {
     log_debug('Tietokantayhteys epäonnistui: ' . $conn->connect_error);
     die(json_encode(["error" => "Tietokantayhteys epäonnistui"]));
 }
-$conn->set_charset("utf8");
+$conn->set_charset("utf8mb4");
 
 // Parametrit: stat_code, limit, toimiala
 $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : null;
