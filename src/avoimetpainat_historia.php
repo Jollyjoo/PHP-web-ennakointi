@@ -86,7 +86,7 @@ $result = $stmt->get_result();
 $data = [];
 while ($row = $result->fetch_assoc()) {
     if (isset($row['Toimiala'])) {
-        $row['Toimiala'] = iconv('ISO-8859-1', 'UTF-8//IGNORE', $row['Toimiala']);
+        $row['Toimiala'] = utf8_encode($row['Toimiala']);
     }
     $data[] = $row;
 }
