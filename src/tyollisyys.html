@@ -391,8 +391,8 @@
                         <option value="MK07">Päijät-Häme (MK07)</option>
                     </select>
                     <div style="display:inline-block;margin-left:24px;">
-                        <button id="chart-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
-                        <button id="chart-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
+                        <button id="chart-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
+                        <button id="chart-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
                         <button id="toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki toimialat</button>
                     </div>
                 </div>
@@ -405,7 +405,7 @@
                     const btnLine = document.getElementById('chart-type-line');
                     const btnBar = document.getElementById('chart-type-bar');
                     let chartInstance = null;
-                    let currentType = 'line';
+                    let currentType = 'bar';
                     const btnToggleDatasets = document.getElementById('toggle-datasets');
                     let allHidden = false;
                     function fetchAndDraw(statCode, chartType = 'line') {
@@ -510,8 +510,8 @@
                         });
                     }
                     // Initial state
-                    btnLine.style.fontWeight = 'bold';
-                    btnBar.style.fontWeight = 'normal';
+                    btnBar.style.fontWeight = 'bold';
+                    btnLine.style.fontWeight = 'normal';
                     fetchAndDraw(select.value, currentType);
                 });
             </script>      <p align="center">Lähde: <a
