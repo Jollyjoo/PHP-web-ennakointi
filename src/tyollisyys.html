@@ -468,15 +468,16 @@
                                         backgroundColor: '#f7fbfc'
                                     }
                                 });
-                    if (btnToggleDatasets) {
-                        btnToggleDatasets.addEventListener('click', function () {
-                            if (!chartInstance) return;
-                            allHidden = !allHidden;
-                            chartInstance.data.datasets.forEach(ds => { ds.hidden = allHidden; });
-                            chartInstance.update();
-                            btnToggleDatasets.textContent = allHidden ? 'Näytä kaikki toimialat' : 'Piilota kaikki toimialat';
-                        });
-                    }
+                                // After chart redraw, update dataset visibility and button label
+                                if (allHidden) {
+                                    chartInstance.data.datasets.forEach(ds => { ds.hidden = true; });
+                                    chartInstance.update();
+                                    btnToggleDatasets.textContent = 'Näytä kaikki toimialat';
+                                } else {
+                                    chartInstance.data.datasets.forEach(ds => { ds.hidden = false; });
+                                    chartInstance.update();
+                                    btnToggleDatasets.textContent = 'Piilota kaikki toimialat';
+                                }
                             })
                             .catch(() => {
                                 const parent = canvas.parentElement;
@@ -498,6 +499,16 @@
                         btnBar.style.fontWeight = 'bold';
                         btnLine.style.fontWeight = 'normal';
                     });
+                    // Attach dataset toggle button ONCE
+                    if (btnToggleDatasets) {
+                        btnToggleDatasets.addEventListener('click', function () {
+                            if (!chartInstance) return;
+                            allHidden = !allHidden;
+                            chartInstance.data.datasets.forEach(ds => { ds.hidden = allHidden; });
+                            chartInstance.update();
+                            btnToggleDatasets.textContent = allHidden ? 'Näytä kaikki toimialat' : 'Piilota kaikki toimialat';
+                        });
+                    }
                     // Initial state
                     btnLine.style.fontWeight = 'bold';
                     btnBar.style.fontWeight = 'normal';
