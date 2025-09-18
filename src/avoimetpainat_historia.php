@@ -85,6 +85,10 @@ $result = $stmt->get_result();
 
 $data = [];
 while ($row = $result->fetch_assoc()) {
+    // Convert Toimiala from latin1 to utf8 if not null
+    if (isset($row['Toimiala'])) {
+        $row['Toimiala'] = mb_convert_encoding($row['Toimiala'], 'UTF-8', 'ISO-8859-1');
+    }
     $data[] = $row;
 }
 log_debug('Rivejä haettu: ' . count($data));
