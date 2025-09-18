@@ -358,6 +358,90 @@ document.addEventListener('DOMContentLoaded', function () {
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
  -->
+
+
+
+<!-- Avoimet työpaikat toimialoittain Chart.js embedded chart -->
+<div style="max-width:900px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+    <h3 style="text-align:center;">Avoimet työpaikat toimialoittain (viimeiset 24kk)</h3>
+    <canvas id="avoimet-toimiala-chart" width="860" height="340"></canvas>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('tyollisyys_historia.php?table=Avoimet_tyopaikat&limit=24')
+        .then(resp => resp.json())
+        .then(raw => {
+            // Group data by Tilastokuukausi, stat_code, Toimiala
+            // Expected raw: [{Tilastokuukausi, stat_code, Toimiala, Maara}]
+            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+            // Get unique months (x-axis)
+            const months = [...new Set(raw.map(r => r.Tilastokuukausi))].sort();
+            // Get unique stat_codes
+            const statCodes = [...new Set(raw.map(r => r.stat_code))];
+            // Get unique toimialas
+            const toimialas = [...new Set(raw.map(r => r.Toimiala))];
+            // Build datasets: one for each stat_code + toimiala
+            const colors = ['#0077cc','#cc3300','#009933','#3366cc','#cc9900','#9900cc','#00cc99','#ff6600','#666666'];
+            let colorIdx = 0;
+            const datasets = [];
+            statCodes.forEach(stat => {
+                toimialas.forEach(toimiala => {
+                    const label = stat + ' - ' + toimiala;
+                    const data = months.map(month => {
+                        const found = raw.find(r => r.Tilastokuukausi === month && r.stat_code === stat && r.Toimiala === toimiala);
+                        return found ? parseInt(found.Maara,10) : 0;
+                    });
+                    datasets.push({
+                        label,
+                        data,
+                        borderColor: colors[colorIdx % colors.length],
+                        backgroundColor: colors[colorIdx % colors.length]+'22',
+                        fill: false,
+                        pointRadius: 2
+                    });
+                    colorIdx++;
+                });
+            });
+            // Format months for x-axis
+            const labels = months.map(l => {
+                const m = l.match(/M(\d{2})/);
+                if (m) {
+                    const kk = parseInt(m[1],10);
+                    return kuukausiNimet[kk-1] + ' ' + l.slice(0,4);
+                }
+                return l;
+            });
+            const ctx = document.getElementById('avoimet-toimiala-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: { labels, datasets },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Kuukausi' } },
+                        y: { title: { display: true, text: 'Avoimet työpaikat' } }
+                    },
+                    layout: { padding: 10 },
+                    backgroundColor: '#f7fbfc'
+                }
+            });
+        })
+        .catch(() => {
+            const canvas = document.getElementById('avoimet-toimiala-chart');
+            if (canvas) {
+                const parent = canvas.parentElement;
+                parent.innerHTML = `<div style='color:#cc3300;text-align:center;font-size:20px;padding:40px 0;'>Ei tietokantayhteyttä</div>`;
+            }
+        });
+});
+</script>
+
+
+
             <br><br> <br>
             <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>
             <!-- Slider main container -->
