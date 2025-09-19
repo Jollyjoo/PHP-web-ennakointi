@@ -159,6 +159,7 @@ async function fetchAlueenTyopaikat() {
     }
 }
 
+
 function renderAlueenTyopaikatChart(data, chartType = 'bar') {
     const ctx = document.getElementById('alueentyopaikatChart').getContext('2d');
     data.datasets.forEach((ds, i) => {
@@ -181,7 +182,9 @@ function renderAlueenTyopaikatChart(data, chartType = 'bar') {
             responsive: false,
             plugins: {
                 legend: { display: true, position: 'top' },
-                tooltip: { mode: 'nearest', intersect: true }
+                tooltip: chartType === 'line'
+                    ? { mode: 'index', intersect: false }
+                    : { mode: 'nearest', intersect: true }
             },
             scales: {
                 x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },

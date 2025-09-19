@@ -10,9 +10,10 @@ try {
 
     // Query: get all years and kunta, sum tyopaikat
     $sql = "SELECT vuosi, Kunta, SUM(tyopaikat) AS tyopaikat
-            FROM Alueentyopaikat
-            GROUP BY vuosi, Kunta
-            ORDER BY vuosi ASC, Kunta ASC";
+        FROM Alueentyopaikat
+        WHERE Kunta <> 'KOKO MAA' AND sukupuoli = 'yhteensä'
+        GROUP BY vuosi, Kunta
+        ORDER BY vuosi ASC, Kunta ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
