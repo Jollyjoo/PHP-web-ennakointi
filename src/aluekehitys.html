@@ -125,6 +125,73 @@
         </div>
 
         
+
+<!-- uusi chart , Alueen työpaikat tähän -->
+<div class="textContainer" style="background:#f7f7f7; border-radius:12px; padding:24px; margin-bottom:32px;">
+    <h2>Alueen työpaikat (Kunta, vuosittain)</h2>
+    <canvas id="alueentyopaikatChart" style="max-width:900px; min-height:400px;"></canvas>
+    <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="alueentyopaikat-paivitys">-</span></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+async function fetchAlueenTyopaikat() {
+    try {
+        const res = await fetch('alueentyopaikat_historia.php');
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        return data;
+    } catch (e) {
+        console.error('Virhe ladattaessa työpaikkadataa:', e);
+        return null;
+    }
+}
+
+function renderAlueenTyopaikatChart(data) {
+    const ctx = document.getElementById('alueentyopaikatChart').getContext('2d');
+    // Assign colors for kunta datasets
+    const palette = [
+        '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'
+    ];
+    data.datasets.forEach((ds, i) => {
+        ds.backgroundColor = palette[i % palette.length];
+        ds.stack = 'Stack 0';
+        ds.borderWidth = 1;
+    });
+    if (window.alueentyopaikatChartObj) window.alueentyopaikatChartObj.destroy();
+    window.alueentyopaikatChartObj = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: data.datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'top' },
+                title: { display: false },
+                tooltip: { mode: 'index', intersect: false }
+            },
+            scales: {
+                x: { stacked: true, title: { display: true, text: 'Vuosi' } },
+                y: { stacked: true, title: { display: true, text: 'Työpaikat' }, beginAtZero: true }
+            }
+        }
+    });
+}
+
+async function updateAlueenTyopaikatChart() {
+    const data = await fetchAlueenTyopaikat();
+    if (!data) return;
+    renderAlueenTyopaikatChart(data);
+    // Päivitysaika: use latest vuosi as a proxy (or add timestamp to backend if needed)
+    const latestYear = Array.isArray(data.labels) ? Math.max(...data.labels.map(Number)) : '-';
+    document.getElementById('alueentyopaikat-paivitys').textContent = latestYear;
+}
+document.addEventListener('DOMContentLoaded', updateAlueenTyopaikatChart);
+</script>
+
+
+
         <div class="textContainer"><br>
             <br><br><b><u> <a href="mediaseuranta.html" target="_blank" class='styled-link'>
                         <h2> Hämeen ELY-keskuksen
