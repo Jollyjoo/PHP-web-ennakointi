@@ -130,8 +130,14 @@
 <br><br>
 
 <div style="max-width:1240px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
-    <h3 style="text-align:center;">Alueella työtyössäkäyvät kunnittain</h3>
+    <h3 style="text-align:center;">Alueella työssäkäyvät kunnittain</h3>
     <div style="text-align:center;margin-bottom:12px;">
+        <label for="alueentyopaikat-region-select"><b>Valitse alue:</b></label>
+        <select id="alueentyopaikat-region-select" style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
+            <option value="all" selected>Koko Häme</option>
+            <option value="1">Päijät-Häme</option>
+            <option value="2">Kanta-Häme</option>
+        </select>
         <b>Kaaviotyyppi:</b>
         <button id="alueentyopaikat-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
         <button id="alueentyopaikat-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
@@ -145,11 +151,13 @@
 let alueentyopaikatChartObj = null;
 let alueentyopaikatCurrentType = 'bar';
 let alueentyopaikatAllHidden = false;
+let alueentyopaikatCurrentRegion = 'all';
 const alueentyopaikatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'];
 
-async function fetchAlueenTyopaikat() {
+async function fetchAlueenTyopaikat(region = 'all') {
     try {
-        const res = await fetch('alueentyopaikat_historia.php');
+        const url = region === 'all' ? 'alueentyopaikat_historia.php' : `alueentyopaikat_historia.php?maakunta_id=${region}`;
+        const res = await fetch(url);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
         return data;
@@ -206,8 +214,8 @@ function renderAlueenTyopaikatChart(data, chartType = 'bar') {
     }
 }
 
-async function updateAlueenTyopaikatChart(chartType = 'bar') {
-    const data = await fetchAlueenTyopaikat();
+async function updateAlueenTyopaikatChart(chartType = 'bar', region = 'all') {
+    const data = await fetchAlueenTyopaikat(region);
     if (!data) return;
     renderAlueenTyopaikatChart(data, chartType);
     // Päivitysaika: use latest vuosi as a proxy (or add timestamp to backend if needed)
@@ -220,20 +228,21 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnBar = document.getElementById('alueentyopaikat-type-bar');
     const btnLine = document.getElementById('alueentyopaikat-type-line');
     const btnToggle = document.getElementById('alueentyopaikat-toggle-datasets');
+    const regionSelect = document.getElementById('alueentyopaikat-region-select');
     btnBar.style.fontWeight = 'bold';
     btnLine.style.fontWeight = 'normal';
-    updateAlueenTyopaikatChart('bar');
+    updateAlueenTyopaikatChart('bar', 'all');
     btnBar.addEventListener('click', function() {
         alueentyopaikatCurrentType = 'bar';
         btnBar.style.fontWeight = 'bold';
         btnLine.style.fontWeight = 'normal';
-        updateAlueenTyopaikatChart('bar');
+        updateAlueenTyopaikatChart('bar', alueentyopaikatCurrentRegion);
     });
     btnLine.addEventListener('click', function() {
         alueentyopaikatCurrentType = 'line';
         btnLine.style.fontWeight = 'bold';
         btnBar.style.fontWeight = 'normal';
-        updateAlueenTyopaikatChart('line');
+        updateAlueenTyopaikatChart('line', alueentyopaikatCurrentRegion);
     });
     btnToggle.addEventListener('click', function() {
         if (!alueentyopaikatChartObj) return;
@@ -241,6 +250,10 @@ document.addEventListener('DOMContentLoaded', function() {
         alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = alueentyopaikatAllHidden; });
         alueentyopaikatChartObj.update();
         btnToggle.textContent = alueentyopaikatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
+    });
+    regionSelect.addEventListener('change', function() {
+        alueentyopaikatCurrentRegion = this.value;
+        updateAlueenTyopaikatChart(alueentyopaikatCurrentType, alueentyopaikatCurrentRegion);
     });
 });
 </script>

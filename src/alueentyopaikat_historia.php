@@ -8,12 +8,19 @@ try {
     $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Query: get all years and kunta, sum tyopaikat
+    // Optional region filter
+    $region = isset($_GET['maakunta_id']) ? $_GET['maakunta_id'] : '';
+    $where = "Kunta <> 'KOKO MAA' AND sukupuoli = 'yhteensä'";
+    if ($region === '1') {
+        $where .= " AND maakunta_id = 1";
+    } elseif ($region === '2') {
+        $where .= " AND maakunta_id = 2";
+    }
     $sql = "SELECT vuosi, Kunta, SUM(tyopaikat) AS tyopaikat
-        FROM Alueentyopaikat
-        WHERE Kunta <> 'KOKO MAA' AND sukupuoli = 'yhteensä'
-        GROUP BY vuosi, Kunta
-        ORDER BY vuosi ASC, Kunta ASC";
+            FROM Alueentyopaikat
+            WHERE $where
+            GROUP BY vuosi, Kunta
+            ORDER BY vuosi ASC, Kunta ASC";
     $stmt = $pdo->prepare($sql);
     $stmt->execute();
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
