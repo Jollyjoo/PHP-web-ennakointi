@@ -22,7 +22,6 @@ deployment:
     - /bin/cp src/aluekehitys.html $DEPLOYPATH
     - /bin/cp src/alueentyopaikat_historia.php $DEPLOYPATH
     - /bin/cp src/db.php $DEPLOYPATH
-    - /bin/cp src/osaaminen.html $DEPLOYPATH
     - /bin/cp src/mediaseuranta.html $DEPLOYPATH
     - /bin/cp src/toimialaennakointi.html $DEPLOYPATH
     - /bin/cp src/tyomarkkinasignaalit.html $DEPLOYPATH
