@@ -218,8 +218,10 @@ async function updateAlueenTyopaikatChart(chartType = 'bar', region = 'all') {
     const data = await fetchAlueenTyopaikat(region);
     if (!data) return;
     renderAlueenTyopaikatChart(data, chartType);
-    // Päivitysaika: show latest_update from backend
-    document.getElementById('alueentyopaikat-paivitys').textContent = data.latest_update || '-';
+        // Päivitysaika: show latest_update from backend in both chart and stat-paivitys-2
+        document.getElementById('alueentyopaikat-paivitys').textContent = data.latest_update || '-';
+        const statPaivitys2 = document.getElementById('stat-paivitys-2');
+        if (statPaivitys2) statPaivitys2.textContent = data.latest_update || '-';
 }
 
 document.addEventListener('DOMContentLoaded', function() {
