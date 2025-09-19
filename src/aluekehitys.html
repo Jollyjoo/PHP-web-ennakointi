@@ -128,12 +128,25 @@
 
 <!-- uusi chart , Alueen työpaikat tähän -->
 <div class="textContainer" style="background:#f7f7f7; border-radius:12px; padding:24px; margin-bottom:32px;">
-    <h2>Alueen työpaikat (Kunta, vuosittain)</h2>
-    <canvas id="alueentyopaikatChart" style="max-width:900px; min-height:400px;"></canvas>
+
+<div style="max-width:1240px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+    <h3 style="text-align:center;">Alueen työpaikat kunnittain (vuosittain)</h3>
+    <div style="text-align:center;margin-bottom:12px;">
+        <b>Kaaviotyyppi:</b>
+        <button id="alueentyopaikat-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
+        <button id="alueentyopaikat-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
+        <button id="alueentyopaikat-toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki kunnat</button>
+    </div>
+    <canvas id="alueentyopaikatChart" width="1100" height="600"></canvas>
     <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="alueentyopaikat-paivitys">-</span></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+let alueentyopaikatChartObj = null;
+let alueentyopaikatCurrentType = 'bar';
+let alueentyopaikatAllHidden = false;
+const alueentyopaikatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'];
+
 async function fetchAlueenTyopaikat() {
     try {
         const res = await fetch('alueentyopaikat_historia.php');
@@ -146,48 +159,87 @@ async function fetchAlueenTyopaikat() {
     }
 }
 
-function renderAlueenTyopaikatChart(data) {
+function renderAlueenTyopaikatChart(data, chartType = 'bar') {
     const ctx = document.getElementById('alueentyopaikatChart').getContext('2d');
-    // Assign colors for kunta datasets
-    const palette = [
-        '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'
-    ];
     data.datasets.forEach((ds, i) => {
-        ds.backgroundColor = palette[i % palette.length];
-        ds.stack = 'Stack 0';
+        ds.backgroundColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
+        ds.borderColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length];
+        ds.stack = chartType === 'bar' ? 'Stack 0' : undefined;
         ds.borderWidth = 1;
+        ds.fill = chartType === 'bar';
+        ds.pointRadius = 2;
+        ds.tension = chartType === 'line' ? 0.45 : undefined;
     });
-    if (window.alueentyopaikatChartObj) window.alueentyopaikatChartObj.destroy();
-    window.alueentyopaikatChartObj = new Chart(ctx, {
-        type: 'bar',
+    if (alueentyopaikatChartObj) alueentyopaikatChartObj.destroy();
+    alueentyopaikatChartObj = new Chart(ctx, {
+        type: chartType,
         data: {
             labels: data.labels,
             datasets: data.datasets
         },
         options: {
-            responsive: true,
+            responsive: false,
             plugins: {
-                legend: { position: 'top' },
-                title: { display: false },
-                tooltip: { mode: 'index', intersect: false }
+                legend: { display: true, position: 'top' },
+                tooltip: { mode: 'nearest', intersect: true }
             },
             scales: {
-                x: { stacked: true, title: { display: true, text: 'Vuosi' } },
-                y: { stacked: true, title: { display: true, text: 'Työpaikat' }, beginAtZero: true }
-            }
+                x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
+                y: { title: { display: true, text: 'Työpaikat' }, stacked: chartType === 'bar' }
+            },
+            layout: { padding: 10 },
+            backgroundColor: '#f7fbfc'
         }
     });
+    // After chart redraw, update dataset visibility and button label
+    if (alueentyopaikatAllHidden) {
+        alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = true; });
+        alueentyopaikatChartObj.update();
+        document.getElementById('alueentyopaikat-toggle-datasets').textContent = 'Näytä kaikki kunnat';
+    } else {
+        alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = false; });
+        alueentyopaikatChartObj.update();
+        document.getElementById('alueentyopaikat-toggle-datasets').textContent = 'Piilota kaikki kunnat';
+    }
 }
 
-async function updateAlueenTyopaikatChart() {
+async function updateAlueenTyopaikatChart(chartType = 'bar') {
     const data = await fetchAlueenTyopaikat();
     if (!data) return;
-    renderAlueenTyopaikatChart(data);
+    renderAlueenTyopaikatChart(data, chartType);
     // Päivitysaika: use latest vuosi as a proxy (or add timestamp to backend if needed)
     const latestYear = Array.isArray(data.labels) ? Math.max(...data.labels.map(Number)) : '-';
     document.getElementById('alueentyopaikat-paivitys').textContent = latestYear;
 }
-document.addEventListener('DOMContentLoaded', updateAlueenTyopaikatChart);
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Button controls
+    const btnBar = document.getElementById('alueentyopaikat-type-bar');
+    const btnLine = document.getElementById('alueentyopaikat-type-line');
+    const btnToggle = document.getElementById('alueentyopaikat-toggle-datasets');
+    btnBar.style.fontWeight = 'bold';
+    btnLine.style.fontWeight = 'normal';
+    updateAlueenTyopaikatChart('bar');
+    btnBar.addEventListener('click', function() {
+        alueentyopaikatCurrentType = 'bar';
+        btnBar.style.fontWeight = 'bold';
+        btnLine.style.fontWeight = 'normal';
+        updateAlueenTyopaikatChart('bar');
+    });
+    btnLine.addEventListener('click', function() {
+        alueentyopaikatCurrentType = 'line';
+        btnLine.style.fontWeight = 'bold';
+        btnBar.style.fontWeight = 'normal';
+        updateAlueenTyopaikatChart('line');
+    });
+    btnToggle.addEventListener('click', function() {
+        if (!alueentyopaikatChartObj) return;
+        alueentyopaikatAllHidden = !alueentyopaikatAllHidden;
+        alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = alueentyopaikatAllHidden; });
+        alueentyopaikatChartObj.update();
+        btnToggle.textContent = alueentyopaikatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
+    });
+});
 </script>
 
 
