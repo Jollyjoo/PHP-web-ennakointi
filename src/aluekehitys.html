@@ -190,9 +190,22 @@ function renderAlueenTyopaikatChart(data, chartType = 'bar') {
             responsive: false,
             plugins: {
                 legend: { display: true, position: 'top' },
-                tooltip: chartType === 'line'
-                    ? { mode: 'index', intersect: false }
-                    : { mode: 'nearest', intersect: true }
+                tooltip: {
+                    mode: chartType === 'line' ? 'index' : 'nearest',
+                    intersect: chartType !== 'line',
+                    callbacks: {
+                        afterBody: function(context) {
+                            // context[0].dataIndex is the index of the selected year
+                            const yearIdx = context[0].dataIndex;
+                            // Sum all dataset values for this year
+                            let total = 0;
+                            context[0].chart.data.datasets.forEach(ds => {
+                                if (typeof ds.data[yearIdx] === 'number') total += ds.data[yearIdx];
+                            });
+                            return 'Yhteensä: ' + total.toLocaleString('fi-FI');
+                        }
+                    }
+                }
             },
             scales: {
                 x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
