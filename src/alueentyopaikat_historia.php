@@ -37,6 +37,19 @@ try {
         if (!in_array($kunta, $kuntaSet)) $kuntaSet[] = $kunta;
         $dataMap[$kunta][$vuosi] = $tyopaikat;
     }
+    // Order Kunta by total tyopaikat descending
+    $kuntaTotals = [];
+    foreach ($kuntaSet as $kunta) {
+        $total = 0;
+        foreach ($labels as $vuosi) {
+            $total += isset($dataMap[$kunta][$vuosi]) ? $dataMap[$kunta][$vuosi] : 0;
+        }
+        $kuntaTotals[$kunta] = $total;
+    }
+    // Sort kuntaSet by totals descending
+    usort($kuntaSet, function($a, $b) use ($kuntaTotals) {
+        return $kuntaTotals[$b] <=> $kuntaTotals[$a];
+    });
     // Build datasets for Chart.js
     $datasets = [];
     foreach ($kuntaSet as $kunta) {

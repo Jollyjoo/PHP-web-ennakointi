@@ -83,6 +83,7 @@ $stmt->bind_param($types, ...$params);
 $stmt->execute();
 $result = $stmt->get_result();
 
+
 // Build data array
 $data = [];
 while ($row = $result->fetch_assoc()) {
@@ -90,6 +91,27 @@ while ($row = $result->fetch_assoc()) {
 }
 log_debug('Rivejä haettu: ' . count($data));
 $stmt->close();
+
+// --- Order toimiala datasets by total Maara descending ---
+$toimialaTotals = [];
+foreach ($data as $row) {
+    $toimiala = $row['Toimiala'];
+    $maara = intval($row['Maara']);
+    if (!isset($toimialaTotals[$toimiala])) $toimialaTotals[$toimiala] = 0;
+    $toimialaTotals[$toimiala] += $maara;
+}
+// Sort toimialas by totals descending
+arsort($toimialaTotals);
+// Reorder $data so toimialas with biggest total are first
+$orderedData = [];
+foreach (array_keys($toimialaTotals) as $toimiala) {
+    foreach ($data as $row) {
+        if ($row['Toimiala'] === $toimiala) {
+            $orderedData[] = $row;
+        }
+    }
+}
+$data = $orderedData;
 
 // Get latest update time from Aika field for the latest Tilastokuukausi for this stat_code
 $update_sql = "SELECT Aika FROM Avoimet_tyopaikat WHERE stat_code = ? ORDER BY Tilastokuukausi DESC LIMIT 1";
