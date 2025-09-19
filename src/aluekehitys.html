@@ -218,9 +218,8 @@ async function updateAlueenTyopaikatChart(chartType = 'bar', region = 'all') {
     const data = await fetchAlueenTyopaikat(region);
     if (!data) return;
     renderAlueenTyopaikatChart(data, chartType);
-    // Päivitysaika: use latest vuosi as a proxy (or add timestamp to backend if needed)
-    const latestYear = Array.isArray(data.labels) ? Math.max(...data.labels.map(Number)) : '-';
-    document.getElementById('alueentyopaikat-paivitys').textContent = latestYear;
+    // Päivitysaika: show latest_update from backend
+    document.getElementById('alueentyopaikat-paivitys').textContent = data.latest_update || '-';
 }
 
 document.addEventListener('DOMContentLoaded', function() {

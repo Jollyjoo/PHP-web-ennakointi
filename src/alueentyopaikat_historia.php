@@ -62,9 +62,17 @@ try {
             'data' => $data
         ];
     }
+    // Get latest timestamp for selected region
+    $tsql = "SELECT MAX(timestamp) AS latest_update FROM Alueentyopaikat WHERE $where";
+    $tstmt = $pdo->prepare($tsql);
+    $tstmt->execute();
+    $trow = $tstmt->fetch(PDO::FETCH_ASSOC);
+    $latest_update = isset($trow['latest_update']) ? $trow['latest_update'] : null;
+
     echo json_encode([
         'labels' => $labels,
-        'datasets' => $datasets
+        'datasets' => $datasets,
+        'latest_update' => $latest_update
     ], JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
     http_response_code(500);
