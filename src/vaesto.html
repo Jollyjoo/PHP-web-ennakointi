@@ -91,7 +91,9 @@
                             <h2>169 455 </h2>
                             (muutos 2013: - 6026/ - 3,4%) <br>
                             (muutos 1972: + 16120/ + 10,51%)
-                             <button id="vaesto-popup-btn" style="margin-top:8px;font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Näytä väestön kehitys</button>
+                             <div style="margin-top:8px;text-align:center;">
+                                 <canvas id="vaesto-embed-chart" width="180" height="48" style="cursor:pointer;"></canvas>
+                             </div>
                         </div>
                         <div class="tilastobox_paijatHäme"><b>Päijät-Häme</b>
                             <p>Väkiluku vuoden 2024 lopussa</p>
@@ -411,44 +413,26 @@
         }
         otsikot();
 
-        // Väestö popup chart
+        // Väestö embedded and popup chart
         document.addEventListener('DOMContentLoaded', function() {
-            const btn = document.getElementById('vaesto-popup-btn');
             let popup = null;
             let chartObj = null;
-            btn.addEventListener('click', async function() {
-                if (popup) return; // Only one popup
-                popup = document.createElement('div');
-                popup.style.position = 'fixed';
-                popup.style.left = '0';
-                popup.style.top = '0';
-                popup.style.width = '100vw';
-                popup.style.height = '100vh';
-                popup.style.background = 'rgba(0,0,0,0.18)';
-                popup.style.zIndex = '9999';
-                popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
-                    '<h3 style="text-align:center;margin-bottom:18px;">Kanta-Hämeen väestön kehitys</h3>'+
-                    '<canvas id="vaestoChart" width="600" height="340"></canvas>'+
-                    '<div style="margin-top:8px;text-align:center;"><button id="vaesto-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
-                    '</div>';
-                document.body.appendChild(popup);
-                document.body.style.overflow = 'hidden';
-                // Fetch data
-                const res = await fetch('vaesto_historia.php?region=2');
-                const data = await res.json();
-                // Chart
-                const ctx = document.getElementById('vaestoChart').getContext('2d');
-                chartObj = new Chart(ctx, {
+            let embedChartObj = null;
+            // Fetch data for both charts
+            fetch('vaesto_historia.php?region=2').then(res => res.json()).then(data => {
+                // Embedded chart (sparkline)
+                const embedCtx = document.getElementById('vaesto-embed-chart').getContext('2d');
+                embedChartObj = new Chart(embedCtx, {
                     type: 'line',
                     data: {
                         labels: data.labels,
                         datasets: [{
-                            label: 'Väkiluku',
+                            label: '',
                             data: data.data,
-                            backgroundColor: '#0077cc22',
+                            backgroundColor: '#0077cc11',
                             borderColor: '#0077cc',
                             borderWidth: 2,
-                            pointRadius: 3,
+                            pointRadius: 0,
                             tension: 0.35,
                             fill: true
                         }]
@@ -456,30 +440,80 @@
                     options: {
                         plugins: {
                             legend: { display: false },
-                            tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                callbacks: {
-                                    label: function(context) {
-                                        return 'Väkiluku: ' + context.parsed.y.toLocaleString('fi-FI');
-                                    }
-                                }
-                            }
+                            tooltip: { enabled: false }
                         },
                         scales: {
-                            x: { title: { display: true, text: 'Vuosi' } },
-                            y: { title: { display: true, text: 'Väkiluku' } }
+                            x: { display: false },
+                            y: { display: false }
                         },
-                        layout: { padding: 10 },
-                        backgroundColor: '#fff'
+                        layout: { padding: 0 },
+                        backgroundColor: '#fff',
+                        events: [] // disables built-in events
                     }
                 });
-                // Close button
-                document.getElementById('vaesto-popup-close').addEventListener('click', function() {
-                    if (chartObj) chartObj.destroy();
-                    popup.remove();
-                    popup = null;
-                    document.body.style.overflow = '';
+                // Click handler for embedded chart
+                document.getElementById('vaesto-embed-chart').addEventListener('click', function() {
+                    if (popup) return;
+                    popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.left = '0';
+                    popup.style.top = '0';
+                    popup.style.width = '100vw';
+                    popup.style.height = '100vh';
+                    popup.style.background = 'rgba(0,0,0,0.18)';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
+                        '<h3 style="text-align:center;margin-bottom:18px;">Kanta-Hämeen väestön kehitys</h3>'+
+                        '<canvas id="vaestoChart" width="600" height="340"></canvas>'+
+                        '<div style="margin-top:8px;text-align:center;"><button id="vaesto-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
+                        '</div>';
+                    document.body.appendChild(popup);
+                    document.body.style.overflow = 'hidden';
+                    // Chart
+                    const ctx = document.getElementById('vaestoChart').getContext('2d');
+                    chartObj = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Väkiluku',
+                                data: data.data,
+                                backgroundColor: '#0077cc22',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Väkiluku: ' + context.parsed.y.toLocaleString('fi-FI');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { title: { display: true, text: 'Väkiluku' } }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#fff'
+                        }
+                    });
+                    // Close button
+                    document.getElementById('vaesto-popup-close').addEventListener('click', function() {
+                        if (chartObj) chartObj.destroy();
+                        popup.remove();
+                        popup = null;
+                        document.body.style.overflow = '';
+                    });
                 });
             });
         });
