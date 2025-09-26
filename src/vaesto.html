@@ -431,12 +431,14 @@
                     data: {
                         labels: data.labels,
                         datasets: [{
-                            label: '',
+                            label: 'Väkiluku',
                             data: data.data,
                             backgroundColor: '#0077cc11',
                             borderColor: '#0077cc',
                             borderWidth: 2,
-                            pointRadius: 0,
+                            pointRadius: 2,
+                            pointBackgroundColor: '#cc3300',
+                            pointBorderColor: '#cc3300',
                             tension: 0.35,
                             fill: true
                         }]
@@ -447,8 +449,16 @@
                             tooltip: { enabled: false }
                         },
                         scales: {
-                            x: { display: false },
-                            y: { display: false }
+                            x: {
+                                display: true,
+                                ticks: { font: { size: 10 }, color: '#555' },
+                                grid: { display: false }
+                            },
+                            y: {
+                                display: true,
+                                ticks: { font: { size: 10 }, color: '#555' },
+                                grid: { display: false }
+                            }
                         },
                         layout: { padding: 0 },
                         backgroundColor: '#fff',
