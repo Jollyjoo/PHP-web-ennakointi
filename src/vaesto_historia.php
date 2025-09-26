@@ -12,7 +12,48 @@ try {
     for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
     $ikas[] = '100 -';
     // Debug log
-    file_put_contents('yli64_log.txt', "Querying yli64: region=$region, ikas=".json_encode($ikas)."\n", FILE_APPEND);
+        file_put_contents('yli64_log.txt', "Querying yli64: region=$region, ikas=".json_encode($ikas)."\n", FILE_APPEND);
+    
+        // Log SQL for latest year
+        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
+        file_put_contents('yli64_log.txt', "SQL (latest): $sql_latest\nParams: ".json_encode(array_merge([$region], $ikas))."\n", FILE_APPEND);
+        $stmt_latest = $pdo->prepare($sql_latest);
+        $stmt_latest->execute(array_merge([$region], $ikas));
+        $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
+        file_put_contents('yli64_log.txt', "Result (latest): ".json_encode($row_latest)."\n", FILE_APPEND);
+        $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
+
+        // Get values for latestYear, latestYear-10, latestYear-20
+        $years = [$latestYear, $latestYear-10, $latestYear-20];
+        $values = [];
+        foreach ($years as $year) {
+            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
+            $params = array_merge([$region], $ikas, [$year]);
+            file_put_contents('yli64_log.txt', "SQL (year $year): $sql\nParams: ".json_encode($params)."\n", FILE_APPEND);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            file_put_contents('yli64_log.txt', "Result (year $year): ".json_encode($row)."\n", FILE_APPEND);
+            $values[$year] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
+        }
+        $value = $values[$latestYear];
+        $value10 = $values[$latestYear-10];
+        $value20 = $values[$latestYear-20];
+        $change10 = $value - $value10;
+        $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
+        $change20 = $value - $value20;
+        $pct20 = $value20 ? ($change20 / $value20 * 100) : 0;
+        file_put_contents('yli64_log.txt', "Final values: year=$latestYear, value=$value, value10=$value10, value20=$value20, change10=$change10, pct10=$pct10, change20=$change20, pct20=$pct20\n", FILE_APPEND);
+        echo json_encode([
+            "year" => $latestYear,
+            "value" => $value,
+            "change10" => $change10,
+            "pct10" => $pct10,
+            "change20" => $change20,
+            "pct20" => $pct20
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
         // Some DBs use '100', some '100 -' for 100+ group
         $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
         $stmt_latest = $pdo->prepare($sql_latest);
@@ -56,7 +97,36 @@ try {
     for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
     $ikas[] = '100 -';
     // Debug log
-    file_put_contents('yli64_log.txt', "Querying yli64history: region=$region, ikas=".json_encode($ikas)."\n", FILE_APPEND);
+        file_put_contents('yli64_log.txt', "Querying yli64history: region=$region, ikas=".json_encode($ikas)."\n", FILE_APPEND);
+        $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).") ORDER BY Tilastovuosi ASC";
+        file_put_contents('yli64_log.txt', "SQL (years): $sql_years\nParams: ".json_encode(array_merge([$region], $ikas))."\n", FILE_APPEND);
+        $stmt_years = $pdo->prepare($sql_years);
+        $stmt_years->execute(array_merge([$region], $ikas));
+        $years = [];
+        while ($row = $stmt_years->fetch(PDO::FETCH_ASSOC)) {
+            $years[] = intval($row['Tilastovuosi']);
+        }
+        file_put_contents('yli64_log.txt', "Years found: ".json_encode($years)."\n", FILE_APPEND);
+        $labels = [];
+        $data = [];
+        foreach ($years as $year) {
+            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
+            $params = array_merge([$region], $ikas, [$year]);
+            file_put_contents('yli64_log.txt', "SQL (year $year): $sql\nParams: ".json_encode($params)."\n", FILE_APPEND);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            file_put_contents('yli64_log.txt', "Result (year $year): ".json_encode($row)."\n", FILE_APPEND);
+            $labels[] = $year;
+            $data[] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
+        }
+        file_put_contents('yli64_log.txt', "Final sparkline: labels=".json_encode($labels).", data=".json_encode($data)."\n", FILE_APPEND);
+        echo json_encode([
+            "labels" => $labels,
+            "data" => $data
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
         $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).") ORDER BY Tilastovuosi ASC";
         $stmt_years = $pdo->prepare($sql_years);
         $stmt_years->execute(array_merge([$region], $ikas));
