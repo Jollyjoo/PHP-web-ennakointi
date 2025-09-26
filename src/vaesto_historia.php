@@ -21,15 +21,15 @@ $region = isset($_GET['region']) ? intval($_GET['region']) : 2;
 $region_map = [1 => 'Päijät-Häme', 2 => 'Kanta-Häme'];
 $region_name = isset($region_map[$region]) ? $region_map[$region] : 'Kanta-Häme';
 
-// Oletetaan taulu Väestö, kentät: vuosi, maakunta_id, vaki_luku
-$sql = "SELECT vuosi, vaki_luku FROM Vaesto WHERE maakunta_id = $region ORDER BY vuosi ASC";
+// Oletetaan taulu Asukasmaara, kentät: vuosi, Kunta_ID, vaki_luku
+$sql = "SELECT Tilastovuosi, Maara FROM Asukasmaara WHERE Kunta_ID = $region and Sukupuoli_ID = 3 ORDER BY Tilastovuosi ASC";
 $res = $conn->query($sql);
 $labels = [];
 $data = [];
 if ($res) {
     while ($row = $res->fetch_assoc()) {
-        $labels[] = $row['vuosi'];
-        $data[] = intval($row['vaki_luku']);
+        $labels[] = $row['Tilastovuosi'];
+        $data[] = intval($row['Maara']);
     }
 }
 $conn->close();
