@@ -5,6 +5,76 @@ header('Content-Type: application/json; charset=utf-8');
 require_once('db.php'); // Use shared DB connection settings
 
 try {
+    // Jos yli64=1, palauta yli 64-vuotiaiden määrä ja muutos
+    if (isset($_GET['yli64']) && $_GET['yli64'] == '1') {
+        // ika >= 65
+        $ikas = [];
+        for ($i = 65; $i <= 120; $i++) $ikas[] = (string)$i;
+        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
+        $stmt_latest = $pdo->prepare($sql_latest);
+        $stmt_latest->execute(array_merge([$region], $ikas));
+        $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
+        $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
+
+        // Get values for latestYear, latestYear-10, latestYear-20
+        $years = [$latestYear, $latestYear-10, $latestYear-20];
+        $values = [];
+        foreach ($years as $year) {
+            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
+            $params = array_merge([$region], $ikas, [$year]);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $values[$year] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
+        }
+        $value = $values[$latestYear];
+        $value10 = $values[$latestYear-10];
+        $value20 = $values[$latestYear-20];
+        $change10 = $value - $value10;
+        $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
+        $change20 = $value - $value20;
+        $pct20 = $value20 ? ($change20 / $value20 * 100) : 0;
+        echo json_encode([
+            "year" => $latestYear,
+            "value" => $value,
+            "change10" => $change10,
+            "pct10" => $pct10,
+            "change20" => $change20,
+            "pct20" => $pct20
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // Jos yli64history=1, palauta yli 64-vuotiaiden määrä vuosittain (sparkline)
+    if (isset($_GET['yli64history']) && $_GET['yli64history'] == '1') {
+        $ikas = [];
+        for ($i = 65; $i <= 120; $i++) $ikas[] = (string)$i;
+        $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).") ORDER BY Tilastovuosi ASC";
+        $stmt_years = $pdo->prepare($sql_years);
+        $stmt_years->execute(array_merge([$region], $ikas));
+        $years = [];
+        while ($row = $stmt_years->fetch(PDO::FETCH_ASSOC)) {
+            $years[] = intval($row['Tilastovuosi']);
+        }
+        $labels = [];
+        $data = [];
+        foreach ($years as $year) {
+            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
+            $params = array_merge([$region], $ikas, [$year]);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $labels[] = $year;
+            $data[] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
+        }
+        echo json_encode([
+            "labels" => $labels,
+            "data" => $data
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
     $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 

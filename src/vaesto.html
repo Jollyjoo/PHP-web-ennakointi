@@ -145,16 +145,30 @@
                     </div>
                     <div class="container">
                         <div class="tilastobox"><b>Kanta-Häme</b>
-                            <p>Yli 64-vuotiaita vuoden 2024 lopussa </p>
-                            <h2> 46 673</h2>
-                            (muutos 2013: + 9 578/ + 25,8 %) <br>
-                            (muutos 1972: + 29 384 / + 170,0 % )
+                            <table> <tr>
+                                 <td style="width:70%">
+                                    <p id="kh-yli64-year">Yli 64-vuotiaita vuoden ... lopussa </p>
+                                    <h2 id="kh-yli64-value">...</h2>
+                                    <span id="kh-yli64-change-2013"></span> <br>
+                                    <span id="kh-yli64-change-1972"></span>
+                                </td>
+                                <td style="width:30%">
+                                    <canvas id="kh-yli64-change10" width="210" height="140" style="cursor:pointer;"></canvas>
+                                </td>
+                            </tr></table>
                         </div>
                         <div class="tilastobox_paijatHäme"><b>Päijät-Häme</b>
-                            <p>Yli 64-vuotiaita vuoden 2024 lopussa </p>
-                            <h2> 58 515</h2>
-                            (muutos 2013: + 11 630/ + 24,8 %) <br>
-                            (muutos 1972: + 39 624 / + 209,8 % )
+                            <table> <tr>
+                                 <td style="width:70%">
+                                    <p id="ph-yli64-year">Yli 64-vuotiaita vuoden ... lopussa </p>
+                                    <h2 id="ph-yli64-value">...</h2>
+                                    <span id="ph-yli64-change-2013"></span> <br>
+                                    <span id="ph-yli64-change-1972"></span>
+                                </td>
+                                <td style="width:30%">
+                                    <canvas id="ph-yli64-change10" width="210" height="140" style="cursor:pointer;"></canvas>
+                                </td>
+                            </tr></table>
                         </div>
                     </div>
                     <p>Lähde: Tilastokeskus 11re / ennusteet: Tilastokeskus 14wx
@@ -442,6 +456,230 @@
 
         // Väestö embedded and popup chart
         document.addEventListener('DOMContentLoaded', function() {
+            // Fetch yli 64-vuotiaita for Kanta-Häme
+            fetch('vaesto_historia.php?region=2&yli64=1').then(res => res.json()).then(data => {
+                document.getElementById('kh-yli64-year').textContent = `Yli 64-vuotiaita vuoden ${data.year} lopussa`;
+                document.getElementById('kh-yli64-value').textContent = data.value ? data.value.toLocaleString('fi-FI') : '...';
+                document.getElementById('kh-yli64-change-2013').textContent = `(muutos 10 v. ${data.change10 >= 0 ? '+' : ''}${data.change10.toLocaleString('fi-FI')}/${data.pct10 >= 0 ? '+' : ''}${data.pct10.toFixed(1)}%)`;
+                document.getElementById('kh-yli64-change-1972').textContent = `(muutos 20 v. ${data.change20 >= 0 ? '+' : ''}${data.change20.toLocaleString('fi-FI')}/${data.pct20 >= 0 ? '+' : ''}${data.pct20.toFixed(1)}%)`;
+                // Fetch yli 64-vuotiaita history for sparkline
+                fetch('vaesto_historia.php?region=2&yli64history=1').then(res => res.json()).then(hist => {
+                    const ctx = document.getElementById('kh-yli64-change10').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Yli 64-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc11',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: false }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                },
+                                y: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                }
+                            },
+                            layout: { padding: 0 },
+                            backgroundColor: '#fff',
+                            events: []
+                        }
+                    });
+                });
+            });
+            // Popup chart for yli 64-vuotiaita Kanta-Häme
+            document.getElementById('kh-yli64-change10').addEventListener('click', function() {
+                if (popup) return;
+                fetch('vaesto_historia.php?region=2&yli64history=1').then(res => res.json()).then(hist => {
+                    popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.left = '0';
+                    popup.style.top = '0';
+                    popup.style.width = '100vw';
+                    popup.style.height = '100vh';
+                    popup.style.background = 'rgba(0,0,0,0.18)';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
+                        '<h3 style="text-align:center;margin-bottom:18px;">Kanta-Häme: Yli 64-vuotiaiden kehitys</h3>'+
+                        '<canvas id="khYli64Chart" width="600" height="340"></canvas>'+
+                        '<div style="margin-top:8px;text-align:center;"><button id="kh-yli64-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
+                        '</div>';
+                    document.body.appendChild(popup);
+                    document.body.style.overflow = 'hidden';
+                    const ctx = document.getElementById('khYli64Chart').getContext('2d');
+                    chartObj = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Yli 64-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc22',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Yli 64-vuotiaita: ' + context.parsed.y.toLocaleString('fi-FI');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { title: { display: true, text: 'Yli 64-vuotiaita' } }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#fff'
+                        }
+                    });
+                    document.getElementById('kh-yli64-popup-close').addEventListener('click', function() {
+                        if (chartObj) chartObj.destroy();
+                        popup.remove();
+                        popup = null;
+                        document.body.style.overflow = '';
+                    });
+                });
+            });
+            // Fetch yli 64-vuotiaita for Päijät-Häme
+            fetch('vaesto_historia.php?region=1&yli64=1').then(res => res.json()).then(data => {
+                document.getElementById('ph-yli64-year').textContent = `Yli 64-vuotiaita vuoden ${data.year} lopussa`;
+                document.getElementById('ph-yli64-value').textContent = data.value ? data.value.toLocaleString('fi-FI') : '...';
+                document.getElementById('ph-yli64-change-2013').textContent = `(muutos 10 v. ${data.change10 >= 0 ? '+' : ''}${data.change10.toLocaleString('fi-FI')}/${data.pct10 >= 0 ? '+' : ''}${data.pct10.toFixed(1)}%)`;
+                document.getElementById('ph-yli64-change-1972').textContent = `(muutos 20 v. ${data.change20 >= 0 ? '+' : ''}${data.change20.toLocaleString('fi-FI')}/${data.pct20 >= 0 ? '+' : ''}${data.pct20.toFixed(1)}%)`;
+                // Fetch yli 64-vuotiaita history for sparkline
+                fetch('vaesto_historia.php?region=1&yli64history=1').then(res => res.json()).then(hist => {
+                    const ctx = document.getElementById('ph-yli64-change10').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Yli 64-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc11',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: false }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                },
+                                y: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                }
+                            },
+                            layout: { padding: 0 },
+                            backgroundColor: '#fff',
+                            events: []
+                        }
+                    });
+                });
+            });
+            // Popup chart for yli 64-vuotiaita Päijät-Häme
+            document.getElementById('ph-yli64-change10').addEventListener('click', function() {
+                if (popup) return;
+                fetch('vaesto_historia.php?region=1&yli64history=1').then(res => res.json()).then(hist => {
+                    popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.left = '0';
+                    popup.style.top = '0';
+                    popup.style.width = '100vw';
+                    popup.style.height = '100vh';
+                    popup.style.background = 'rgba(0,0,0,0.18)';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
+                        '<h3 style="text-align:center;margin-bottom:18px;">Päijät-Häme: Yli 64-vuotiaiden kehitys</h3>'+
+                        '<canvas id="phYli64Chart" width="600" height="340"></canvas>'+
+                        '<div style="margin-top:8px;text-align:center;"><button id="ph-yli64-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
+                        '</div>';
+                    document.body.appendChild(popup);
+                    document.body.style.overflow = 'hidden';
+                    const ctx = document.getElementById('phYli64Chart').getContext('2d');
+                    chartObj = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Yli 64-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc22',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Yli 64-vuotiaita: ' + context.parsed.y.toLocaleString('fi-FI');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { title: { display: true, text: 'Yli 64-vuotiaita' } }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#fff'
+                        }
+                    });
+                    document.getElementById('ph-yli64-popup-close').addEventListener('click', function() {
+                        if (chartObj) chartObj.destroy();
+                        popup.remove();
+                        popup = null;
+                        document.body.style.overflow = '';
+                    });
+                });
+            });
             // Popup chart for alle 5-vuotiaita Kanta-Häme
             document.getElementById('kh-alle5-change10').addEventListener('click', function() {
                 if (popup) return;
