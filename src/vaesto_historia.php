@@ -15,7 +15,6 @@ try {
 
     // Jos alle5=1, palauta alle 5-vuotiaiden määrä ja muutos
     if (isset($_GET['alle5']) && $_GET['alle5'] == '1') {
-        // Find latest year available for alle 5-vuotiaita
         $ikas = ['0','1','2','3','4'];
         $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (?,?,?,?,?)";
         $stmt_latest = $pdo->prepare($sql_latest);
@@ -49,6 +48,35 @@ try {
             "pct10" => $pct10,
             "change20" => $change20,
             "pct20" => $pct20
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+
+    // Jos alle5history=1, palauta alle 5-vuotiaiden määrä vuosittain (sparkline)
+    if (isset($_GET['alle5history']) && $_GET['alle5history'] == '1') {
+        $ikas = ['0','1','2','3','4'];
+        $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (?,?,?,?,?) ORDER BY Tilastovuosi ASC";
+        $stmt_years = $pdo->prepare($sql_years);
+        $stmt_years->execute(array_merge([$region], $ikas));
+        $years = [];
+        while ($row = $stmt_years->fetch(PDO::FETCH_ASSOC)) {
+            $years[] = intval($row['Tilastovuosi']);
+        }
+        $labels = [];
+        $data = [];
+        foreach ($years as $year) {
+            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
+            $params = array_merge([$region], $ikas, [$year]);
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute($params);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $labels[] = $year;
+            $data[] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
+        }
+        echo json_encode([
+            "labels" => $labels,
+            "data" => $data
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }

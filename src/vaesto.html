@@ -116,16 +116,31 @@
                     </div>
                     <div class="container">
                         <div class="tilastobox"><b>Kanta-Häme</b>
+                                <table> <tr>
+                                 <td style="width:70%">
                             <p id="kh-alle5-year">Alle 5-vuotiaita vuoden ... lopussa </p>
                             <h2 id="kh-alle5-value">...</h2>
                             <span id="kh-alle5-change-2013"></span> <br>
                             <span id="kh-alle5-change-1972"></span>
+                            </td>
+                                <td style="width:30%">
+                                     <canvas id="kh-alle5-change10" width="210" height="140" style="cursor:pointer;"></canvas>
+                            </td>               
+                            </tr></table>
+
                         </div>
                         <div class="tilastobox_paijatHäme"><b>Päijät-Häme</b>
-                            <p id="ph-alle5-year">Alle 5-vuotiaita vuoden ... lopussa </p>
-                            <h2 id="ph-alle5-value">...</h2>
-                            <span id="ph-alle5-change-2013"></span> <br>
-                            <span id="ph-alle5-change-1972"></span>
+                            <table> <tr>
+                                 <td style="width:70%">
+                                    <p id="ph-alle5-year">Alle 5-vuotiaita vuoden ... lopussa </p>
+                                    <h2 id="ph-alle5-value">...</h2>
+                                    <span id="ph-alle5-change-2013"></span> <br>
+                                    <span id="ph-alle5-change-1972"></span>
+                                </td>
+                                <td style="width:30%">
+                                    <canvas id="ph-alle5-change10" width="210" height="140" style="cursor:pointer;"></canvas>
+                                </td>
+                            </tr></table>
                         </div>
                     </div>
                     <div class="container">
@@ -564,6 +579,48 @@
                 document.getElementById('kh-alle5-value').textContent = data.value ? data.value.toLocaleString('fi-FI') : '...';
                 document.getElementById('kh-alle5-change-2013').textContent = `(muutos 10 v. ${data.change10 >= 0 ? '+' : ''}${data.change10.toLocaleString('fi-FI')}/${data.pct10 >= 0 ? '+' : ''}${data.pct10.toFixed(1)}%)`;
                 document.getElementById('kh-alle5-change-1972').textContent = `(muutos 20 v. ${data.change20 >= 0 ? '+' : ''}${data.change20.toLocaleString('fi-FI')}/${data.pct20 >= 0 ? '+' : ''}${data.pct20.toFixed(1)}%)`;
+                // Fetch alle 5-vuotiaita history for sparkline
+                fetch('vaesto_historia.php?region=2&alle5history=1').then(res => res.json()).then(hist => {
+                    // hist: { labels: [years], data: [values] }
+                    const ctx = document.getElementById('kh-alle5-change10').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Alle 5-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc11',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: false }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                },
+                                y: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                }
+                            },
+                            layout: { padding: 0 },
+                            backgroundColor: '#fff',
+                            events: []
+                        }
+                    });
+                });
             });
             // Fetch data for Päijät-Häme
             fetch('vaesto_historia.php?region=1').then(res => res.json()).then(data => {
@@ -697,6 +754,48 @@
                 document.getElementById('ph-alle5-value').textContent = data.value ? data.value.toLocaleString('fi-FI') : '...';
                 document.getElementById('ph-alle5-change-2013').textContent = `(muutos 10 v. ${data.change10 >= 0 ? '+' : ''}${data.change10.toLocaleString('fi-FI')}/${data.pct10 >= 0 ? '+' : ''}${data.pct10.toFixed(1)}%)`;
                 document.getElementById('ph-alle5-change-1972').textContent = `(muutos 20 v. ${data.change20 >= 0 ? '+' : ''}${data.change20.toLocaleString('fi-FI')}/${data.pct20 >= 0 ? '+' : ''}${data.pct20.toFixed(1)}%)`;
+                // Fetch alle 5-vuotiaita history for sparkline
+                fetch('vaesto_historia.php?region=1&alle5history=1').then(res => res.json()).then(hist => {
+                    // hist: { labels: [years], data: [values] }
+                    const ctx = document.getElementById('ph-alle5-change10').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Alle 5-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc11',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 0,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: { enabled: false }
+                            },
+                            scales: {
+                                x: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                },
+                                y: {
+                                    display: true,
+                                    ticks: { font: { size: 10 }, color: '#555' },
+                                    grid: { display: false }
+                                }
+                            },
+                            layout: { padding: 0 },
+                            backgroundColor: '#fff',
+                            events: []
+                        }
+                    });
+                });
             });
             // Fetch data for Päijät-Häme
             fetch('vaesto_historia.php?region=1').then(res => res.json()).then(data => {
