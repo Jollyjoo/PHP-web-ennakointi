@@ -120,6 +120,23 @@
   /* Tekstin väri */
 }
 
+/* Tekstin tyyli */
+.tilastobox_paijatHäme h2 {
+  font-size: 32px;
+  /* Otsikon fonttikoko */
+  font-weight: bold;
+  color: #35254d;
+  /* Otsikon väri */
+}
+
+.tilastobox_paijatHäme p {
+  font-size: 18px;
+  /* Tekstin fonttikoko */
+  color: #35254d;
+  /* Tekstin väri */
+}
+
+
 /* Kontainerin tyyli */
 .container {
   display: flex;

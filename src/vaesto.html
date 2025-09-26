@@ -116,16 +116,16 @@
                     </div>
                     <div class="container">
                         <div class="tilastobox"><b>Kanta-Häme</b>
-                            <p>Alle 1-vuotiaita vuoden 2024 lopussa </p>
-                            <h2> 1 053 </h2>
-                            (muutos 2013: - 683/ - 39,3 %) <br>
-                            (muutos 1972: - 652/ - 38,2 % )
+                            <p id="kh-alle5-year">Alle 5-vuotiaita vuoden ... lopussa </p>
+                            <h2 id="kh-alle5-value">...</h2>
+                            <span id="kh-alle5-change-2013"></span> <br>
+                            <span id="kh-alle5-change-1972"></span>
                         </div>
                         <div class="tilastobox_paijatHäme"><b>Päijät-Häme</b>
-                            <p>Alle 1-vuotiaita vuoden 2024 lopussa </p>
-                            <h2>1 295</h2>
-                            (muutos 2013: - 634/- 32,9%) <br>
-                            (muutos 1972: - 1 126/- 46,5 % )
+                            <p id="ph-alle5-year">Alle 5-vuotiaita vuoden ... lopussa </p>
+                            <h2 id="ph-alle5-value">...</h2>
+                            <span id="ph-alle5-change-2013"></span> <br>
+                            <span id="ph-alle5-change-1972"></span>
                         </div>
                     </div>
                     <div class="container">
@@ -557,6 +557,14 @@
                     });
                 });
             });
+            // Fetch alle 5-vuotiaita for Kanta-Häme
+            fetch('vaesto_historia.php?region=2&alle5=1').then(res => res.json()).then(data => {
+                // data: { year: 2024, value: ..., change2013: ..., pct2013: ..., change1972: ..., pct1972: ... }
+                document.getElementById('kh-alle5-year').textContent = `Alle 5-vuotiaita vuoden ${data.year} lopussa`;
+                document.getElementById('kh-alle5-value').textContent = data.value ? data.value.toLocaleString('fi-FI') : '...';
+                document.getElementById('kh-alle5-change-2013').textContent = `(muutos 2013: ${data.change2013 >= 0 ? '+' : ''}${data.change2013.toLocaleString('fi-FI')}/${data.pct2013 >= 0 ? '+' : ''}${data.pct2013.toFixed(1)}%)`;
+                document.getElementById('kh-alle5-change-1972').textContent = `(muutos 1972: ${data.change1972 >= 0 ? '+' : ''}${data.change1972.toLocaleString('fi-FI')}/${data.pct1972 >= 0 ? '+' : ''}${data.pct1972.toFixed(1)}%)`;
+            });
             // Fetch data for Päijät-Häme
             fetch('vaesto_historia.php?region=1').then(res => res.json()).then(data => {
                 if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
@@ -682,6 +690,13 @@
                         document.body.style.overflow = '';
                     });
                 });
+            });
+            // Fetch alle 5-vuotiaita for Päijät-Häme
+            fetch('vaesto_historia.php?region=1&alle5=1').then(res => res.json()).then(data => {
+                document.getElementById('ph-alle5-year').textContent = `Alle 5-vuotiaita vuoden ${data.year} lopussa`;
+                document.getElementById('ph-alle5-value').textContent = data.value ? data.value.toLocaleString('fi-FI') : '...';
+                document.getElementById('ph-alle5-change-2013').textContent = `(muutos 2013: ${data.change2013 >= 0 ? '+' : ''}${data.change2013.toLocaleString('fi-FI')}/${data.pct2013 >= 0 ? '+' : ''}${data.pct2013.toFixed(1)}%)`;
+                document.getElementById('ph-alle5-change-1972').textContent = `(muutos 1972: ${data.change1972 >= 0 ? '+' : ''}${data.change1972.toLocaleString('fi-FI')}/${data.pct1972 >= 0 ? '+' : ''}${data.pct1972.toFixed(1)}%)`;
             });
             // Fetch data for Päijät-Häme
             fetch('vaesto_historia.php?region=1').then(res => res.json()).then(data => {
