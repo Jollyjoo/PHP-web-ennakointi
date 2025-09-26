@@ -171,7 +171,13 @@
                             </tr></table>
                         </div>
                     </div>
-                    <p>Lähde: Tilastokeskus 11re / ennusteet: Tilastokeskus 14wx
+                 
+                    <p>Lähde: <a
+                        href="https://statfin.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__vaerak/statfin_vaerak_pxt_11re.px/"
+                        target="_blank"
+                        title="11re -- Väestö iän (1-v.) ja sukupuolen mukaan alueittain, 1972-2024">
+                        Tilastokeskus 11re</a> (Väestö iän mukaan alueittain), viimeisin tilasto tarkistettu lähteestä <b> <span
+                            id="stat-paivitys-ika">...</span></b>
                 </div>
             </div>
 
@@ -456,6 +462,12 @@
 
         // Väestö embedded and popup chart
         document.addEventListener('DOMContentLoaded', function() {
+            // Fetch latest update timestamp for ika data
+            fetch('vaesto_historia.php?timestamp=1').then(res => res.json()).then(data => {
+                if (data.timestamp) {
+                    document.getElementById('stat-paivitys-ika').textContent = data.timestamp;
+                }
+            });
             // Fetch yli 64-vuotiaita for Kanta-Häme
             fetch('vaesto_historia.php?region=2&yli64=1').then(res => res.json()).then(data => {
                 document.getElementById('kh-yli64-year').textContent = `Yli 64-vuotiaita vuoden ${data.year} lopussa`;
