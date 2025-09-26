@@ -7,52 +7,57 @@ require_once('db.php'); // Use shared DB connection settings
 try {
     // Jos yli64=1, palauta yli 64-vuotiaiden määrä ja muutos
     if (isset($_GET['yli64']) && $_GET['yli64'] == '1') {
-        // ika >= 65, include '100 -' for 100 and over
-        $ikas = [];
-    for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
-    $ikas[] = '100 -';
-        // Some DBs use '100', some '100 -' for 100+ group
-        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
-        $stmt_latest = $pdo->prepare($sql_latest);
-        $stmt_latest->execute(array_merge([$region], $ikas));
-        $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
-        $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
+        try {
+            // ika >= 65, include '100 -' for 100 and over
+            $ikas = [];
+            for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
+            $ikas[] = '100 -';
+            $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
+            $stmt_latest = $pdo->prepare($sql_latest);
+            $stmt_latest->execute(array_merge([$region], $ikas));
+            $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
+            $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
 
-        // Get values for latestYear, latestYear-10, latestYear-20
-        $years = [$latestYear, $latestYear-10, $latestYear-20];
-        $values = [];
-        foreach ($years as $year) {
-            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
-            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
-            $params = array_merge([$region], $ikas, [$year]);
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute($params);
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
-            $values[$year] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
-        }
-        $value = $values[$latestYear];
-        $value10 = $values[$latestYear-10];
-        $value20 = $values[$latestYear-20];
-        if ($value === 0 && $value10 === 0 && $value20 === 0) {
+            // Get values for latestYear, latestYear-10, latestYear-20
+            $years = [$latestYear, $latestYear-10, $latestYear-20];
+            $values = [];
+            foreach ($years as $year) {
+                $placeholders = implode(',', array_fill(0, count($ikas), '?'));
+                $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
+                $params = array_merge([$region], $ikas, [$year]);
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute($params);
+                $row = $stmt->fetch(PDO::FETCH_ASSOC);
+                $values[$year] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
+            }
+            $value = $values[$latestYear];
+            $value10 = $values[$latestYear-10];
+            $value20 = $values[$latestYear-20];
+            if ($value === 0 && $value10 === 0 && $value20 === 0) {
+                echo json_encode([
+                    "error" => "No yli64 data found for region $region, years $latestYear, $latestYear-10, $latestYear-20",
+                    "debug" => ["ikas" => $ikas, "years" => $years, "region" => $region]
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+            $change10 = $value - $value10;
+            $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
+            $change20 = $value - $value20;
+            $pct20 = $value20 ? ($change20 / $value20 * 100) : 0;
             echo json_encode([
-                "error" => "No yli64 data found for region $region, years $latestYear, $latestYear-10, $latestYear-20",
-                "debug" => ["ikas" => $ikas, "years" => $years, "region" => $region]
+                "year" => $latestYear,
+                "value" => $value,
+                "change10" => $change10,
+                "pct10" => $pct10,
+                "change20" => $change20,
+                "pct20" => $pct20
             ], JSON_UNESCAPED_UNICODE);
             exit;
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(["error" => $e->getMessage(), "debug" => ["ikas" => isset($ikas) ? $ikas : null, "region" => $region]]);
+            exit;
         }
-        $change10 = $value - $value10;
-        $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
-        $change20 = $value - $value20;
-        $pct20 = $value20 ? ($change20 / $value20 * 100) : 0;
-        echo json_encode([
-            "year" => $latestYear,
-            "value" => $value,
-            "change10" => $change10,
-            "pct10" => $pct10,
-            "change20" => $change20,
-            "pct20" => $pct20
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
     }
 
     // Jos yli64history=1, palauta yli 64-vuotiaiden määrä vuosittain (sparkline)
