@@ -89,8 +89,9 @@
                         <div class="tilastobox"><b>Kanta-Häme</b>
                            
                            <table> <tr>
-                                 <td style="width:80%">   <p >Väkiluku vuoden 2024 lopussa</p>
-                                    <h2 >169 455</h2>
+                                 <td style="width:80%">
+                                    <p id="vaesto-year">Väkiluku vuoden ... lopussa</p>
+                                    <h2 id="vaesto-value">...</h2>
                                     (muutos 2013: - 6026/ - 3,4%) <br>
                                     (muutos 1972: + 16120/ + 10,51%)                        
                                 </td>
@@ -424,6 +425,13 @@
             let embedChartObj = null;
             // Fetch data for both charts
             fetch('vaesto_historia.php?region=2').then(res => res.json()).then(data => {
+                // Show latest year and value from database
+                if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
+                    const latestYear = data.labels[data.labels.length - 1];
+                    const latestValue = data.data[data.data.length - 1];
+                    document.getElementById('vaesto-year').textContent = `Väkiluku vuoden ${latestYear} lopussa`;
+                    document.getElementById('vaesto-value').textContent = latestValue.toLocaleString('fi-FI');
+                }
                 // Embedded chart (sparkline)
                 const embedCtx = document.getElementById('vaesto-embed-chart').getContext('2d');
                 embedChartObj = new Chart(embedCtx, {
@@ -436,9 +444,7 @@
                             backgroundColor: '#0077cc11',
                             borderColor: '#0077cc',
                             borderWidth: 2,
-                            pointRadius: 2,
-                            pointBackgroundColor: '#cc3300',
-                            pointBorderColor: '#cc3300',
+                            pointRadius: 0,
                             tension: 0.35,
                             fill: true
                         }]
