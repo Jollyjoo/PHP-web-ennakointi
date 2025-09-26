@@ -442,6 +442,135 @@
 
         // Väestö embedded and popup chart
         document.addEventListener('DOMContentLoaded', function() {
+            // Popup chart for alle 5-vuotiaita Kanta-Häme
+            document.getElementById('kh-alle5-change10').addEventListener('click', function() {
+                if (popup) return;
+                fetch('vaesto_historia.php?region=2&alle5history=1').then(res => res.json()).then(hist => {
+                    popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.left = '0';
+                    popup.style.top = '0';
+                    popup.style.width = '100vw';
+                    popup.style.height = '100vh';
+                    popup.style.background = 'rgba(0,0,0,0.18)';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
+                        '<h3 style="text-align:center;margin-bottom:18px;">Kanta-Häme: Alle 5-vuotiaiden kehitys</h3>'+
+                        '<canvas id="khAlle5Chart" width="600" height="340"></canvas>'+
+                        '<div style="margin-top:8px;text-align:center;"><button id="kh-alle5-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
+                        '</div>';
+                    document.body.appendChild(popup);
+                    document.body.style.overflow = 'hidden';
+                    const ctx = document.getElementById('khAlle5Chart').getContext('2d');
+                    chartObj = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Alle 5-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc22',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Alle 5-vuotiaita: ' + context.parsed.y.toLocaleString('fi-FI');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { title: { display: true, text: 'Alle 5-vuotiaita' } }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#fff'
+                        }
+                    });
+                    document.getElementById('kh-alle5-popup-close').addEventListener('click', function() {
+                        if (chartObj) chartObj.destroy();
+                        popup.remove();
+                        popup = null;
+                        document.body.style.overflow = '';
+                    });
+                });
+            });
+
+            // Popup chart for alle 5-vuotiaita Päijät-Häme
+            document.getElementById('ph-alle5-change10').addEventListener('click', function() {
+                if (popup) return;
+                fetch('vaesto_historia.php?region=1&alle5history=1').then(res => res.json()).then(hist => {
+                    popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.left = '0';
+                    popup.style.top = '0';
+                    popup.style.width = '100vw';
+                    popup.style.height = '100vh';
+                    popup.style.background = 'rgba(0,0,0,0.18)';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
+                        '<h3 style="text-align:center;margin-bottom:18px;">Päijät-Häme: Alle 5-vuotiaiden kehitys</h3>'+
+                        '<canvas id="phAlle5Chart" width="600" height="340"></canvas>'+
+                        '<div style="margin-top:8px;text-align:center;"><button id="ph-alle5-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
+                        '</div>';
+                    document.body.appendChild(popup);
+                    document.body.style.overflow = 'hidden';
+                    const ctx = document.getElementById('phAlle5Chart').getContext('2d');
+                    chartObj = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: hist.labels,
+                            datasets: [{
+                                label: 'Alle 5-vuotiaita',
+                                data: hist.data,
+                                backgroundColor: '#0077cc22',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Alle 5-vuotiaita: ' + context.parsed.y.toLocaleString('fi-FI');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { title: { display: true, text: 'Alle 5-vuotiaita' } }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#fff'
+                        }
+                    });
+                    document.getElementById('ph-alle5-popup-close').addEventListener('click', function() {
+                        if (chartObj) chartObj.destroy();
+                        popup.remove();
+                        popup = null;
+                        document.body.style.overflow = '';
+                    });
+                });
+            });
             let popup = null;
             let chartObj = null;
             let embedChartObj = null;
