@@ -5,6 +5,11 @@ header('Content-Type: application/json; charset=utf-8');
 require_once('db.php'); // Use shared DB connection settings
 
 try {
+    // Haetaan maakunta parametri (1 = Päijät-Häme, 2 = Kanta-Häme, default = Kanta-Häme)
+    $region = isset($_GET['region']) ? intval($_GET['region']) : 2;
+    $region_map = [1 => 'Päijät-Häme', 2 => 'Kanta-Häme'];
+    $region_name = isset($region_map[$region]) ? $region_map[$region] : 'Kanta-Häme';
+
     // Jos yli64=1, palauta yli 64-vuotiaiden määrä ja muutos
     if (isset($_GET['yli64']) && $_GET['yli64'] == '1') {
         // ika >= 65, include '100 -' for 100 and over
@@ -154,11 +159,6 @@ try {
     }
     $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-    // Haetaan maakunta parametri (1 = Päijät-Häme, 2 = Kanta-Häme, default = Kanta-Häme)
-    $region = isset($_GET['region']) ? intval($_GET['region']) : 2;
-    $region_map = [1 => 'Päijät-Häme', 2 => 'Kanta-Häme'];
-    $region_name = isset($region_map[$region]) ? $region_map[$region] : 'Kanta-Häme';
 
     // Jos alle5=1, palauta alle 5-vuotiaiden määrä ja muutos
     if (isset($_GET['alle5']) && $_GET['alle5'] == '1') {
