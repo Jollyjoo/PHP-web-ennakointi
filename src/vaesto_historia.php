@@ -52,6 +52,7 @@ try {
             "change20" => $change20,
             "pct20" => $pct20
         ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     // Jos yli64history=1, palauta yli 64-vuotiaiden määrä vuosittain (sparkline)
@@ -83,6 +84,7 @@ try {
             "labels" => $labels,
             "data" => $data
         ], JSON_UNESCAPED_UNICODE);
+        exit;
     }
 
     // Jos alle5=1, palauta alle 5-vuotiaiden määrä ja muutos
