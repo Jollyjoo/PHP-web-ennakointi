@@ -12,6 +12,7 @@ deployment:
     - /bin/cp src/index.html $DEPLOYPATH
     - /bin/cp src/haeMaakunnalla.php $DEPLOYPATH
     - /bin/cp src/vaesto.html $DEPLOYPATH
+    - /bin/cp src/vaesto_historia.php $DEPLOYPATH
     - /bin/cp src/tyollisyys.html $DEPLOYPATH
     - /bin/cp src/tyollisyys.php $DEPLOYPATH    
     - /bin/cp src/tyollisyys_historia.php $DEPLOYPATH
