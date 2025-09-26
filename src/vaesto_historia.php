@@ -33,6 +33,13 @@ try {
         $value = $values[$latestYear];
         $value10 = $values[$latestYear-10];
         $value20 = $values[$latestYear-20];
+        if ($value === 0 && $value10 === 0 && $value20 === 0) {
+            echo json_encode([
+                "error" => "No yli64 data found for region $region, years $latestYear, $latestYear-10, $latestYear-20",
+                "debug" => ["ikas" => $ikas, "years" => $years, "region" => $region]
+            ], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
         $change10 = $value - $value10;
         $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
         $change20 = $value - $value20;
