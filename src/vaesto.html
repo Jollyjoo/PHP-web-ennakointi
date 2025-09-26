@@ -89,14 +89,14 @@
                         <div class="tilastobox"><b>Kanta-Häme</b>
                            
                            <table> <tr>
-                                 <td style="width:80%">
+                                 <td style="width:70%">
                                     <p id="vaesto-year">Väkiluku vuoden ... lopussa</p>
                                     <h2 id="vaesto-value">...</h2>
-                                    (muutos 2013: - 6026/ - 3,4%) <br>
-                                    (muutos 1972: + 16120/ + 10,51%)                        
+                                    <span id="vaesto-change-10"></span> <br>
+                                    <span id="vaesto-change-20"></span>
                                 </td>
-                                <td style="width:20%">
-                                <canvas id="vaesto-embed-chart" width="180" height="90" style="cursor:pointer;"></canvas>
+                                <td style="width:30%">
+                                <canvas id="vaesto-embed-chart" width="2400" height="130" style="cursor:pointer;"></canvas>
                             </td>               
                             </tr></table>
                         </div>
@@ -431,6 +431,25 @@
                     const latestValue = data.data[data.data.length - 1];
                     document.getElementById('vaesto-year').textContent = `Väkiluku vuoden ${latestYear} lopussa`;
                     document.getElementById('vaesto-value').textContent = latestValue.toLocaleString('fi-FI');
+                    // Calculate 10-year and 20-year changes
+                    let idx10 = data.labels.findIndex(y => y == (latestYear - 10));
+                    let idx20 = data.labels.findIndex(y => y == (latestYear - 20));
+                    if (idx10 !== -1) {
+                        const value10 = data.data[idx10];
+                        const abs10 = latestValue - value10;
+                        const pct10 = value10 ? (abs10 / value10 * 100) : 0;
+                        document.getElementById('vaesto-change-10').textContent = `(muutos 10 v.: ${abs10 >= 0 ? '+' : ''}${abs10.toLocaleString('fi-FI')}/ ${pct10 >= 0 ? '+' : ''}${pct10.toFixed(2)}%)`;
+                    } else {
+                        document.getElementById('vaesto-change-10').textContent = '';
+                    }
+                    if (idx20 !== -1) {
+                        const value20 = data.data[idx20];
+                        const abs20 = latestValue - value20;
+                        const pct20 = value20 ? (abs20 / value20 * 100) : 0;
+                        document.getElementById('vaesto-change-20').textContent = `(muutos 20 v.: ${abs20 >= 0 ? '+' : ''}${abs20.toLocaleString('fi-FI')}/ ${pct20 >= 0 ? '+' : ''}${pct20.toFixed(2)}%)`;
+                    } else {
+                        document.getElementById('vaesto-change-20').textContent = '';
+                    }
                 }
                 // Embedded chart (sparkline)
                 const embedCtx = document.getElementById('vaesto-embed-chart').getContext('2d');
