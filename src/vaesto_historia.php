@@ -15,8 +15,16 @@ try {
 
     // Jos alle5=1, palauta alle 5-vuotiaiden määrä ja muutos
     if (isset($_GET['alle5']) && $_GET['alle5'] == '1') {
-        $years = [2024, 2013, 1972];
+        // Find latest year available for alle 5-vuotiaita
         $ikas = ['0','1','2','3','4'];
+        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (?,?,?,?,?)";
+        $stmt_latest = $pdo->prepare($sql_latest);
+        $stmt_latest->execute(array_merge([$region], $ikas));
+        $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
+        $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
+
+        // Get values for latestYear, latestYear-10, latestYear-20
+        $years = [$latestYear, $latestYear-10, $latestYear-20];
         $values = [];
         foreach ($years as $year) {
             $placeholders = implode(',', array_fill(0, count($ikas), '?'));
@@ -27,19 +35,20 @@ try {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             $values[$year] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
         }
-        $latestYear = $years[0];
         $value = $values[$latestYear];
-        $change2013 = $value - $values[2013];
-        $pct2013 = $values[2013] ? ($change2013 / $values[2013] * 100) : 0;
-        $change1972 = $value - $values[1972];
-        $pct1972 = $values[1972] ? ($change1972 / $values[1972] * 100) : 0;
+        $value10 = $values[$latestYear-10];
+        $value20 = $values[$latestYear-20];
+        $change10 = $value - $value10;
+        $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
+        $change20 = $value - $value20;
+        $pct20 = $value20 ? ($change20 / $value20 * 100) : 0;
         echo json_encode([
             "year" => $latestYear,
             "value" => $value,
-            "change2013" => $change2013,
-            "pct2013" => $pct2013,
-            "change1972" => $change1972,
-            "pct1972" => $pct1972
+            "change10" => $change10,
+            "pct10" => $pct10,
+            "change20" => $change20,
+            "pct20" => $pct20
         ], JSON_UNESCAPED_UNICODE);
         exit;
     }
