@@ -678,6 +678,7 @@
                     });
                     document.getElementById('ph-vaesto-popup-close').addEventListener('click', function() {
                         popup.remove();
+                        popup = null;
                         document.body.style.overflow = '';
                     });
                 });
