@@ -2,31 +2,19 @@
 // --- Väestön historian backend ---
 // Palauttaa JSON-muodossa väestön historian Kanta-Hämeelle ja Päijät-Hämeelle
 header('Content-Type: application/json; charset=utf-8');
-header('Content-Type: application/json; charset=utf-8');
 require_once('db.php'); // Use shared DB connection settings
 
 try {
-    // Haetaan maakunta parametri (1 = Päijät-Häme, 2 = Kanta-Häme, default = Kanta-Häme)
-    $region = isset($_GET['region']) ? intval($_GET['region']) : 2;
-    $region_map = [1 => 'Päijät-Häme', 2 => 'Kanta-Häme'];
-    $region_name = isset($region_map[$region]) ? $region_map[$region] : 'Kanta-Häme';
-    // Varmista että $pdo on alustettu
-    if (!isset($pdo)) {
-        $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    }
-
     // Jos yli64=1, palauta yli 64-vuotiaiden määrä ja muutos
     if (isset($_GET['yli64']) && $_GET['yli64'] == '1') {
         // ika >= 65, include '100 -' for 100 and over
         $ikas = [];
-        for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
-        $ikas[] = '100 -';
-        $placeholders = implode(',', array_fill(0, count($ikas), '?'));
-        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders)";
-        $params_latest = array_merge([$region], $ikas);
+    for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
+    $ikas[] = '100 -';
+        // Some DBs use '100', some '100 -' for 100+ group
+        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
         $stmt_latest = $pdo->prepare($sql_latest);
-        $stmt_latest->execute($params_latest);
+        $stmt_latest->execute(array_merge([$region], $ikas));
         $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
         $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
 
@@ -45,13 +33,6 @@ try {
         $value = $values[$latestYear];
         $value10 = $values[$latestYear-10];
         $value20 = $values[$latestYear-20];
-        if ($value === 0 && $value10 === 0 && $value20 === 0) {
-            echo json_encode([
-                "error" => "No yli64 data found for region $region, years $latestYear, $latestYear-10, $latestYear-20",
-                "debug" => ["ikas" => $ikas, "years" => $years, "region" => $region]
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
         $change10 = $value - $value10;
         $pct10 = $value10 ? ($change10 / $value10 * 100) : 0;
         $change20 = $value - $value20;
@@ -96,7 +77,7 @@ try {
             "data" => $data
         ], JSON_UNESCAPED_UNICODE);
         exit;
-                    $ikas[] = '100 -';
+    }
     $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -184,9 +165,13 @@ try {
         $data[] = intval($row['Maara']);
     }
     // Palautetaan tiedot Chart.js:lle
-    // Palautetaan tiedot Chart.js:lle
     echo json_encode([
         "labels" => $labels,
         "data" => $data,
         "region" => $region_name
     ], JSON_UNESCAPED_UNICODE);
+} catch (Exception $e) {
+    http_response_code(500);
+    echo json_encode(["error" => $e->getMessage()]);
+}
+?>
