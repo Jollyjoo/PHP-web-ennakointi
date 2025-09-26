@@ -96,15 +96,22 @@
                                     <span id="vaesto-change-20"></span>
                                 </td>
                                 <td style="width:30%">
-                                <canvas id="vaesto-embed-chart" width="210" height="150" style="cursor:pointer;"></canvas>
+                                <canvas id="vaesto-embed-chart" width="210" height="140" style="cursor:pointer;"></canvas>
                             </td>               
                             </tr></table>
                         </div>
                         <div class="tilastobox_paijatHäme"><b>Päijät-Häme</b>
-                            <p>Väkiluku vuoden 2024 lopussa</p>
-                            <h2>204 635</h2>
-                            (muutos 2013: - 4770/ - 2,4%) <br>
-                            (muutos 1972: + 11301/ + 5,8%)
+                               <table> <tr>
+                                 <td style="width:70%">
+                            <p id="ph-vaesto-year">Väkiluku vuoden ... lopussa</p>
+                            <h2 id="ph-vaesto-value">...</h2>
+                            <span id="ph-vaesto-change-10"></span> <br>
+                            <span id="ph-vaesto-change-20"></span>
+                            </td>
+                                <td style="width:30%">
+                                <canvas id="ph-vaesto-embed-chart" width="210" height="140" style="cursor:pointer;"></canvas>
+                            </td>
+                            </tr></table>
                         </div>
                     </div>
                     <div class="container">
@@ -423,22 +430,20 @@
             let popup = null;
             let chartObj = null;
             let embedChartObj = null;
-            // Fetch data for both charts
+            // Fetch data for Kanta-Häme
             fetch('vaesto_historia.php?region=2').then(res => res.json()).then(data => {
-                // Show latest year and value from database
                 if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
                     const latestYear = data.labels[data.labels.length - 1];
                     const latestValue = data.data[data.data.length - 1];
                     document.getElementById('vaesto-year').textContent = `Väkiluku vuoden ${latestYear} lopussa`;
                     document.getElementById('vaesto-value').textContent = latestValue.toLocaleString('fi-FI');
-                    // Calculate 10-year and 20-year changes
                     let idx10 = data.labels.findIndex(y => y == (latestYear - 10));
                     let idx20 = data.labels.findIndex(y => y == (latestYear - 20));
                     if (idx10 !== -1) {
                         const value10 = data.data[idx10];
                         const abs10 = latestValue - value10;
                         const pct10 = value10 ? (abs10 / value10 * 100) : 0;
-                        document.getElementById('vaesto-change-10').textContent = `(muutos 10 v.: ${abs10 >= 0 ? '+' : ''}${abs10.toLocaleString('fi-FI')}/ ${pct10 >= 0 ? '+' : ''}${pct10.toFixed(2)}%)`;
+                        document.getElementById('vaesto-change-10').textContent = `(muutos 10 v. ${abs10 >= 0 ? '+' : ''}${abs10.toLocaleString('fi-FI')}/ ${pct10 >= 0 ? '+' : ''}${pct10.toFixed(2)}%)`;
                     } else {
                         document.getElementById('vaesto-change-10').textContent = '';
                     }
@@ -446,7 +451,7 @@
                         const value20 = data.data[idx20];
                         const abs20 = latestValue - value20;
                         const pct20 = value20 ? (abs20 / value20 * 100) : 0;
-                        document.getElementById('vaesto-change-20').textContent = `(muutos 20 v.: ${abs20 >= 0 ? '+' : ''}${abs20.toLocaleString('fi-FI')}/ ${pct20 >= 0 ? '+' : ''}${pct20.toFixed(2)}%)`;
+                        document.getElementById('vaesto-change-20').textContent = `(muutos 20 v. ${abs20 >= 0 ? '+' : ''}${abs20.toLocaleString('fi-FI')}/ ${pct20 >= 0 ? '+' : ''}${pct20.toFixed(2)}%)`;
                     } else {
                         document.getElementById('vaesto-change-20').textContent = '';
                     }
@@ -490,7 +495,6 @@
                         events: [] // disables built-in events
                     }
                 });
-                // Click handler for embedded chart
                 document.getElementById('vaesto-embed-chart').addEventListener('click', function() {
                     if (popup) return;
                     popup = document.createElement('div');
@@ -508,7 +512,6 @@
                         '</div>';
                     document.body.appendChild(popup);
                     document.body.style.overflow = 'hidden';
-                    // Chart
                     const ctx = document.getElementById('vaestoChart').getContext('2d');
                     chartObj = new Chart(ctx, {
                         type: 'line',
@@ -546,7 +549,6 @@
                             backgroundColor: '#fff'
                         }
                     });
-                    // Close button
                     document.getElementById('vaesto-popup-close').addEventListener('click', function() {
                         if (chartObj) chartObj.destroy();
                         popup.remove();
@@ -554,6 +556,158 @@
                         document.body.style.overflow = '';
                     });
                 });
+            });
+            // Fetch data for Päijät-Häme
+            fetch('vaesto_historia.php?region=3').then(res => res.json()).then(data => {
+                if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
+                    const latestYear = data.labels[data.labels.length - 1];
+                    const latestValue = data.data[data.data.length - 1];
+                    document.getElementById('ph-vaesto-year').textContent = `Väkiluku vuoden ${latestYear} lopussa`;
+                    document.getElementById('ph-vaesto-value').textContent = latestValue.toLocaleString('fi-FI');
+                    let idx10 = data.labels.findIndex(y => y == (latestYear - 10));
+                    let idx20 = data.labels.findIndex(y => y == (latestYear - 20));
+                    if (idx10 !== -1) {
+                        const value10 = data.data[idx10];
+                        const abs10 = latestValue - value10;
+                        const pct10 = value10 ? (abs10 / value10 * 100) : 0;
+                        document.getElementById('ph-vaesto-change-10').textContent = `(muutos 10 v. ${abs10 >= 0 ? '+' : ''}${abs10.toLocaleString('fi-FI')}/ ${pct10 >= 0 ? '+' : ''}${pct10.toFixed(2)}%)`;
+                    } else {
+                        document.getElementById('ph-vaesto-change-10').textContent = '';
+                    }
+                    if (idx20 !== -1) {
+                        const value20 = data.data[idx20];
+                        const abs20 = latestValue - value20;
+                        const pct20 = value20 ? (abs20 / value20 * 100) : 0;
+                        document.getElementById('ph-vaesto-change-20').textContent = `(muutos 20 v. ${abs20 >= 0 ? '+' : ''}${abs20.toLocaleString('fi-FI')}/ ${pct20 >= 0 ? '+' : ''}${pct20.toFixed(2)}%)`;
+                    } else {
+                        document.getElementById('ph-vaesto-change-20').textContent = '';
+                    }
+                }
+                // Embedded chart (sparkline)
+                const phEmbedCtx = document.getElementById('ph-vaesto-embed-chart').getContext('2d');
+                new Chart(phEmbedCtx, {
+                    type: 'line',
+                    data: {
+                        labels: data.labels,
+                        datasets: [{
+                            label: 'Väkiluku',
+                            data: data.data,
+                            backgroundColor: '#0077cc11',
+                            borderColor: '#0077cc',
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.35,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { enabled: false }
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                ticks: { font: { size: 10 }, color: '#555' },
+                                grid: { display: false }
+                            },
+                            y: {
+                                display: true,
+                                ticks: { font: { size: 10 }, color: '#555' },
+                                grid: { display: false }
+                            }
+                        },
+                        layout: { padding: 0 },
+                        backgroundColor: '#fff',
+                        events: []
+                    }
+                });
+                document.getElementById('ph-vaesto-embed-chart').addEventListener('click', function() {
+                    if (popup) return;
+                    popup = document.createElement('div');
+                    popup.style.position = 'fixed';
+                    popup.style.left = '0';
+                    popup.style.top = '0';
+                    popup.style.width = '100vw';
+                    popup.style.height = '100vh';
+                    popup.style.background = 'rgba(0,0,0,0.18)';
+                    popup.style.zIndex = '9999';
+                    popup.innerHTML = '<div style="position:absolute;top:50px;left:50%;transform:translateX(-50%);background:#fff;padding:32px 32px 24px 32px;border-radius:16px;box-shadow:0 2px 16px rgba(0,0,0,0.18);max-width:700px;width:90vw;">'+
+                        '<h3 style="text-align:center;margin-bottom:18px;">Päijät-Hämeen väestön kehitys</h3>'+
+                        '<canvas id="phVaestoChart" width="600" height="340"></canvas>'+
+                        '<div style="margin-top:8px;text-align:center;"><button id="ph-vaesto-popup-close" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Sulje</button></div>'+
+                        '</div>';
+                    document.body.appendChild(popup);
+                    document.body.style.overflow = 'hidden';
+                    const ctx = document.getElementById('phVaestoChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Väkiluku',
+                                data: data.data,
+                                backgroundColor: '#0077cc22',
+                                borderColor: '#0077cc',
+                                borderWidth: 2,
+                                pointRadius: 3,
+                                tension: 0.35,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Väkiluku: ' + context.parsed.y.toLocaleString('fi-FI');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { title: { display: true, text: 'Väkiluku' } }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#fff'
+                        }
+                    });
+                    document.getElementById('ph-vaesto-popup-close').addEventListener('click', function() {
+                        popup.remove();
+                        document.body.style.overflow = '';
+                    });
+                });
+            });
+            // Fetch data for Päijät-Häme
+            fetch('vaesto_historia.php?region=3').then(res => res.json()).then(data => {
+                if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
+                    const latestYear = data.labels[data.labels.length - 1];
+                    const latestValue = data.data[data.data.length - 1];
+                    document.getElementById('ph-vaesto-year').textContent = `Väkiluku vuoden ${latestYear} lopussa`;
+                    document.getElementById('ph-vaesto-value').textContent = latestValue.toLocaleString('fi-FI');
+                    let idx10 = data.labels.findIndex(y => y == (latestYear - 10));
+                    let idx20 = data.labels.findIndex(y => y == (latestYear - 20));
+                    if (idx10 !== -1) {
+                        const value10 = data.data[idx10];
+                        const abs10 = latestValue - value10;
+                        const pct10 = value10 ? (abs10 / value10 * 100) : 0;
+                        document.getElementById('ph-vaesto-change-10').textContent = `(muutos 10 v. ${abs10 >= 0 ? '+' : ''}${abs10.toLocaleString('fi-FI')}/ ${pct10 >= 0 ? '+' : ''}${pct10.toFixed(2)}%)`;
+                    } else {
+                        document.getElementById('ph-vaesto-change-10').textContent = '';
+                    }
+                    if (idx20 !== -1) {
+                        const value20 = data.data[idx20];
+                        const abs20 = latestValue - value20;
+                        const pct20 = value20 ? (abs20 / value20 * 100) : 0;
+                        document.getElementById('ph-vaesto-change-20').textContent = `(muutos 20 v. ${abs20 >= 0 ? '+' : ''}${abs20.toLocaleString('fi-FI')}/ ${pct20 >= 0 ? '+' : ''}${pct20.toFixed(2)}%)`;
+                    } else {
+                        document.getElementById('ph-vaesto-change-20').textContent = '';
+                    }
+                }
             });
         });
     </script>
