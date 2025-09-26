@@ -22,7 +22,7 @@ $region_map = [1 => 'Päijät-Häme', 2 => 'Kanta-Häme'];
 $region_name = isset($region_map[$region]) ? $region_map[$region] : 'Kanta-Häme';
 
 // Oletetaan taulu Asukasmaara, kentät: vuosi, Kunta_ID, vaki_luku
-$sql = "SELECT Tilastovuosi, Maara FROM Asukasmaara WHERE Kunta_ID = $region and Sukupuoli_ID = 3 ORDER BY Tilastovuosi ASC";
+$sql = "SELECT Tilastovuosi, Maara FROM Asukasmaara WHERE Kunta_ID = $region and Sukupuoli_ID = 3 and ika= "yhteensä" ORDER BY Tilastovuosi ASC";
 $res = $conn->query($sql);
 $labels = [];
 $data = [];
