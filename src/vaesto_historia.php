@@ -9,7 +9,7 @@ if (isset($_GET['timestamp']) && $_GET['timestamp'] == '1') {
     try {
         $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $stmt = $pdo->query("SELECT MAX(timestamp) AS timestamp FROM vaesto WHERE timestamp IS NOT NULL");
+        $stmt = $pdo->query("SELECT MAX(timestamp) AS timestamp FROM Asukasmaara WHERE timestamp IS NOT NULL");
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
         $timestamp = $row && $row['timestamp'] ? $row['timestamp'] : null;
         echo json_encode(['timestamp' => $timestamp]);
