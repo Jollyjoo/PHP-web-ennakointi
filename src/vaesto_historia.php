@@ -16,22 +16,18 @@ try {
     // Jos yli64=1, palauta yli 64-vuotiaiden määrä ja muutos
     if (isset($_GET['yli64']) && $_GET['yli64'] == '1') {
         // ika >= 65, include '100 -' and '100' for 100 and over
-        $ikas = [];
-        for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
-        $ikas[] = '100 -';
-        $ikas[] = '100';
-        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
+        // Numeric comparison for ika >= 65, plus '100 -' and '100'
+        $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND (CAST(ika AS UNSIGNED) >= 65 OR ika = '100 -' OR ika = '100')";
         $stmt_latest = $pdo->prepare($sql_latest);
-        $stmt_latest->execute(array_merge([$region], $ikas));
+        $stmt_latest->execute([$region]);
         $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
         $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
 
         $years = [$latestYear, $latestYear-10, $latestYear-20];
         $values = [];
         foreach ($years as $year) {
-            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
-            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
-            $params = array_merge([$region], $ikas, [$year]);
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND (CAST(ika AS UNSIGNED) >= 65 OR ika = '100 -' OR ika = '100') AND Tilastovuosi = ?";
+            $params = [$region, $year];
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -57,13 +53,9 @@ try {
 
     // Jos yli64history=1, palauta yli 64-vuotiaiden määrä vuosittain (sparkline)
     if (isset($_GET['yli64history']) && $_GET['yli64history'] == '1') {
-        $ikas = [];
-        for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
-        $ikas[] = '100 -';
-        $ikas[] = '100';
-        $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).") ORDER BY Tilastovuosi ASC";
+        $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND (CAST(ika AS UNSIGNED) >= 65 OR ika = '100 -' OR ika = '100') ORDER BY Tilastovuosi ASC";
         $stmt_years = $pdo->prepare($sql_years);
-        $stmt_years->execute(array_merge([$region], $ikas));
+        $stmt_years->execute([$region]);
         $years = [];
         while ($row = $stmt_years->fetch(PDO::FETCH_ASSOC)) {
             $years[] = intval($row['Tilastovuosi']);
@@ -71,9 +63,8 @@ try {
         $labels = [];
         $data = [];
         foreach ($years as $year) {
-            $placeholders = implode(',', array_fill(0, count($ikas), '?'));
-            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN ($placeholders) AND Tilastovuosi = ?";
-            $params = array_merge([$region], $ikas, [$year]);
+            $sql = "SELECT SUM(Maara) as summa FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND (CAST(ika AS UNSIGNED) >= 65 OR ika = '100 -' OR ika = '100') AND Tilastovuosi = ?";
+            $params = [$region, $year];
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
