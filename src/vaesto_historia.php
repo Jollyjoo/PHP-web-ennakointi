@@ -7,9 +7,12 @@ require_once('db.php'); // Use shared DB connection settings
 try {
     // Jos yli64=1, palauta yli 64-vuotiaiden määrä ja muutos
     if (isset($_GET['yli64']) && $_GET['yli64'] == '1') {
-        // ika >= 65
+        // ika >= 65, include '100 -' for 100 and over
         $ikas = [];
-        for ($i = 65; $i <= 120; $i++) $ikas[] = (string)$i;
+        for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
+        $ikas[] = '100';
+        $ikas[] = '100 -';
+        // Some DBs use '100', some '100 -' for 100+ group
         $sql_latest = "SELECT MAX(Tilastovuosi) as maxyear FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).")";
         $stmt_latest = $pdo->prepare($sql_latest);
         $stmt_latest->execute(array_merge([$region], $ikas));
@@ -49,7 +52,9 @@ try {
     // Jos yli64history=1, palauta yli 64-vuotiaiden määrä vuosittain (sparkline)
     if (isset($_GET['yli64history']) && $_GET['yli64history'] == '1') {
         $ikas = [];
-        for ($i = 65; $i <= 120; $i++) $ikas[] = (string)$i;
+        for ($i = 65; $i <= 99; $i++) $ikas[] = (string)$i;
+        $ikas[] = '100';
+        $ikas[] = '100 -';
         $sql_years = "SELECT DISTINCT Tilastovuosi FROM Asukasmaara WHERE Kunta_ID = ? AND Sukupuoli_ID = 3 AND ika IN (".implode(',', array_fill(0, count($ikas), '?')).") ORDER BY Tilastovuosi ASC";
         $stmt_years = $pdo->prepare($sql_years);
         $stmt_years->execute(array_merge([$region], $ikas));
