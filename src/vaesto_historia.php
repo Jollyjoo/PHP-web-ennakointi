@@ -23,6 +23,7 @@ try {
         $stmt_latest = $pdo->prepare($sql_latest);
         $stmt_latest->execute(array_merge([$region], $ikas));
         $row_latest = $stmt_latest->fetch(PDO::FETCH_ASSOC);
+        file_put_contents('yli64_log.txt', "DB result (maxyear): ".json_encode($row_latest)."\n", FILE_APPEND);
         $latestYear = $row_latest && $row_latest['maxyear'] ? intval($row_latest['maxyear']) : 2024;
 
         $years = [$latestYear, $latestYear-10, $latestYear-20];
@@ -34,6 +35,7 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            file_put_contents('yli64_log.txt', "DB result (year $year): ".json_encode($row)."\n", FILE_APPEND);
             $values[$year] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
         }
         $value = $values[$latestYear];
@@ -102,6 +104,7 @@ try {
         $stmt_years->execute(array_merge([$region], $ikas));
         $years = [];
         while ($row = $stmt_years->fetch(PDO::FETCH_ASSOC)) {
+            file_put_contents('yli64_log.txt', "DB result (years loop): ".json_encode($row)."\n", FILE_APPEND);
             $years[] = intval($row['Tilastovuosi']);
         }
         $labels = [];
@@ -113,6 +116,7 @@ try {
             $stmt = $pdo->prepare($sql);
             $stmt->execute($params);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            file_put_contents('yli64_log.txt', "DB result (year $year): ".json_encode($row)."\n", FILE_APPEND);
             $labels[] = $year;
             $data[] = $row && $row['summa'] !== null ? intval($row['summa']) : 0;
         }
