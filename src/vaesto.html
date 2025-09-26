@@ -558,7 +558,7 @@
                 });
             });
             // Fetch data for Päijät-Häme
-            fetch('vaesto_historia.php?region=3').then(res => res.json()).then(data => {
+            fetch('vaesto_historia.php?region=1').then(res => res.json()).then(data => {
                 if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
                     const latestYear = data.labels[data.labels.length - 1];
                     const latestValue = data.data[data.data.length - 1];
@@ -683,7 +683,7 @@
                 });
             });
             // Fetch data for Päijät-Häme
-            fetch('vaesto_historia.php?region=3').then(res => res.json()).then(data => {
+            fetch('vaesto_historia.php?region=1').then(res => res.json()).then(data => {
                 if (data.labels && data.labels.length > 0 && data.data && data.data.length > 0) {
                     const latestYear = data.labels[data.labels.length - 1];
                     const latestValue = data.data[data.data.length - 1];
