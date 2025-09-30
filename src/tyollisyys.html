@@ -86,6 +86,7 @@
                                 <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Työttömien
                                     osuus työvoimasta - historia</div>
                             </div>
+                            <canvas id="tyollisyys-embed-chart" width="210" height="40" style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
                         </h2>
                         <p>Päijät-Häme</p>
                         <h2><span id="kh-osuus" style="cursor:pointer;text-decoration:underline;">...</span> %</h2>
@@ -650,6 +651,48 @@
                 </script>
 
                 <script>
+                // Pieni upotettu sparkline-kaavio ph-osuus (Päijät-Häme työttömien osuus työvoimasta)
+                document.addEventListener('DOMContentLoaded', function () {
+                    const canvas = document.getElementById('tyollisyys-embed-chart');
+                    if (!canvas) return;
+                    fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomien_osuus&limit=24')
+                        .then(resp => resp.json())
+                        .then(data => {
+                            if (!data || !data.labels || !data.data) return;
+                            // Näytetään viimeiset 24 kuukautta
+                            const labels = data.labels.slice(-24);
+                            const values = data.data.slice(-24);
+                            // Etsitään minimi ja maksimi, jotta sparkline näyttää hyvältä
+                            const minY = Math.floor(Math.min(...values));
+                            const maxY = Math.ceil(Math.max(...values));
+                            // Piirretään pieni viivakaavio Chart.js:llä
+                            new Chart(canvas.getContext('2d'), {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: [{
+                                        data: values,
+                                        borderColor: '#009933',
+                                        backgroundColor: 'rgba(0,153,51,0.10)',
+                                        fill: true,
+                                        pointRadius: 0,
+                                        borderWidth: 2,
+                                        tension: 0.4
+                                    }]
+                                },
+                                options: {
+                                    responsive: false,
+                                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                    scales: {
+                                        x: { display: false },
+                                        y: { display: false, min: minY, max: maxY }
+                                    },
+                                    elements: { line: { borderCapStyle: 'round' } },
+                                    layout: { padding: 0 },
+                                }
+                            });
+                        });
+                });
                     // Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot sekä summary
                     fetch('tyollisyys.php')
                         .then(resp => resp.json())

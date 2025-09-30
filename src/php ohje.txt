@@ -1,9 +1,60 @@
-Paht originaali:
-PATH=C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Java\jdk-11.0.8\bin;C:\Users\A032826\Documents\Python\Scripts\;C:\Users\A032826\Documents\Python\;C:\windows\system32;C:\windows;C:\windows\System32\Wbem;C:\windows\System32\WindowsPowerShell\v1.0\;C:\windows\System32\OpenSSH\;C:\Program Files\Java\jdk-11.0.8\bin;C:\Users\A032826\AppData\Local\Programs\Python\Launcher\;C:\Users\A032826\AppData\Local\Microsoft\WindowsApps;C:\Users\A032826\AppData\Local\GitHubDesktop\bin;C:\Users\A032826\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\A032826\Documents\node-v20.11.1-win-x64;C:\Users\A032826\AppData\Local\Programs\Microsoft VS Code Insiders\bin;C:\Users\A032826\Git\cmd
+# PHP-sovelluksen ajaminen ajastetusti Linux-palvelimella (crontab)
 
-Testaile php-scripti omalla koneella:
-Mene oikeaan kansioon ja cmd: php -S localhost:8000
+Tämä ohje neuvoo, kuinka PHP-skripti ajetaan automaattisesti kerran päivässä Linux-palvelimella käyttäen crontabia.
 
+## 1. Varmista, että PHP on asennettu
 
-Sovelluksen Deploy menee ainakin Azureen ihan ok, 
-VAIHDA VIELÄ VÄHÄN KANSIOITA, KUN NYT SOTKEE TUO 'SRC/...'
+Aja komento:
+```
+php -v
+```
+Jos PHP ei ole asennettu, asenna se esimerkiksi:
+```
+sudo apt-get update
+sudo apt-get install php
+```
+
+## 2. Lataa tai kopioi PHP-sovellus palvelimelle
+
+Siirrä haluamasi PHP-tiedosto (esim. `oma_skripti.php`) palvelimelle, esim. kansioon `/home/kayttaja/scripts/`.
+
+## 3. Testaa skriptin toiminta komentoriviltä
+
+Aja skripti käsin varmistaaksesi, että se toimii:
+```
+php /home/kayttaja/scripts/oma_skripti.php
+```
+
+## 4. Lisää ajastus crontabiin
+
+Avaa crontab muokattavaksi:
+```
+crontab -e
+```
+
+Lisää rivi (esimerkki: suorita joka päivä klo 03:00):
+```
+0 3 * * * /usr/bin/php /home/kayttaja/scripts/oma_skripti.php >> /home/kayttaja/scripts/skripti.log 2>&1
+```
+
+- `0 3 * * *` = joka päivä klo 03:00
+- `/usr/bin/php` = polku PHP-tulkkiin (tarkista komennolla `which php`)
+- `/home/kayttaja/scripts/oma_skripti.php` = skriptin polku
+- `>> ...skripti.log 2>&1` = ohjaa tulosteen ja virheet lokiin
+
+Tallenna ja sulje crontab.
+
+## 5. Tarkista, että ajastus toimii
+
+- Tarkista lokitiedosto (`skripti.log`), että ajo onnistuu.
+- Voit tarkistaa crontab-listan komennolla:
+```
+crontab -l
+```
+
+---
+
+**Vinkki:**
+- Jos skripti käyttää tiedostopolkuja, käytä aina absoluuttisia polkuja.
+- Ympäristömuuttujat voivat poiketa crontab-ajossa verrattuna interaktiiviseen komentoriviin.
+
