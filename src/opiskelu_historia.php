@@ -29,7 +29,7 @@ $field = isset($_GET['field']) && in_array($_GET['field'], $allowed_fields) ? $_
 $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : '';
 
 // Correct table name: Opiskelijat
-$sql = "SELECT vuosi, $field FROM Opiskelijat WHERE stat_code = ? ORDER BY vuosi DESC LIMIT 10";
+$sql = "SELECT vuosi, $field FROM Opiskelijat WHERE stat_code = ? ORDER BY vuosi DESC LIMIT 20";
 debug_log("SQL: $sql | stat_code: $stat_code | field: $field");
 $stmt = $conn->prepare($sql);
 if (!$stmt) {
