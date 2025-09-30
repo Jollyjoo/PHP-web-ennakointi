@@ -1409,15 +1409,15 @@
                             positionChartPopup(e);
                             // Fetch real data only once
                             if (!chartDataLoaded) {
-                                fetch('tyollisyys_historia.php')
+                                fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomien_osuus&limit=24')
                                     .then(resp => resp.json())
                                     .then(hist => {
                                         chartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
                                             const kk = parseInt(m.slice(1), 10);
                                             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
                                             return ' ' + (kuukausiNimet[kk - 1] || m);
-                                        }));
-                                        chartData = hist.data;
+                                        })).slice(-24);
+                                        chartData = hist.data.slice(-24);
                                         chartDataLoaded = true;
                                         // Dynamic scale
                                         const minY = Math.floor(Math.min(...chartData) - 1);
@@ -1431,8 +1431,8 @@
                                                 datasets: [{
                                                     label: 'Työttömien osuus (%)',
                                                     data: chartData,
-                                                    borderColor: '#0077cc',
-                                                    backgroundColor: 'rgba(0,119,204,0.1)',
+                                                    borderColor: '#009933',
+                                                    backgroundColor: 'rgba(0,153,51,0.10)',
                                                     fill: true,
                                                     pointRadius: 3
                                                 }]
