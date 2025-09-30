@@ -77,7 +77,10 @@
                 <div class="container">
                     <div class="tilastobox">
                         <p>Työttömien osuus työvoimasta <span id="stat-aika"></span></p>
-                        <h2 style="position:relative;"><span id="ph-osuus"
+                        <table> <tr>
+                        <td style="width:70%">
+                       
+                            <h2 style="position:relative;"><span id="ph-osuus"
                                 style="cursor:pointer;text-decoration:underline;">...</span> %
                             <!-- Chart.js popup for history -->
                             <div id="ph-osuus-chart-popup"
@@ -86,7 +89,11 @@
                                 <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Työttömien
                                     osuus työvoimasta - historia</div>
                             </div>
+                              </td>
+                                <td style="width:30%">
                             <canvas id="tyollisyys-embed-chart" width="210" height="40" style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
+                         </td>               
+                            </tr>
                         </h2>
                         <p>Päijät-Häme</p>
                         <h2><span id="kh-osuus" style="cursor:pointer;text-decoration:underline;">...</span> %</h2>
