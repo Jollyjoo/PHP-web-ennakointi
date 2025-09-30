@@ -77,41 +77,46 @@
                 <div class="container">
                     <div class="tilastobox">
                         <p>Työttömien osuus työvoimasta <span id="stat-aika"></span></p>
-                        <table> <tr>
-                        <td style="width:70%">
-                       
-                            <h2 style="position:relative;"><span id="ph-osuus"
-                                style="cursor:pointer;text-decoration:underline;">...</span> %
-                            <!-- Chart.js popup for history -->
-                            <div id="ph-osuus-chart-popup"
-                                style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                                <canvas id="ph-osuus-chart" width="400" height="180"></canvas>
-                                <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Työttömien
-                                    osuus työvoimasta - historia</div>
-                            </div>
-                              </td>
+                        <table>
+                            <tr>
+                                <td style="width:70%">
+
+                                    <h2 style="position:relative;"><span id="ph-osuus"
+                                            style="cursor:pointer;text-decoration:underline;">...</span> %
+                                        <!-- Chart.js popup for history -->
+                                        <div id="ph-osuus-chart-popup"
+                                            style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                                            <canvas id="ph-osuus-chart" width="400" height="180"></canvas>
+                                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">
+                                                Työttömien
+                                                osuus työvoimasta - historia</div>
+                                        </div>
+                                </td>
                                 <td style="width:30%">
-                            <canvas id="tyollisyys-embed-chart" width="210" height="140" style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
-                         </td>               
+                                    <canvas id="tyollisyys-embed-chart" width="210" height="140"
+                                        style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
+                                </td>
                             </tr>
 
-                        </h2>
-                        <p>Päijät-Häme</p>
- <tr>
-                        <td style="width:70%">
-                        <h2><span id="kh-osuus" style="cursor:pointer;text-decoration:underline;">...</span> %</h2>
-                        <!-- Chart.js popup for Kanta-Häme history -->
-                        <div id="kh-osuus-chart-popup"
-                            style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
-                            <canvas id="kh-osuus-chart" width="400" height="180"></canvas>
-                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Työttömien osuus
-                                työvoimasta - historia</div>
-                        </div>
-                        </td>
-                                <td style="width:30%">
-                            <canvas id="tyollisyys-embed-chart" width="210" height="140" style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
-                         </td>               
-                            </tr></table>
+                            </h2>
+                            <p>Päijät-Häme</p>
+                            <tr>
+                                <td style="width:70%">
+                                    <h2><span id="kh-osuus" style="cursor:pointer;text-decoration:underline;">...</span>
+                                        %
+                                        <!-- Chart.js popup for Kanta-Häme history -->
+                                        <div id="kh-osuus-chart-popup"
+                                            style="display:none;position:absolute;z-index:1000;background:#fff;border:1px solid #ccc;padding:10px;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+                                            <canvas id="kh-osuus-chart" width="400" height="180"></canvas>
+                                            <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">
+                                                Työttömien osuus työvoimasta - historia</div>
+                                        </div>
+                                        <canvas id="kh-embed-chart" width="210" height="40"
+                                            style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
+                                    </h2>
+                                </td>
+                            </tr>
+                        </table>
                         <p>Kanta-Häme</p>
 
                         </p>
@@ -166,8 +171,8 @@
                         href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12r5.px"
                         target="_blank"
                         title="12r5 -- Työttömät työnhakijat eri ryhmissä, palveluissa olevat ja avoimet työpaikat kuukauden lopussa">
-                        Tilastokeskus 12r5</a> (työnvälitystilasto, KEHA), viimeisin tilasto tarkistettu lähteestä <b> <span
-                            id="stat-paivitys-2">...</span></b>
+                        Tilastokeskus 12r5</a> (työnvälitystilasto, KEHA), viimeisin tilasto tarkistettu lähteestä <b>
+                        <span id="stat-paivitys-2">...</span></b>
             </div>
         </div>
 
@@ -544,7 +549,7 @@
                         id="avoimet-toimiala-update">...</span></b></p>
 
 
-<!-- 
+            <!-- 
             <br><br> <br>
             <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>
            
@@ -666,48 +671,85 @@
                 </script>
 
                 <script>
-                // Pieni upotettu sparkline-kaavio ph-osuus (Päijät-Häme työttömien osuus työvoimasta)
-                document.addEventListener('DOMContentLoaded', function () {
-                    const canvas = document.getElementById('tyollisyys-embed-chart');
-                    if (!canvas) return;
-                    fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomien_osuus&limit=24')
-                        .then(resp => resp.json())
-                        .then(data => {
-                            if (!data || !data.labels || !data.data) return;
-                            // Näytetään viimeiset 24 kuukautta
-                            const labels = data.labels.slice(-24);
-                            const values = data.data.slice(-24);
-                            // Etsitään minimi ja maksimi, jotta sparkline näyttää hyvältä
-                            const minY = Math.floor(Math.min(...values));
-                            const maxY = Math.ceil(Math.max(...values));
-                            // Piirretään pieni viivakaavio Chart.js:llä
-                            new Chart(canvas.getContext('2d'), {
-                                type: 'line',
-                                data: {
-                                    labels: labels,
-                                    datasets: [{
-                                        data: values,
-                                        borderColor: '#009933',
-                                        backgroundColor: 'rgba(0,153,51,0.10)',
-                                        fill: true,
-                                        pointRadius: 0,
-                                        borderWidth: 2,
-                                        tension: 0.4
-                                    }]
-                                },
-                                options: {
-                                    responsive: false,
-                                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                                    scales: {
-                                        x: { display: false },
-                                        y: { display: false, min: minY, max: maxY }
-                                    },
-                                    elements: { line: { borderCapStyle: 'round' } },
-                                    layout: { padding: 0 },
-                                }
-                            });
-                        });
-                });
+                    // Pienet upotetut sparkline-kaaviot ph-osuus ja kh-osuus
+                    document.addEventListener('DOMContentLoaded', function () {
+                        // Päijät-Häme sparkline
+                        const phCanvas = document.getElementById('tyollisyys-embed-chart');
+                        if (phCanvas) {
+                            fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomien_osuus&limit=24')
+                                .then(resp => resp.json())
+                                .then(data => {
+                                    if (!data || !data.labels || !data.data) return;
+                                    const labels = data.labels.slice(-24);
+                                    const values = data.data.slice(-24);
+                                    const minY = Math.floor(Math.min(...values));
+                                    const maxY = Math.ceil(Math.max(...values));
+                                    new Chart(phCanvas.getContext('2d'), {
+                                        type: 'line',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                data: values,
+                                                borderColor: '#009933',
+                                                backgroundColor: 'rgba(0,153,51,0.10)',
+                                                fill: true,
+                                                pointRadius: 0,
+                                                borderWidth: 2,
+                                                tension: 0.4
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: false,
+                                            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                            scales: {
+                                                x: { display: false },
+                                                y: { display: false, min: minY, max: maxY }
+                                            },
+                                            elements: { line: { borderCapStyle: 'round' } },
+                                            layout: { padding: 0 },
+                                        }
+                                    });
+                                });
+                        }
+                        // Kanta-Häme sparkline
+                        const khCanvas = document.getElementById('kh-embed-chart');
+                        if (khCanvas) {
+                            fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomien_osuus&limit=24')
+                                .then(resp => resp.json())
+                                .then(data => {
+                                    if (!data || !data.labels || !data.data) return;
+                                    const labels = data.labels.slice(-24);
+                                    const values = data.data.slice(-24);
+                                    const minY = Math.floor(Math.min(...values));
+                                    const maxY = Math.ceil(Math.max(...values));
+                                    new Chart(khCanvas.getContext('2d'), {
+                                        type: 'line',
+                                        data: {
+                                            labels: labels,
+                                            datasets: [{
+                                                data: values,
+                                                borderColor: '#3366cc',
+                                                backgroundColor: 'rgba(51,102,204,0.10)',
+                                                fill: true,
+                                                pointRadius: 0,
+                                                borderWidth: 2,
+                                                tension: 0.4
+                                            }]
+                                        },
+                                        options: {
+                                            responsive: false,
+                                            plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                            scales: {
+                                                x: { display: false },
+                                                y: { display: false, min: minY, max: maxY }
+                                            },
+                                            elements: { line: { borderCapStyle: 'round' } },
+                                            layout: { padding: 0 },
+                                        }
+                                    });
+                                });
+                        }
+                    });
                     // Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot sekä summary
                     fetch('tyollisyys.php')
                         .then(resp => resp.json())
