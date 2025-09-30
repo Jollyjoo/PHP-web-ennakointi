@@ -240,7 +240,7 @@ document.addEventListener('DOMContentLoaded', function () {
         popup.style.padding = '10px';
         popup.style.borderRadius = '8px';
         popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-        popup.innerHTML = `<canvas id="${chartId}" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">${label} - 10v</div>`;
+        popup.innerHTML = `<canvas id="${chartId}" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">${label} - 20v</div>`;
         document.body.appendChild(popup);
         let chartInstance = null;
         span.addEventListener('mouseover', function(e) {
@@ -256,12 +256,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 fetch(endpoint)
                     .then(resp => resp.json())
                     .then(hist => {
-                        // Use only last 10 years
+                        // Use only last 20 years
                         let labels = hist.labels;
                         let data = hist.data;
-                        if (labels.length > 10) {
-                            labels = labels.slice(-10);
-                            data = data.slice(-10);
+                        if (labels.length > 20) {
+                            labels = labels.slice(-20);
+                            data = data.slice(-20);
                         }
                         // Labels are years, no month parsing
                         const minY = Math.floor(Math.min(...data) - 1);
