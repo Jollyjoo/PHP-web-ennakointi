@@ -1334,7 +1334,7 @@
                             khChartPopup.style.display = 'block';
                             positionKhChartPopup(e);
                             if (!khChartDataLoaded) {
-                                fetch('tyollisyys_historia.php?stat_code=MK05')
+                                fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomien_osuus&limit=24')
                                     .then(resp => resp.json())
                                     .then(hist => {
                                         khChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
