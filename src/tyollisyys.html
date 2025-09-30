@@ -978,7 +978,7 @@
                                                 popup.style.left = x + 'px';
                                                 popup.style.top = y + 'px';
                                                 if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=ELY04&field=tyottomat_yht&limit=24')
+                                                    fetch('tyollisyys_historia.php?stat_code=ELY04&field=tyottomatlopussa&limit=24')
                                                         .then(resp => resp.json())
                                                         .then(hist => {
                                                             const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
