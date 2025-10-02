@@ -1,41 +1,70 @@
-# Ennakointi-node-rest
 
-Tämä projekti sisältää PHP- ja Node.js-ohjelmia, jotka hakevat Tilastokeskuksen rajapinnoista (API) ajankohtaista tietoa Hämeen alueen väestöstä, työpaikoista, valmistuneista, työttömistä, avoimista työpaikoista ja vieraskielisistä. Ohjelmat tallentavat tiedot MySQL-tietokantaan jatkokäyttöä varten.
+# Hämeen osaamistarpeiden ennakointi - Ennakointialusta
 
-## Mitä ohjelmat tekevät?
-- **fetchVaesto_11re.php**: Hakee väestötiedot Tilastokeskuksen API:sta ja tallentaa ne Asukasmaara-tauluun.
-- **fetchVierasKieliset_11c4.php**: Hakee vieraskielisten ja ulkomaalaisten opiskelijoiden määrät ja tallentaa ne Vieraskieliset-tauluun.
-- **fetchTyottomat_12r5.php**: Hakee työttömien määrät ja tallentaa ne tietokantaan.
-- **fetchAlueenTyopaikat_115h.php**: Hakee alueen työpaikkatiedot ja tallentaa ne tietokantaan.
-- **fetchavoimetpaikat12tw.php**: Hakee avoimet työpaikat ja tallentaa ne tietokantaan.
-- **fetchValmistuneet_12bs.php**: Hakee valmistuneiden määrät ja tallentaa ne tietokantaan.
+Tämä projekti on Hämeen osaamistarpeiden ennakointialusta, joka tarjoaa tilannekuvaa ja tulevaisuuskuvaa alueen koulutuksesta, työllisyydestä, väestöstä ja elinvoimasta. Sivusto hyödyntää PHP-backendia ja dynaamista HTML/JS-frontendia. Tämän ohjelman scriptit hakee tietokannasta tiedot.
 
-Kaikki ohjelmat lukevat .json-muotoisen kyselytiedoston, lähettävät sen Tilastokeskuksen API:lle, käsittelevät JSON-stat2-vastauksen ja päivittävät tietokannan.
+Yhteyden ulkoisiin tilastoihin hoidetaan Backend ohjelmilla (projekti: Ennakointi-node-rest)
 
-## Ajastettu ajo (crontab)
-Ohjelmat voidaan ajastaa Linux-palvelimella ajettavaksi automaattisesti esimerkiksi kerran päivässä crontabilla.
+## Pääasialliset tiedostot ja kansiot. Täsmällinen toiminta löytyy tiedostojen kommenteista.
 
-1. Avaa crontab muokattavaksi:
-   ```
-   crontab -e
-   ```
-2. Lisää rivi jokaista ajettavaa ohjelmaa varten, esim. joka päivä klo 04:07:
-   ```
-   7 4 * * * php /public_html/cgi-bin/fetchVaesto_11re.php
-   7 4 * * * php /public_html/cgi-bin/fetchVierasKieliset_11c4.php
-   7 4 * * * php /public_html/cgi-bin/fetchTyottomat_12r5.php
-   7 4 * * * php /public_html/cgi-bin/fetchAlueenTyopaikat_115h.php
-   7 4 * * * php /public_html/cgi-bin/fetchavoimetpaikat12tw.php
-   7 4 * * * php /public_html/cgi-bin/fetchValmistuneet_12bs.php
-   ```
-   Vaihda `/polku/projektiin/` tarvittaessa oikeaksi hakemistopoluksi.
-3.1 Muokkaa tiedostoa: i (insert)
-3. Tallenna ja sulje crontab (esim. Esc , :wq (Write-Quit) , Enter .
+- **index.html**  
+  Sivuston etusivu. Sisältää esittelyn, navigaation ja linkit tilannekuvaan, tulevaisuuskuvaan sekä info-sivulle.
+
+- **opiskelu.html**  
+  Koulutuksen tilastot ja visualisoinnit. Näyttää dynaamisesti koulutustilastot (toisen asteen ja korkea-asteen suorittaneet) Päijät-Hämeessä, Kanta-Hämeessä ja koko maassa.
+
+- **tyollisyys.html**  
+  Työllisyystilastot ja visualisoinnit. Näyttää dynaamisesti työttömien osuudet, avoimet työpaikat ja työttömät työnhakijat.
+
+- **aluekehitys.html, vaesto.html, toimialaennakointi.html, analyysit.html, mediaseuranta.html, info.html**  
+  Muut tilannekuvan ja ennakoinnin osiot.
+
+- **opiskelu.php**  
+  Backend-PHP, joka hakee koulutustilastot tietokannasta ja palauttaa ne JSON-muodossa frontendille.
+
+- **tyollisyys.php**  
+  Backend-PHP, joka hakee työllisyystilastot tietokannasta ja palauttaa ne JSON-muodossa frontendille.
+  Asennetaan palvelimen /cgi-bin -kansioon ja ajastetaan linuxin crontab ajamaan tämä vaikka kerran päivässä 
+
+- **haeMaakunnalla.php, haehakusanalla.php, haehakusanalla sql-server.php, sqltest sql-server.php**  
+  Erilaisia PHP-skriptejä tiedonhakuun ja hakutoimintoihin. Käytetään mediaseurannat tietojen hakuun kannasta.
+
+- **header.html, footer.html, otsikot.html**  
+  Sivuston yhteiset osat (ylä- ja alatunnisteet, otsikot).
+
+- **styles.css, signaalit.css, webflow.css, caroucell/style.css, caroucell/styles.css**  
+  Tyylitiedostot.
+
+- **webflow.js, caroucell/script.js**  
+  JavaScript-tiedostot dynaamisiin toimintoihin ja visualisointeihin.
+
+- **img/**  
+  Kuvakansio (logot, taustakuvat, visualisoinnit).
+
+- **SQL/**  
+  Tietokannan mediaseurannan varmuuskopiot ja rakenteet (.sql-tiedostot).
+
+- **react/**  
+  Mahdolliset React-komponentit tai kehityskokeilut.
+
+## Käyttö
+
+1. Avaa `index.html` selaimessa.
+2. Navigoi tilannekuva- ja tulevaisuuskuva-osiin.
+3. Dynaamiset tilastot päivittyvät automaattisesti PHP-backendin kautta.
+
+## Yhteystiedot ja palaute
+
+Palautetta ja kehitysehdotuksia voi lähettää osoitteeseen info@tulevaisuusluotain.fi.
+
+
+
+
+
 
 ## Vaatimukset
 - PHP (vähintään 7.x)
 - MySQL-tietokanta
-- Yhteys Tilastokeskuksen PxWeb API:in
 - Oikeat tietokantataulut ja -rakenne (katso kunkin skriptin kommentit)
 
 ## Kehitysympäristön ja versionhallinnan työkalut
@@ -55,5 +84,3 @@ Ohjelmat voidaan ajastaa Linux-palvelimella ajettavaksi automaattisesti esimerki
 - Pidä projektin tiedostot versionhallinnassa (GitHub), jotta muutokset ja varmuuskopiot säilyvät.
 - Testaa skriptit ensin paikallisesti, ennen kuin ajastat ne tuotantopalvelimelle.
 
-## Yhteystiedot
-Lisätietoja tilasto-rajapinnoista: [Tilastokeskus PxWeb API](https://stat.fi/tilastot/pxweb)
