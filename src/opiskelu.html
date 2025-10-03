@@ -503,7 +503,30 @@
             },
             options: {
                 responsive: false,
-                plugins: { legend: { display: true, position: 'top' } },
+                plugins: {
+                    legend: { display: true, position: 'top' },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                // Show all values as usual
+                                let label = context.dataset.label + ': ' + context.formattedValue;
+                                // Add percentage for Ulkomaiset and Vieraskieliset
+                                if (context.datasetIndex === 1 || context.datasetIndex === 2) {
+                                    // Get yhteensa value for this index
+                                    const yhteensa = context.chart.data.datasets[0].data[context.dataIndex];
+                                    if (yhteensa && yhteensa > 0) {
+                                        const val = context.parsed.y;
+                                        const percent = ((val / yhteensa) * 100).toFixed(1);
+                                        label += ' (' + percent + '%)';
+                                    }
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                },
                 scales: {
                     x: { title: { display: true, text: 'Vuosi' } },
                     y: { title: { display: true, text: 'Opiskelijoita' }, beginAtZero: true }
