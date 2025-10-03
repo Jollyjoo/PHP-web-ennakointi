@@ -539,7 +539,21 @@
                 kuntaSelect.innerHTML = '';
                 const grouped = res.stat_codes_grouped;
                 let firstCode = null;
+                // Maakuntataso optgroup first if exists
+                if (grouped['maakunta']) {
+                    const mkOptgroup = document.createElement('optgroup');
+                    mkOptgroup.label = grouped['maakunta'].maakunta_nimi;
+                    grouped['maakunta'].kunnat.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.stat_code;
+                        opt.textContent = item.kunta + ' (' + item.stat_code + ')';
+                        mkOptgroup.appendChild(opt);
+                        if (!firstCode) firstCode = item.stat_code;
+                    });
+                    kuntaSelect.appendChild(mkOptgroup);
+                }
                 for (const mkid in grouped) {
+                    if (mkid === 'maakunta') continue;
                     const optgroup = document.createElement('optgroup');
                     optgroup.label = grouped[mkid].maakunta_nimi + ' (' + mkid + ')';
                     grouped[mkid].kunnat.forEach(item => {

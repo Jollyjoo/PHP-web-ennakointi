@@ -13,13 +13,28 @@ if (isset($_GET['list_stat_codes'])) {
         $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
         // Haetaan kaikki stat_codet, kunta-nimet ja maakunta_id:t
         $stmt = $pdo->query("SELECT DISTINCT k.stat_code, k.Kunta, k.Maakunta_ID FROM Kunta k WHERE k.stat_code IS NOT NULL AND k.stat_code != '' ORDER BY k.Maakunta_ID, k.Kunta ASC");
-        // Hae maakunta-nimet
-        $maakuntaStmt = $pdo->query("SELECT Maakunta_ID, Maakunta FROM Maakunnat");
+        // Hae maakunta-nimet ja maakunta-tason stat_codet
+        $maakuntaStmt = $pdo->query("SELECT Maakunta_ID, Maakunta, stat_code FROM Maakunnat");
         $maakuntaNimet = [];
+        $maakuntaStatCodes = [];
         while ($mk = $maakuntaStmt->fetch(PDO::FETCH_ASSOC)) {
             $maakuntaNimet[$mk['Maakunta_ID']] = $mk['Maakunta'];
+            if (!empty($mk['stat_code'])) {
+                $maakuntaStatCodes[$mk['stat_code']] = [
+                    'maakunta_id' => $mk['Maakunta_ID'],
+                    'maakunta_nimi' => $mk['Maakunta']
+                ];
+            }
         }
         $maakunnat = [];
+        // Lisää maakunta-tason stat_codet omaksi ryhmäksi
+        $maakunnat['maakunta'] = ['maakunta_nimi' => 'Maakuntataso', 'kunnat' => []];
+        foreach ($maakuntaStatCodes as $code => $info) {
+            $maakunnat['maakunta']['kunnat'][] = [
+                'stat_code' => $code,
+                'kunta' => $info['maakunta_nimi'] . ' (maakunta)'
+            ];
+        }
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $mkid = $row['Maakunta_ID'] ?: 'Tuntematon';
             $mkname = isset($maakuntaNimet[$mkid]) ? $maakuntaNimet[$mkid] : ('Maakunta ' . $mkid);
