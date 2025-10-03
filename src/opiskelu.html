@@ -443,14 +443,80 @@
         <br><br>
 
 
+
+<!-- Vieraskieliset opiskelijat - embedded Chart.js line chart (not mixed with iframe) -->
+<div class="centerContainer" style="margin-bottom: 32px;">
+    <h2>Vieraskieliset opiskelijat Hämeessä (tilastovuosi)</h2>
+    <div style="width: 100%; max-width: 700px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 18px 12px 8px 12px;">
+        <canvas id="vieraskieliset-linechart-embed" width="650" height="320"></canvas>
+        <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Vieraskieliset, ulkomaiset ja kaikki opiskelijat Hämeessä</div>
+    </div>
+    <script>
+    // Embedded line chart for vieraskieliset (not mixed with iframe)
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('vieraskieliset_historia.php?stat_code=SSS')
+            .then(resp => resp.json())
+            .then(data => {
+                const ctx = document.getElementById('vieraskieliset-linechart-embed').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.years,
+                        datasets: [
+                            {
+                                label: 'Yhteensä',
+                                data: data.yhteensa,
+                                borderColor: '#0077cc',
+                                backgroundColor: 'rgba(0,119,204,0.08)',
+                                fill: false,
+                                pointRadius: 3,
+                                tension: 0.15
+                            },
+                            {
+                                label: 'Ulkomaiset',
+                                data: data.ulkomaiset,
+                                borderColor: '#cc3300',
+                                backgroundColor: 'rgba(204,51,0,0.08)',
+                                fill: false,
+                                pointRadius: 3,
+                                tension: 0.15
+                            },
+                            {
+                                label: 'Vieraskieliset',
+                                data: data.vieraskieliset,
+                                borderColor: '#009933',
+                                backgroundColor: 'rgba(0,153,51,0.08)',
+                                fill: false,
+                                pointRadius: 3,
+                                tension: 0.15
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: { legend: { display: true, position: 'top' } },
+                        scales: {
+                            x: { title: { display: true, text: 'Vuosi' } },
+                            y: { title: { display: true, text: 'Opiskelijoita' }, beginAtZero: true }
+                        }
+                    }
+                });
+            });
+    });
+    </script>
+    <p style="text-align:center;">Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset ja ulkomaalaiset opiskelijat koulutusalueen ja koulutussektorin mukaan, 2004-2023</p>
+</div>
+
+
         <!--opiskelu-->
 
         <br>
         <p align="center">
         <h2>Vieraskieliset opiskelijat Hämeessä.</h2><br>
         </p>
-        <div class="centerContainer">Vieraskielisten opiskelijoiden määrä on kasvanut
-            tasaisesti vuodesta 2010 lähtien. <br> Vuonna 2023 vieraskielisiä opiskelijoita oli Hämeessä yhteensä 4 500.
+        <div class="centerContainer">
+            Vieraskielisten opiskelijoiden määrä on kasvanut tasaisesti vuodesta 2010 lähtien. <br>
+            Vuonna 2023 vieraskielisiä opiskelijoita oli Hämeessä yhteensä 4 500.
             Vieraskielisten osuus kaikista opiskelijoista on noin 10 %. <br><br>
             <iframe title="Vieraskieliset_opiskelijat_stat" width="100%" height="650"
                 src="https://app.powerbi.com/view?r=eyJrIjoiMzFhOTkwZjUtNWQzYy00YWYwLTgyMzEtZDMxYWQ1ZTZjZGEzIiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9"

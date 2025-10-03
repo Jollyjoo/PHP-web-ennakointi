@@ -18,6 +18,7 @@ deployment:
     - /bin/cp src/tyollisyys_historia.php $DEPLOYPATH
     - /bin/cp src/avoimetpainat_historia.php $DEPLOYPATH
     - /bin/cp src/opiskelu.html $DEPLOYPATH
+    - /bin/cp src/vieraskieliset_historia.php $DEPLOYPATH
     - /bin/cp src/opiskelu.php $DEPLOYPATH    
     - /bin/cp src/opiskelu_historia.php $DEPLOYPATH
     - /bin/cp src/aluekehitys.html $DEPLOYPATH
