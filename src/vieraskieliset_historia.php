@@ -14,7 +14,7 @@ try {
         SUM(Yhteensa) as yhteensa, 
         SUM(Ulkomaiset) as ulkomaiset, 
         SUM(Vieraskieliset) as vieraskieliset
-        FROM vieraskieliset
+        FROM Vieraskieliset
         WHERE stat_code = :stat_code
         GROUP BY vuosi
         ORDER BY vuosi ASC");
