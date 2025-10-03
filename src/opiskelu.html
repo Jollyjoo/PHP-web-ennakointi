@@ -511,6 +511,8 @@
             }
         });
     }
+    // Store last selected sektori for each stat_code
+    let vierasLastSektori = {};
     function fetchAndPopulateVieras(statCode) {
         fetch('vieraskieliset_historia.php?stat_code=' + encodeURIComponent(statCode))
             .then(resp => resp.json())
@@ -519,14 +521,16 @@
                 const sektoriSelect = document.getElementById('vieras-sektori-select');
                 sektoriSelect.innerHTML = '';
                 const sektorit = Object.keys(res.data);
+                let selectedSektori = vierasLastSektori[statCode] && sektorit.includes(vierasLastSektori[statCode]) ? vierasLastSektori[statCode] : sektorit[0];
                 sektorit.forEach(sektori => {
                     const opt = document.createElement('option');
                     opt.value = sektori;
                     opt.textContent = sektori;
+                    if (sektori === selectedSektori) opt.selected = true;
                     sektoriSelect.appendChild(opt);
                 });
-                if (sektorit.length > 0) {
-                    updateVierasChart(statCode, sektorit[0]);
+                if (selectedSektori) {
+                    updateVierasChart(statCode, selectedSektori);
                 }
             });
     }
@@ -571,7 +575,8 @@
                 if (firstCode) fetchAndPopulateVieras(firstCode);
             });
         document.getElementById('vieras-sektori-select').addEventListener('change', function() {
-            const statCode = document.getElementById('vieras-statcode-select').value;
+            const statCode = document.getElementById('vieras-kunta-select').value;
+            vierasLastSektori[statCode] = this.value;
             updateVierasChart(statCode, this.value);
         });
     });
