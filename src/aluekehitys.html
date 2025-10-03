@@ -168,16 +168,27 @@ async function fetchAlueenTyopaikat(region = 'all') {
 }
 
 
+
 function renderAlueenTyopaikatChart(data, chartType = 'bar') {
     const ctx = document.getElementById('alueentyopaikatChart').getContext('2d');
+    // Find if we have a comparison line dataset (last one, type: 'line')
+    let comparisonLineIdx = -1;
+    if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
+        comparisonLineIdx = data.datasets.length - 1;
+        // Remove color from comparison line
+        data.datasets[comparisonLineIdx].borderColor = '#444';
+        data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
+    }
     data.datasets.forEach((ds, i) => {
-        ds.backgroundColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
-        ds.borderColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length];
-        ds.stack = chartType === 'bar' ? 'Stack 0' : undefined;
-        ds.borderWidth = 1;
-        ds.fill = chartType === 'bar';
-        ds.pointRadius = 2;
-        ds.tension = chartType === 'line' ? 0.45 : undefined;
+        if (i !== comparisonLineIdx) {
+            ds.backgroundColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
+            ds.borderColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length];
+        }
+        ds.stack = chartType === 'bar' && i !== comparisonLineIdx ? 'Stack 0' : undefined;
+        ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
+        ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
+        ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
+        ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
     });
     if (alueentyopaikatChartObj) alueentyopaikatChartObj.destroy();
     alueentyopaikatChartObj = new Chart(ctx, {
@@ -195,14 +206,21 @@ function renderAlueenTyopaikatChart(data, chartType = 'bar') {
                     intersect: chartType !== 'line',
                     callbacks: {
                         afterBody: function(context) {
-                            // context[0].dataIndex is the index of the selected year
                             const yearIdx = context[0].dataIndex;
-                            // Sum all dataset values for this year
-                            let total = 0;
-                            context[0].chart.data.datasets.forEach(ds => {
-                                if (typeof ds.data[yearIdx] === 'number') total += ds.data[yearIdx];
+                            // Sum selected region total (all bar datasets)
+                            let selectedTotal = 0;
+                            let comparisonTotal = null;
+                            context[0].chart.data.datasets.forEach((ds, i) => {
+                                if (ds.type === 'line') {
+                                    comparisonTotal = ds.data[yearIdx];
+                                } else if (typeof ds.data[yearIdx] === 'number') {
+                                    selectedTotal += ds.data[yearIdx];
+                                }
                             });
-                            return 'Yhteensä: ' + total.toLocaleString('fi-FI');
+                            let lines = [];
+                            if (selectedTotal > 0) lines.push('Valittu alue yhteensä: ' + selectedTotal.toLocaleString('fi-FI'));
+                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push('Vertailualue yhteensä: ' + comparisonTotal.toLocaleString('fi-FI'));
+                            return lines.join('\n');
                         }
                     }
                 }
