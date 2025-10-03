@@ -537,14 +537,22 @@
             .then(res => {
                 const statSelect = document.getElementById('vieras-statcode-select');
                 statSelect.innerHTML = '';
-                res.stat_codes.forEach(code => {
-                    const opt = document.createElement('option');
-                    opt.value = code;
-                    opt.textContent = code;
-                    statSelect.appendChild(opt);
-                });
-                if (res.stat_codes.length > 0) {
-                    fetchAndPopulateVieras(res.stat_codes[0]);
+                const grouped = res.stat_codes_grouped;
+                let firstCode = null;
+                for (const mkid in grouped) {
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = 'Maakunta ' + mkid;
+                    grouped[mkid].forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.stat_code;
+                        opt.textContent = item.kunta + ' (' + item.stat_code + ')';
+                        optgroup.appendChild(opt);
+                        if (!firstCode) firstCode = item.stat_code;
+                    });
+                    statSelect.appendChild(optgroup);
+                }
+                if (firstCode) {
+                    fetchAndPopulateVieras(firstCode);
                 }
             });
         document.getElementById('vieras-statcode-select').addEventListener('change', function() {

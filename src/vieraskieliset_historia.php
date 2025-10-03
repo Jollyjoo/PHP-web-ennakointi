@@ -11,12 +11,18 @@ $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : 'SSS'; // default:
 if (isset($_GET['list_stat_codes'])) {
     try {
         $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
-        $stmt = $pdo->query("SELECT DISTINCT stat_code FROM Vieraskieliset WHERE stat_code IS NOT NULL AND stat_code != '' ORDER BY stat_code ASC");
-        $codes = [];
+        // Haetaan kaikki stat_codet, kunta-nimet ja maakunta_id:t
+        $stmt = $pdo->query("SELECT DISTINCT k.stat_code, k.Kunta, k.Maakunta_ID FROM Kunta k WHERE k.stat_code IS NOT NULL AND k.stat_code != '' ORDER BY k.Maakunta_ID, k.Kunta ASC");
+        $maakunnat = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $codes[] = $row['stat_code'];
+            $mkid = $row['Maakunta_ID'] ?: 'Tuntematon';
+            if (!isset($maakunnat[$mkid])) $maakunnat[$mkid] = [];
+            $maakunnat[$mkid][] = [
+                'stat_code' => $row['stat_code'],
+                'kunta' => $row['Kunta']
+            ];
         }
-        echo json_encode(['stat_codes' => $codes], JSON_UNESCAPED_UNICODE);
+        echo json_encode(['stat_codes_grouped' => $maakunnat], JSON_UNESCAPED_UNICODE);
         exit;
     } catch (Exception $e) {
         http_response_code(500);
