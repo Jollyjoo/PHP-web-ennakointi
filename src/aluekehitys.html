@@ -227,14 +227,52 @@ function renderAlueenTyopaikatChart(data, chartType = 'bar') {
     }
 }
 
+
 async function updateAlueenTyopaikatChart(chartType = 'bar', region = 'all') {
-    const data = await fetchAlueenTyopaikat(region);
-    if (!data) return;
-    renderAlueenTyopaikatChart(data, chartType);
-        // Päivitysaika: show latest_update from backend in both chart and stat-paivitys-2
+    // For region 1 or 2, fetch both regions' data for overlay
+    if (region === '1' || region === '2') {
+        const otherRegion = region === '1' ? '2' : '1';
+        const [mainData, otherData] = await Promise.all([
+            fetchAlueenTyopaikat(region),
+            fetchAlueenTyopaikat(otherRegion)
+        ]);
+        if (!mainData || !otherData) return;
+        // Sum other region's municipalities for each year
+        const yearCount = mainData.labels.length;
+        const otherTotals = Array(yearCount).fill(0);
+        otherData.datasets.forEach(ds => {
+            ds.data.forEach((val, idx) => {
+                otherTotals[idx] += typeof val === 'number' ? val : 0;
+            });
+        });
+        // Add as a line dataset
+        mainData.datasets.push({
+            label: otherRegion === '1' ? 'Päijät-Häme yhteensä (vertailu)' : 'Kanta-Häme yhteensä (vertailu)',
+            data: otherTotals,
+            type: 'line',
+            borderColor: '#222',
+            backgroundColor: 'rgba(0,0,0,0.08)',
+            borderWidth: 3,
+            pointRadius: 3,
+            fill: false,
+            tension: 0.15,
+            order: 99,
+            yAxisID: 'y',
+            datalabels: { display: false }
+        });
+        renderAlueenTyopaikatChart(mainData, chartType);
+        document.getElementById('alueentyopaikat-paivitys').textContent = mainData.latest_update || '-';
+        const statPaivitys2 = document.getElementById('stat-paivitys-2');
+        if (statPaivitys2) statPaivitys2.textContent = mainData.latest_update || '-';
+    } else {
+        // Default: Koko Häme, no overlay
+        const data = await fetchAlueenTyopaikat(region);
+        if (!data) return;
+        renderAlueenTyopaikatChart(data, chartType);
         document.getElementById('alueentyopaikat-paivitys').textContent = data.latest_update || '-';
         const statPaivitys2 = document.getElementById('stat-paivitys-2');
         if (statPaivitys2) statPaivitys2.textContent = data.latest_update || '-';
+    }
 }
 
 document.addEventListener('DOMContentLoaded', function() {
