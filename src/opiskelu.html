@@ -448,10 +448,8 @@
 <div class="centerContainer" style="margin-bottom: 32px;">
     <h2>Vieraskieliset opiskelijat Hämeessä (valitse alue ja sektori)</h2>
     <div style="margin-bottom: 12px; text-align:center;">
-        <label for="vieras-maakunta-select">Maakunta: </label>
-        <select id="vieras-maakunta-select"></select>
-        <label for="vieras-statcode-select" style="margin-left:12px;">Kunta: </label>
-        <select id="vieras-statcode-select"></select>
+        <label for="vieras-kunta-select">Maakunta ja kunta: </label>
+        <select id="vieras-kunta-select"></select>
         <label for="vieras-sektori-select" style="margin-left:18px;">Sektori: </label>
         <select id="vieras-sektori-select"></select>
     </div>
@@ -537,43 +535,26 @@
         fetch('vieraskieliset_historia.php?list_stat_codes=1')
             .then(resp => resp.json())
             .then(res => {
-                const maakuntaSelect = document.getElementById('vieras-maakunta-select');
-                const statSelect = document.getElementById('vieras-statcode-select');
-                maakuntaSelect.innerHTML = '';
-                statSelect.innerHTML = '';
+                const kuntaSelect = document.getElementById('vieras-kunta-select');
+                kuntaSelect.innerHTML = '';
                 const grouped = res.stat_codes_grouped;
-                // Populate maakunta select
+                let firstCode = null;
                 for (const mkid in grouped) {
-                    const opt = document.createElement('option');
-                    opt.value = mkid;
-                    opt.textContent = grouped[mkid].maakunta_nimi + ' (' + mkid + ')';
-                    maakuntaSelect.appendChild(opt);
+                    const optgroup = document.createElement('optgroup');
+                    optgroup.label = grouped[mkid].maakunta_nimi + ' (' + mkid + ')';
+                    grouped[mkid].kunnat.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.stat_code;
+                        opt.textContent = item.kunta + ' (' + item.stat_code + ')';
+                        optgroup.appendChild(opt);
+                        if (!firstCode) firstCode = item.stat_code;
+                    });
+                    kuntaSelect.appendChild(optgroup);
                 }
-                // Helper to update kunta select when maakunta changes
-                function updateKuntaSelect() {
-                    const mkid = maakuntaSelect.value;
-                    statSelect.innerHTML = '';
-                    let firstCode = null;
-                    if (grouped[mkid]) {
-                        grouped[mkid].kunnat.forEach(item => {
-                            const opt = document.createElement('option');
-                            opt.value = item.stat_code;
-                            opt.textContent = item.kunta + ' (' + item.stat_code + ')';
-                            statSelect.appendChild(opt);
-                            if (!firstCode) firstCode = item.stat_code;
-                        });
-                    }
-                    if (firstCode) fetchAndPopulateVieras(firstCode);
-                }
-                maakuntaSelect.addEventListener('change', updateKuntaSelect);
-                statSelect.addEventListener('change', function() {
+                kuntaSelect.addEventListener('change', function() {
                     fetchAndPopulateVieras(this.value);
                 });
-                // Init with first maakunta
-                if (maakuntaSelect.options.length > 0) {
-                    maakuntaSelect.selectedIndex = 0;
-                    updateKuntaSelect();
-                }
+                if (firstCode) fetchAndPopulateVieras(firstCode);
             });
         document.getElementById('vieras-sektori-select').addEventListener('change', function() {
             const statCode = document.getElementById('vieras-statcode-select').value;
