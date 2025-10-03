@@ -444,64 +444,116 @@
 
 
 
-<!-- Vieraskieliset opiskelijat - embedded Chart.js line chart (not mixed with iframe) -->
+<!-- Vieraskieliset opiskelijat - embedded Chart.js line chart with stat_code and sektori selection -->
 <div class="centerContainer" style="margin-bottom: 32px;">
-    <h2>Vieraskieliset opiskelijat Hämeessä (tilastovuosi)</h2>
+    <h2>Vieraskieliset opiskelijat Hämeessä (valitse alue ja sektori)</h2>
+    <div style="margin-bottom: 12px; text-align:center;">
+        <label for="vieras-statcode-select">Alue (stat_code): </label>
+        <select id="vieras-statcode-select"></select>
+        <label for="vieras-sektori-select" style="margin-left:18px;">Sektori: </label>
+        <select id="vieras-sektori-select"></select>
+    </div>
     <div style="width: 100%; max-width: 700px; margin: 0 auto; background: #fff; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); padding: 18px 12px 8px 12px;">
         <canvas id="vieraskieliset-linechart-embed" width="650" height="320"></canvas>
         <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Vieraskieliset, ulkomaiset ja kaikki opiskelijat Hämeessä</div>
     </div>
     <script>
-    // Embedded line chart for vieraskieliset (not mixed with iframe)
-    document.addEventListener('DOMContentLoaded', function() {
-        fetch('vieraskieliset_historia.php?stat_code=SSS')
-            .then(resp => resp.json())
-            .then(data => {
-                const ctx = document.getElementById('vieraskieliset-linechart-embed').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.years,
-                        datasets: [
-                            {
-                                label: 'Yhteensä',
-                                data: data.yhteensa,
-                                borderColor: '#0077cc',
-                                backgroundColor: 'rgba(0,119,204,0.08)',
-                                fill: false,
-                                pointRadius: 3,
-                                tension: 0.15
-                            },
-                            {
-                                label: 'Ulkomaiset',
-                                data: data.ulkomaiset,
-                                borderColor: '#cc3300',
-                                backgroundColor: 'rgba(204,51,0,0.08)',
-                                fill: false,
-                                pointRadius: 3,
-                                tension: 0.15
-                            },
-                            {
-                                label: 'Vieraskieliset',
-                                data: data.vieraskieliset,
-                                borderColor: '#009933',
-                                backgroundColor: 'rgba(0,153,51,0.08)',
-                                fill: false,
-                                pointRadius: 3,
-                                tension: 0.15
-                            }
-                        ]
+    // Vieraskieliset chart with stat_code and sektori selection
+    let vierasChart = null;
+    let vierasDataCache = {};
+    function updateVierasChart(statCode, sektori) {
+        const ctx = document.getElementById('vieraskieliset-linechart-embed').getContext('2d');
+        if (!vierasDataCache[statCode]) return;
+        const data = vierasDataCache[statCode].data[sektori];
+        if (!data) return;
+        if (vierasChart) { vierasChart.destroy(); }
+        vierasChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: data.years,
+                datasets: [
+                    {
+                        label: 'Yhteensä',
+                        data: data.yhteensa,
+                        borderColor: '#0077cc',
+                        backgroundColor: 'rgba(0,119,204,0.08)',
+                        fill: false,
+                        pointRadius: 3,
+                        tension: 0.15
                     },
-                    options: {
-                        responsive: false,
-                        plugins: { legend: { display: true, position: 'top' } },
-                        scales: {
-                            x: { title: { display: true, text: 'Vuosi' } },
-                            y: { title: { display: true, text: 'Opiskelijoita' }, beginAtZero: true }
-                        }
+                    {
+                        label: 'Ulkomaiset',
+                        data: data.ulkomaiset,
+                        borderColor: '#cc3300',
+                        backgroundColor: 'rgba(204,51,0,0.08)',
+                        fill: false,
+                        pointRadius: 3,
+                        tension: 0.15
+                    },
+                    {
+                        label: 'Vieraskieliset',
+                        data: data.vieraskieliset,
+                        borderColor: '#009933',
+                        backgroundColor: 'rgba(0,153,51,0.08)',
+                        fill: false,
+                        pointRadius: 3,
+                        tension: 0.15
                     }
+                ]
+            },
+            options: {
+                responsive: false,
+                plugins: { legend: { display: true, position: 'top' } },
+                scales: {
+                    x: { title: { display: true, text: 'Vuosi' } },
+                    y: { title: { display: true, text: 'Opiskelijoita' }, beginAtZero: true }
+                }
+            }
+        });
+    }
+    function fetchAndPopulateVieras(statCode) {
+        fetch('vieraskieliset_historia.php?stat_code=' + encodeURIComponent(statCode))
+            .then(resp => resp.json())
+            .then(res => {
+                vierasDataCache[statCode] = res;
+                const sektoriSelect = document.getElementById('vieras-sektori-select');
+                sektoriSelect.innerHTML = '';
+                const sektorit = Object.keys(res.data);
+                sektorit.forEach(sektori => {
+                    const opt = document.createElement('option');
+                    opt.value = sektori;
+                    opt.textContent = sektori;
+                    sektoriSelect.appendChild(opt);
                 });
+                if (sektorit.length > 0) {
+                    updateVierasChart(statCode, sektorit[0]);
+                }
             });
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Populate stat_code select
+        fetch('vieraskieliset_historia.php?list_stat_codes=1')
+            .then(resp => resp.json())
+            .then(res => {
+                const statSelect = document.getElementById('vieras-statcode-select');
+                statSelect.innerHTML = '';
+                res.stat_codes.forEach(code => {
+                    const opt = document.createElement('option');
+                    opt.value = code;
+                    opt.textContent = code;
+                    statSelect.appendChild(opt);
+                });
+                if (res.stat_codes.length > 0) {
+                    fetchAndPopulateVieras(res.stat_codes[0]);
+                }
+            });
+        document.getElementById('vieras-statcode-select').addEventListener('change', function() {
+            fetchAndPopulateVieras(this.value);
+        });
+        document.getElementById('vieras-sektori-select').addEventListener('change', function() {
+            const statCode = document.getElementById('vieras-statcode-select').value;
+            updateVierasChart(statCode, this.value);
+        });
     });
     </script>
     <p style="text-align:center;">Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset ja ulkomaalaiset opiskelijat koulutusalueen ja koulutussektorin mukaan, 2004-2023</p>
