@@ -463,10 +463,36 @@
     let vierasDataCache = {};
     function updateVierasChart(statCode, sektori) {
         const ctx = document.getElementById('vieraskieliset-linechart-embed').getContext('2d');
-        if (!vierasDataCache[statCode]) return;
-        const data = vierasDataCache[statCode].data[sektori];
-        if (!data) return;
         if (vierasChart) { vierasChart.destroy(); }
+        if (!vierasDataCache[statCode] || !vierasDataCache[statCode].data[sektori]) {
+            // Show empty chart with 'Ei dataa'
+            vierasChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: []
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: false },
+                        title: {
+                            display: true,
+                            text: 'Ei dataa valitulle alueelle/sektorille',
+                            color: '#cc3300',
+                            font: { size: 18 }
+                        }
+                    },
+                    scales: {
+                        x: { display: false },
+                        y: { display: false }
+                    }
+                }
+            });
+            return;
+        }
+        const data = vierasDataCache[statCode].data[sektori];
         vierasChart = new Chart(ctx, {
             type: 'line',
             data: {
