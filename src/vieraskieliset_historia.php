@@ -1,3 +1,4 @@
+
 <?php
 // vieraskieliset_historia.php
 // Palauttaa JSON: tilastovuosi (vuosi), yhteensa, ulkomaiset, vieraskieliset - embedded line chartia varten
@@ -6,6 +7,22 @@ require_once "db.php";
 
 
 $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : 'SSS'; // default: koko maa/alue
+
+// Jos pyydetään viimeisin päivitysaika (timestamp)
+if (isset($_GET['get_last_update'])) {
+    try {
+        $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
+        $stmt = $pdo->query("SELECT MAX(timestamp) as last_update FROM Vieraskieliset");
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $lastUpdate = $row && $row['last_update'] ? $row['last_update'] : null;
+        echo json_encode(['last_update' => $lastUpdate], JSON_UNESCAPED_UNICODE);
+        exit;
+    } catch (Exception $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Tietokantavirhe', 'details' => $e->getMessage()]);
+        exit;
+    }
+}
 
 // Jos pyydetään stat_code-listaa (dropdownia varten)
 if (isset($_GET['list_stat_codes'])) {
@@ -32,7 +49,7 @@ if (isset($_GET['list_stat_codes'])) {
         foreach ($maakuntaStatCodes as $code => $info) {
             $maakunnat['maakunta']['kunnat'][] = [
                 'stat_code' => $code,
-                'kunta' => $info['maakunta_nimi'] . ' (maakunta)'
+                'kunta' => $info['maakunta_nimi'] 
             ];
         }
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {

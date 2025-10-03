@@ -446,9 +446,9 @@
 
 <!-- Vieraskieliset opiskelijat - embedded Chart.js line chart with stat_code and sektori selection -->
 <div class="centerContainer" style="margin-bottom: 32px;">
-    <h2>Vieraskieliset opiskelijat Hämeessä (valitse alue ja sektori)</h2>
+    <h2>Vieraskielisten opiskelijoiden osuudet</h2>
     <div style="margin-bottom: 12px; text-align:center;">
-        <label for="vieras-kunta-select">Maakunta ja kunta: </label>
+        <label for="vieras-kunta-select">Valitse alue: </label>
         <select id="vieras-kunta-select"></select>
         <label for="vieras-sektori-select" style="margin-left:18px;">Sektori: </label>
         <select id="vieras-sektori-select"></select>
@@ -635,7 +635,24 @@
         });
     });
     </script>
-    <p style="text-align:center;">Lähde: Tilastokeskus: 11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset ja ulkomaalaiset opiskelijat koulutusalueen ja koulutussektorin mukaan, 2004-2023</p>
+                    <p>Lähde: <a
+                        href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__opiskt/statfin_opiskt_pxt_11c4.px/"
+                        target="_blank"
+                        title="11c4 -- Tutkintotavoitteisen koulutuksen vieraskieliset ja ulkomaalaiset opiskelijat koulutusalueen ja koulutussektorin mukaan, 2004-2023">
+                        Tilastokeskus: 11c4</a>, viimeisin tilasto tarkistettu lähteestä <b>
+                        <span id="stat-paivitys-X">...</span></b>
+                        <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            fetch('vieraskieliset_historia.php?get_last_update=1')
+                                .then(resp => resp.json())
+                                .then(res => {
+                                    if (res && res.last_update) {
+                                        document.getElementById('stat-paivitys-X').textContent = res.last_update;
+                                    }
+                                });
+                        });
+                        </script>
+    </p>
 </div>
 
 
