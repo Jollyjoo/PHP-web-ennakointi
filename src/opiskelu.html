@@ -570,6 +570,11 @@
                 const sektoriSelect = document.getElementById('vieras-sektori-select');
                 sektoriSelect.innerHTML = '';
                 const sektorit = Object.keys(res.data);
+                if (sektorit.length === 0) {
+                    // No sektorit, clear chart and sektori select
+                    updateVierasChart(statCode, '');
+                    return;
+                }
                 let selectedSektori = vierasLastSektori[statCode] && sektorit.includes(vierasLastSektori[statCode]) ? vierasLastSektori[statCode] : sektorit[0];
                 sektorit.forEach(sektori => {
                     const opt = document.createElement('option');
