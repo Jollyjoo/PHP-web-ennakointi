@@ -19,7 +19,7 @@
 header('Content-Type: application/json; charset=utf-8');
 
 // Use db.php for connection variables, then create PDO
-require_once '/cgi-bin/db.php';
+require_once '/../cgi-bin/db.php';
 if (!isset($pdo)) {
     $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
 }
