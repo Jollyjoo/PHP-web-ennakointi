@@ -33,11 +33,9 @@ $maakunta_id = isset($_GET['maakunta_id']) ? $_GET['maakunta_id'] : null;
 $where = '';
 $params = [];
 if ($maakunta_id === '1') {
-    $where = 'WHERE Maakunta_ID = 1 AND Maakunta_ID IS NOT NULL';
-    $params[] = 1;
+    $where = 'WHERE Maakunta_ID = 1';
 } elseif ($maakunta_id === '2') {
-    $where = 'WHERE Maakunta_ID = 2 AND Maakunta_ID IS NOT NULL';
-    $params[] = 2;
+    $where = 'WHERE Maakunta_ID = 2';
 } else {
     $where = 'WHERE Maakunta_ID IS NOT NULL';
 }
@@ -52,7 +50,7 @@ $sql = "SELECT Aika, stat_label AS kunta_nimi, SUM(tyottomatlopussa) AS tyottoma
     ORDER BY Aika, stat_label";
 
 $stmt = $pdo->prepare($sql);
-$stmt->execute($params);
+$stmt->execute();
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $labels = [];
