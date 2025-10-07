@@ -38,6 +38,8 @@ if ($maakunta_id === '1') {
 } elseif ($maakunta_id === '2') {
     $where = 'WHERE Maakunta_ID = 2 AND Maakunta_ID IS NOT NULL';
     $params[] = 2;
+} else {
+    $where = 'WHERE Maakunta_ID IS NOT NULL';
 }
 
 
