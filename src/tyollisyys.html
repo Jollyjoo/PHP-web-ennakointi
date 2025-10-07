@@ -551,7 +551,35 @@
                         id="avoimet-toimiala-update">...</span></b></p>
 
 
-        <!-- Uusi Chart.js: Työttömät työnhakijat kunnittain -->
+            <!-- 
+            <br><br> <br>
+            <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>          
+            <div class="swiper">               
+                <div class="swiper-wrapper">                  
+                    <div class="swiper-slide" align="center" max-width="50%">
+                        <div class="flourish-embed flourish-chart" data-src="visualisation/22517240">
+                            <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
+                                    src="https://public.flourish.studio/visualisation/22517240/thumbnail"
+                                    alt="chart visualization" /></noscript>
+                        </div>
+                    </div>
+                    <div class="swiper-slide" id="bookmark4">
+                        <div class="flourish-embed flourish-chart" data-src="visualisation/22517613">
+                            <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
+                                    src="https://public.flourish.studio/visualisation/22517613/thumbnail"
+                                    alt="chart visualization" /></noscript>
+                        </div>
+                    </div>
+                </div>            
+                <div class="swiper-pagination"></div>
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>
+            </div> -->
+
+
+
+
+<!-- Uusi Chart.js: Työttömät työnhakijat kunnittain -->
 
 <br><br>
 <div id="bookmark-tyottomat" style="max-width:1240px;margin:0 auto 40px auto;background:#ffffff;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
@@ -602,21 +630,12 @@ function renderTyottomatChart(data, chartType = 'bar') {
     }
     // Add comparison line for ulkomaalaiset työttömät (tyottomatulk)
     if (data.ulkomaalaiset_sum) {
-        // Pad with zeros to match bar chart stacking (start from zero)
-        const ulkomaalaisetData = data.ulkomaalaiset_sum.map((v, i) => {
-            // If all bar datasets are zero at this index, force ulkomaalaiset to zero too
-            let barSum = 0;
-            data.datasets.forEach(ds => {
-                if (!ds.type || ds.type !== 'line') barSum += ds.data[i] || 0;
-            });
-            return barSum === 0 ? 0 : v;
-        });
         data.datasets.push({
             label: 'Ulkomaalaiset työttömät (kaikki alueet)',
-            data: ulkomaalaisetData,
+            data: data.ulkomaalaiset_sum,
             type: 'line',
             borderColor: '#ff00cc',
-            backgroundColor: 'rgba(0,0,0,0)', // No area fill
+            backgroundColor: 'rgba(255,0,204,0.08)',
             borderWidth: 3,
             pointRadius: 3,
             fill: false,
@@ -1286,13 +1305,11 @@ document.addEventListener('DOMContentLoaded', function() {
                                             },
                                             options: {
                                                 responsive: false,
-                                                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                                plugins: { legend: { display: false } },
                                                 scales: {
-                                                    x: { display: false },
-                                                    y: { display: false, min: minY, max: maxY }
-                                                },
-                                                elements: { line: { borderCapStyle: 'round' } },
-                                                layout: { padding: 0 },
+                                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                                    y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
+                                                }
                                             }
                                         });
                                     });
@@ -1304,298 +1321,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         phTyottomatSpan.addEventListener('mouseout', function () {
                             phTyottomatChartPopup.style.display = 'none';
                         });
-                    });
-               
-                    // Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot sekä summary
-                    fetch('tyollisyys.php')
-                        .then(resp => resp.json())
-                        .then(data => {
-                            if (data.maakunnat && data.maakunnat['MK07'] && data.maakunnat['MK05']) {
-                                // Päivitetään aikaleimat
-                                document.getElementById('stat-aika').textContent = data.aika;
-                                document.getElementById('stat-aika2').textContent = data.aika;
-                                document.getElementById('stat-aika3').textContent = data.aika;
-                                // Päivitetään päivitysaika
-                                if (data.paivitys) {
-                                    document.getElementById('stat-paivitys').textContent = data.paivitys;
-                                    var statPaivitys2 = document.getElementById('stat-paivitys-2');
-                                    if (statPaivitys2) statPaivitys2.textContent = data.paivitys;
-                                }
-                                // Päijät-Häme
-                                document.getElementById('ph-osuus').textContent = data.maakunnat['MK07'].tyottomien_osuus;
-                                document.getElementById('ph-avoimet').textContent = data.maakunnat['MK07'].uudet_avopaikat;
-                                document.getElementById('ph-tyottomat').textContent = data.maakunnat['MK07'].tyottomat_yht;
-                                // Kanta-Häme
-                                document.getElementById('kh-osuus').textContent = data.maakunnat['MK05'].tyottomien_osuus;
-                                document.getElementById('kh-avoimet').textContent = data.maakunnat['MK05'].uudet_avopaikat;
-                                document.getElementById('kh-tyottomat').textContent = data.maakunnat['MK05'].tyottomat_yht;
-                                // Rakennetaan summary dynaamisesti ELY04 ja SSS arvoilla
-                                if (data.maakunnat['ELY04'] && data.maakunnat['SSS']) {
-                                    const ely = data.maakunnat['ELY04'];
-                                    const sss = data.maakunnat['SSS'];
-                                    // Muunna aika (esim. 2025M06 -> kesäkuu 2025)
-                                    function formatAika(aika) {
-                                        const kuukausiNimet = ['tammikuu', 'helmikuu', 'maaliskuu', 'huhtikuu', 'toukokuu', 'kesäkuu', 'heinäkuu', 'elokuu', 'syyskuu', 'lokakuu', 'marraskuu', 'joulukuu'];
-                                        const match = aika.match(/(\d{4})M(\d{2})/);
-                                        if (match) {
-                                            const vuosi = match[1];
-                                            const kk = parseInt(match[2], 10);
-                                            const kuukausi = kuukausiNimet[kk - 1] || kk;
-                                            return `${kuukausi} ${vuosi}`;
-                                        }
-                                        return aika;
-                                    }
-                                    const aikaTeksti = formatAika(data.aika);
-                                    document.getElementById('tyollisyys-summary').innerHTML =
-                                        `<b>${aikaTeksti}</b>: Hämeen ELY-alueella työttömyysaste oli <span id="ely-tyottomyysaste" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${ely.tyottomien_osuus} %</span>, (koko maa <span id="sss-tyottomyysaste" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${sss.tyottomien_osuus} %</span>). ` +
-                                        `Työttömiä työnhakijoita oli <span id="ely-tyottomat" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${ely.tyottomat_yht}</span>.`;
 
-
-
-                                    // --- Popup chart logic for summary values ---
-                                    setTimeout(function () {
-                                        // ELY työttömyysaste
-                                        const elyTyottomyysSpan = document.getElementById('ely-tyottomyysaste');
-                                        if (elyTyottomyysSpan) {
-                                            let popup = document.createElement('div');
-                                            popup.id = 'ely-tyottomyysaste-popup';
-                                            popup.style.display = 'none';
-                                            popup.style.position = 'fixed';
-                                            popup.style.zIndex = '1000';
-                                            popup.style.background = '#fff';
-                                            popup.style.border = '1px solid #ccc';
-                                            popup.style.padding = '10px';
-                                            popup.style.borderRadius = '8px';
-                                            popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-                                            popup.innerHTML = '<canvas id="ely-tyottomyysaste-chart" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">ELY-alueen työttömyysaste - 24kk</div>';
-                                            document.body.appendChild(popup);
-                                            let chartInstance = null;
-                                            elyTyottomyysSpan.addEventListener('mouseover', function (e) {
-                                                popup.style.display = 'block';
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                                if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=ELY04&field=tyottomien_osuus&limit=24')
-                                                        .then(resp => resp.json())
-                                                        .then(hist => {
-                                                            const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                                                                const kk = parseInt(m.slice(1), 10);
-                                                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                                                            }));
-                                                            const data = hist.data;
-                                                            const minY = Math.floor(Math.min(...data) - 1);
-                                                            const maxY = Math.ceil(Math.max(...data) + 1);
-                                                            const ctx = document.getElementById('ely-tyottomyysaste-chart').getContext('2d');
-                                                            chartInstance = new Chart(ctx, {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels: labels,
-                                                                    datasets: [{
-                                                                        label: 'Työttömyysaste (%)',
-                                                                        data: data,
-                                                                        borderColor: '#0077cc',
-                                                                        backgroundColor: 'rgba(0,119,204,0.1)',
-                                                                        fill: true,
-                                                                        pointRadius: 3
-                                                                    }]
-                                                                },
-                                                                options: {
-                                                                    responsive: false,
-                                                                    plugins: { legend: { display: false } },
-                                                                    scales: {
-                                                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                                                        y: { title: { display: true, text: '%' }, min: minY, max: maxY }
-                                                                    }
-                                                                }
-                                                            });
-                                                        });
-                                                }
-                                            });
-                                            elyTyottomyysSpan.addEventListener('mousemove', function (e) {
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                            });
-                                            elyTyottomyysSpan.addEventListener('mouseout', function () {
-                                                popup.style.display = 'none';
-                                            });
-                                        }
-                                        // SSS työttömyysaste
-                                        const sssTyottomyysSpan = document.getElementById('sss-tyottomyysaste');
-                                        if (sssTyottomyysSpan) {
-                                            let popup = document.createElement('div');
-                                            popup.id = 'sss-tyottomyysaste-popup';
-                                            popup.style.display = 'none';
-                                            popup.style.position = 'fixed';
-                                            popup.style.zIndex = '1000';
-                                            popup.style.background = '#fff';
-                                            popup.style.border = '1px solid #ccc';
-                                            popup.style.padding = '10px';
-                                            popup.style.borderRadius = '8px';
-                                            popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-                                            popup.innerHTML = '<canvas id="sss-tyottomyysaste-chart" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Koko maan työttömyysaste - 24kk</div>';
-                                            document.body.appendChild(popup);
-                                            let chartInstance = null;
-                                            sssTyottomyysSpan.addEventListener('mouseover', function (e) {
-                                                popup.style.display = 'block';
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                                if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=SSS&field=tyottomien_osuus&limit=24')
-                                                        .then(resp => resp.json())
-                                                        .then(hist => {
-                                                            const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                                                                const kk = parseInt(m.slice(1), 10);
-                                                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                                                            }));
-                                                            const data = hist.data;
-                                                            const minY = Math.floor(Math.min(...data) - 1);
-                                                            const maxY = Math.ceil(Math.max(...data) + 1);
-                                                            const ctx = document.getElementById('sss-tyottomyysaste-chart').getContext('2d');
-                                                            chartInstance = new Chart(ctx, {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels: labels,
-                                                                    datasets: [{
-                                                                        label: 'Työttömyysaste (%)',
-                                                                        data: data,
-                                                                        borderColor: '#009933',
-                                                                        backgroundColor: 'rgba(0,153,51,0.1)',
-                                                                        fill: true,
-                                                                        pointRadius: 3
-                                                                    }]
-                                                                },
-                                                                options: {
-                                                                    responsive: false,
-                                                                    plugins: { legend: { display: false } },
-                                                                    scales: {
-                                                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                                                        y: { title: { display: true, text: '%' }, min: minY, max: maxY }
-                                                                    }
-                                                                }
-                                                            });
-                                                        });
-                                                }
-                                            });
-                                            sssTyottomyysSpan.addEventListener('mousemove', function (e) {
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                            });
-                                            sssTyottomyysSpan.addEventListener('mouseout', function () {
-                                                popup.style.display = 'none';
-                                            });
-                                        }
-                                        // ELY työttömät työnhakijat
-                                        const elyTyottomatSpan = document.getElementById('ely-tyottomat');
-                                        if (elyTyottomatSpan) {
-                                            let popup = document.createElement('div');
-                                            popup.id = 'ely-tyottomat-popup';
-                                            popup.style.display = 'none';
-                                            popup.style.position = 'fixed';
-                                            popup.style.zIndex = '1000';
-                                            popup.style.background = '#fff';
-                                            popup.style.border = '1px solid #ccc';
-                                            popup.style.padding = '10px';
-                                            popup.style.borderRadius = '8px';
-                                            popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-                                            popup.innerHTML = '<canvas id="ely-tyottomat-chart" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">ELY-alueen työttömät työnhakijat - 24kk</div>';
-                                            document.body.appendChild(popup);
-                                            let chartInstance = null;
-                                            elyTyottomatSpan.addEventListener('mouseover', function (e) {
-                                                popup.style.display = 'block';
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                                if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=ELY04&field=tyottomatlopussa&limit=24')
-                                                        .then(resp => resp.json())
-                                                        .then(hist => {
-                                                            const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                                                                const kk = parseInt(m.slice(1), 10);
-                                                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                                                            }));
-                                                            const data = hist.data;
-                                                            const minY = Math.floor(Math.min(...data) - 1);
-                                                            const maxY = Math.ceil(Math.max(...data) + 1);
-                                                            const ctx = document.getElementById('ely-tyottomat-chart').getContext('2d');
-                                                            chartInstance = new Chart(ctx, {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels: labels,
-                                                                    datasets: [{
-                                                                        label: 'Työttömät työnhakijat',
-                                                                        data: data,
-                                                                        borderColor: '#cc3300',
-                                                                        backgroundColor: 'rgba(204,51,0,0.1)',
-                                                                        fill: true,
-                                                                        pointRadius: 3
-                                                                    }]
-                                                                },
-                                                                options: {
-                                                                    responsive: false,
-                                                                    plugins: { legend: { display: false } },
-                                                                    scales: {
-                                                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                                                        y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
-                                                                    }
-                                                                }
-                                                            });
-                                                        });
-                                                }
-                                            });
-                                            elyTyottomatSpan.addEventListener('mousemove', function (e) {
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                            });
-                                            elyTyottomatSpan.addEventListener('mouseout', function () {
-                                                popup.style.display = 'none';
-                                            });
-                                        }
-                                    }, 0);
-                                }
-                            }
-                        })
-                        .catch(e => { /* virheenkäsittely, esim. näytä virheilmoitus */ });
-
-                    // Chart popup logic for ph-osuus
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Chart popup logic for Päijät-Häme työttömät työnhakijat
-                        const phTyottomatSpan = document.getElementById('ph-tyottomat');
-                        const phTyottomatChartPopup = document.getElementById('ph-tyottomat-chart-popup');
-                        let phTyottomatChartInstance = null;
-                        phTyottomatChartPopup.style.position = 'fixed';
-                        function positionPhTyottomatChartPopup(e) {
+                        // Chart popup logic for Kanta-Häme työttömät työnhakijat
+                        const khTyottomatSpan = document.getElementById('kh-tyottomat');
+                        const khTyottomatChartPopup = document.getElementById('kh-tyottomat-chart-popup');
+                        let khTyottomatChartInstance = null;
+                        khTyottomatChartPopup.style.position = 'fixed';
+                        function positionKhTyottomatChartPopup(e) {
                             const popupWidth = 400;
                             const popupHeight = 220;
                             let x = e.clientX - 50;
@@ -1604,36 +1336,36 @@ document.addEventListener('DOMContentLoaded', function() {
                             if (x < 8) x = 8;
                             if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
                             if (y < 8) y = 8;
-                            phTyottomatChartPopup.style.left = x + 'px';
-                            phTyottomatChartPopup.style.top = y + 'px';
+                            khTyottomatChartPopup.style.left = x + 'px';
+                            khTyottomatChartPopup.style.top = y + 'px';
                         }
-                        let phTyottomatChartDataLoaded = false;
-                        let phTyottomatChartLabels = [];
-                        let phTyottomatChartData = [];
-                        phTyottomatSpan.addEventListener('mouseover', function (e) {
-                            phTyottomatChartPopup.style.display = 'block';
-                            positionPhTyottomatChartPopup(e);
-                            if (!phTyottomatChartDataLoaded) {
-                                fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa')
+                        let khTyottomatChartDataLoaded = false;
+                        let khTyottomatChartLabels = [];
+                        let khTyottomatChartData = [];
+                        khTyottomatSpan.addEventListener('mouseover', function (e) {
+                            khTyottomatChartPopup.style.display = 'block';
+                            positionKhTyottomatChartPopup(e);
+                            if (!khTyottomatChartDataLoaded) {
+                                fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa')
                                     .then(resp => resp.json())
                                     .then(hist => {
-                                        phTyottomatChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                                        khTyottomatChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
                                             const kk = parseInt(m.slice(1), 10);
                                             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
                                             return ' ' + (kuukausiNimet[kk - 1] || m);
                                         }));
-                                        phTyottomatChartData = hist.data;
-                                        phTyottomatChartDataLoaded = true;
-                                        const minY = Math.floor(Math.min(...phTyottomatChartData) - 1);
-                                        const maxY = Math.ceil(Math.max(...phTyottomatChartData) + 1);
-                                        const ctx = document.getElementById('ph-tyottomat-chart').getContext('2d');
-                                        phTyottomatChartInstance = new Chart(ctx, {
+                                        khTyottomatChartData = hist.data;
+                                        khTyottomatChartDataLoaded = true;
+                                        const minY = Math.floor(Math.min(...khTyottomatChartData) - 1);
+                                        const maxY = Math.ceil(Math.max(...khTyottomatChartData) + 1);
+                                        const ctx = document.getElementById('kh-tyottomat-chart').getContext('2d');
+                                        khTyottomatChartInstance = new Chart(ctx, {
                                             type: 'line',
                                             data: {
-                                                labels: phTyottomatChartLabels,
+                                                labels: khTyottomatChartLabels,
                                                 datasets: [{
                                                     label: 'Työttömät työnhakijat',
-                                                    data: phTyottomatChartData,
+                                                    data: khTyottomatChartData,
                                                     borderColor: '#cc3300',
                                                     backgroundColor: 'rgba(204,51,0,0.1)',
                                                     fill: true,
@@ -1642,460 +1374,309 @@ document.addEventListener('DOMContentLoaded', function() {
                                             },
                                             options: {
                                                 responsive: false,
-                                                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                                plugins: { legend: { display: false } },
                                                 scales: {
-                                                    x: { display: false },
-                                                    y: { display: false, min: minY, max: maxY }
-                                                },
-                                                elements: { line: { borderCapStyle: 'round' } },
-                                                layout: { padding: 0 },
+                                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                                    y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
+                                                }
                                             }
                                         });
                                     });
                             }
                         });
-                        phTyottomatSpan.addEventListener('mousemove', function (e) {
-                            positionPhTyottomatChartPopup(e);
+                        khTyottomatSpan.addEventListener('mousemove', function (e) {
+                            positionKhTyottomatChartPopup(e);
                         });
-                        phTyottomatSpan.addEventListener('mouseout', function () {
-                            phTyottomatChartPopup.style.display = 'none';
+                        khTyottomatSpan.addEventListener('mouseout', function () {
+                            khTyottomatChartPopup.style.display = 'none';
                         });
-                    });
-                </script>
-
-                <script>
-                    // Pienet upotetut sparkline-kaaviot ph-osuus ja kh-osuus
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Päijät-Häme sparkline
-                        const phCanvas = document.getElementById('tyollisyys-embed-chart');
-                        if (phCanvas) {
-                            fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomien_osuus&limit=24')
-                                .then(resp => resp.json())
-                                .then(data => {
-                                    if (!data || !data.labels || !data.data) return;
-                                    const labels = data.labels.slice(-24);
-                                    const values = data.data.slice(-24);
-                                    const minY = Math.floor(Math.min(...values));
-                                    const maxY = Math.ceil(Math.max(...values));
-                                    new Chart(phCanvas.getContext('2d'), {
-                                        type: 'line',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                data: values,
-                                                borderColor: '#009933',
-                                                backgroundColor: 'rgba(0,153,51,0.10)',
-                                                fill: true,
-                                                pointRadius: 0,
-                                                borderWidth: 2,
-                                                tension: 0.4
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: false,
-                                            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                                            scales: {
-                                                x: { display: false },
-                                                y: { display: false, min: minY, max: maxY }
-                                            },
-                                            elements: { line: { borderCapStyle: 'round' } },
-                                            layout: { padding: 0 },
-                                        }
-                                    });
-                                });
-                        }
-                        // Kanta-Häme sparkline
-                        const khCanvas = document.getElementById('kh-embed-chart');
-                        if (khCanvas) {
-                            fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomien_osuus&limit=24')
-                                .then(resp => resp.json())
-                                .then(data => {
-                                    if (!data || !data.labels || !data.data) return;
-                                    const labels = data.labels.slice(-24);
-                                    const values = data.data.slice(-24);
-                                    const minY = Math.floor(Math.min(...values));
-                                    const maxY = Math.ceil(Math.max(...values));
-                                    new Chart(khCanvas.getContext('2d'), {
-                                        type: 'line',
-                                        data: {
-                                            labels: labels,
-                                            datasets: [{
-                                                data: values,
-                                                borderColor: '#3366cc',
-                                                backgroundColor: 'rgba(51,102,204,0.10)',
-                                                fill: true,
-                                                pointRadius: 0,
-                                                borderWidth: 2,
-                                                tension: 0.4
-                                            }]
-                                        },
-                                        options: {
-                                            responsive: false,
-                                            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-                                            scales: {
-                                                x: { display: false },
-                                                y: { display: false, min: minY, max: maxY }
-                                            },
-                                            elements: { line: { borderCapStyle: 'round' } },
-                                            layout: { padding: 0 },
-                                        }
-                                    });
-                                });
-                        }
-                    });
-                    // Haetaan työllisyystilastot dynaamisesti PHP:sta ja päivitetään laatikot sekä summary
-                    fetch('tyollisyys.php')
-                        .then(resp => resp.json())
-                        .then(data => {
-                            if (data.maakunnat && data.maakunnat['MK07'] && data.maakunnat['MK05']) {
-                                // Päivitetään aikaleimat
-                                document.getElementById('stat-aika').textContent = data.aika;
-                                document.getElementById('stat-aika2').textContent = data.aika;
-                                document.getElementById('stat-aika3').textContent = data.aika;
-                                // Päivitetään päivitysaika
-                                if (data.paivitys) {
-                                    document.getElementById('stat-paivitys').textContent = data.paivitys;
-                                    var statPaivitys2 = document.getElementById('stat-paivitys-2');
-                                    if (statPaivitys2) statPaivitys2.textContent = data.paivitys;
-                                }
-                                // Päijät-Häme
-                                document.getElementById('ph-osuus').textContent = data.maakunnat['MK07'].tyottomien_osuus;
-                                document.getElementById('ph-avoimet').textContent = data.maakunnat['MK07'].uudet_avopaikat;
-                                document.getElementById('ph-tyottomat').textContent = data.maakunnat['MK07'].tyottomat_yht;
-                                // Kanta-Häme
-                                document.getElementById('kh-osuus').textContent = data.maakunnat['MK05'].tyottomien_osuus;
-                                document.getElementById('kh-avoimet').textContent = data.maakunnat['MK05'].uudet_avopaikat;
-                                document.getElementById('kh-tyottomat').textContent = data.maakunnat['MK05'].tyottomat_yht;
-                                // Rakennetaan summary dynaamisesti ELY04 ja SSS arvoilla
-                                if (data.maakunnat['ELY04'] && data.maakunnat['SSS']) {
-                                    const ely = data.maakunnat['ELY04'];
-                                    const sss = data.maakunnat['SSS'];
-                                    // Muunna aika (esim. 2025M06 -> kesäkuu 2025)
-                                    function formatAika(aika) {
-                                        const kuukausiNimet = ['tammikuu', 'helmikuu', 'maaliskuu', 'huhtikuu', 'toukokuu', 'kesäkuu', 'heinäkuu', 'elokuu', 'syyskuu', 'lokakuu', 'marraskuu', 'joulukuu'];
-                                        const match = aika.match(/(\d{4})M(\d{2})/);
-                                        if (match) {
-                                            const vuosi = match[1];
-                                            const kk = parseInt(match[2], 10);
-                                            const kuukausi = kuukausiNimet[kk - 1] || kk;
-                                            return `${kuukausi} ${vuosi}`;
-                                        }
-                                        return aika;
-                                    }
-                                    const aikaTeksti = formatAika(data.aika);
-                                    document.getElementById('tyollisyys-summary').innerHTML =
-                                        `<b>${aikaTeksti}</b>: Hämeen ELY-alueella työttömyysaste oli <span id="ely-tyottomyysaste" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${ely.tyottomien_osuus} %</span>, (koko maa <span id="sss-tyottomyysaste" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${sss.tyottomien_osuus} %</span>). ` +
-                                        `Työttömiä työnhakijoita oli <span id="ely-tyottomat" style="text-decoration:underline;cursor:pointer;font-weight:bold;">${ely.tyottomat_yht}</span>.`;
-
-
-
-                                    // --- Popup chart logic for summary values ---
-                                    setTimeout(function () {
-                                        // ELY työttömyysaste
-                                        const elyTyottomyysSpan = document.getElementById('ely-tyottomyysaste');
-                                        if (elyTyottomyysSpan) {
-                                            let popup = document.createElement('div');
-                                            popup.id = 'ely-tyottomyysaste-popup';
-                                            popup.style.display = 'none';
-                                            popup.style.position = 'fixed';
-                                            popup.style.zIndex = '1000';
-                                            popup.style.background = '#fff';
-                                            popup.style.border = '1px solid #ccc';
-                                            popup.style.padding = '10px';
-                                            popup.style.borderRadius = '8px';
-                                            popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-                                            popup.innerHTML = '<canvas id="ely-tyottomyysaste-chart" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">ELY-alueen työttömyysaste - 24kk</div>';
-                                            document.body.appendChild(popup);
-                                            let chartInstance = null;
-                                            elyTyottomyysSpan.addEventListener('mouseover', function (e) {
-                                                popup.style.display = 'block';
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                                if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=ELY04&field=tyottomien_osuus&limit=24')
-                                                        .then(resp => resp.json())
-                                                        .then(hist => {
-                                                            const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                                                                const kk = parseInt(m.slice(1), 10);
-                                                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                                                            }));
-                                                            const data = hist.data;
-                                                            const minY = Math.floor(Math.min(...data) - 1);
-                                                            const maxY = Math.ceil(Math.max(...data) + 1);
-                                                            const ctx = document.getElementById('ely-tyottomyysaste-chart').getContext('2d');
-                                                            chartInstance = new Chart(ctx, {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels: labels,
-                                                                    datasets: [{
-                                                                        label: 'Työttömyysaste (%)',
-                                                                        data: data,
-                                                                        borderColor: '#0077cc',
-                                                                        backgroundColor: 'rgba(0,119,204,0.1)',
-                                                                        fill: true,
-                                                                        pointRadius: 3
-                                                                    }]
-                                                                },
-                                                                options: {
-                                                                    responsive: false,
-                                                                    plugins: { legend: { display: false } },
-                                                                    scales: {
-                                                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                                                        y: { title: { display: true, text: '%' }, min: minY, max: maxY }
-                                                                    }
-                                                                }
-                                                            });
-                                                        });
-                                                }
-                                            });
-                                            elyTyottomyysSpan.addEventListener('mousemove', function (e) {
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                            });
-                                            elyTyottomyysSpan.addEventListener('mouseout', function () {
-                                                popup.style.display = 'none';
-                                            });
-                                        }
-                                        // SSS työttömyysaste
-                                        const sssTyottomyysSpan = document.getElementById('sss-tyottomyysaste');
-                                        if (sssTyottomyysSpan) {
-                                            let popup = document.createElement('div');
-                                            popup.id = 'sss-tyottomyysaste-popup';
-                                            popup.style.display = 'none';
-                                            popup.style.position = 'fixed';
-                                            popup.style.zIndex = '1000';
-                                            popup.style.background = '#fff';
-                                            popup.style.border = '1px solid #ccc';
-                                            popup.style.padding = '10px';
-                                            popup.style.borderRadius = '8px';
-                                            popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-                                            popup.innerHTML = '<canvas id="sss-tyottomyysaste-chart" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">Koko maan työttömyysaste - 24kk</div>';
-                                            document.body.appendChild(popup);
-                                            let chartInstance = null;
-                                            sssTyottomyysSpan.addEventListener('mouseover', function (e) {
-                                                popup.style.display = 'block';
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                                if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=SSS&field=tyottomien_osuus&limit=24')
-                                                        .then(resp => resp.json())
-                                                        .then(hist => {
-                                                            const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                                                                const kk = parseInt(m.slice(1), 10);
-                                                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                                                            }));
-                                                            const data = hist.data;
-                                                            const minY = Math.floor(Math.min(...data) - 1);
-                                                            const maxY = Math.ceil(Math.max(...data) + 1);
-                                                            const ctx = document.getElementById('sss-tyottomyysaste-chart').getContext('2d');
-                                                            chartInstance = new Chart(ctx, {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels: labels,
-                                                                    datasets: [{
-                                                                        label: 'Työttömyysaste (%)',
-                                                                        data: data,
-                                                                        borderColor: '#009933',
-                                                                        backgroundColor: 'rgba(0,153,51,0.1)',
-                                                                        fill: true,
-                                                                        pointRadius: 3
-                                                                    }]
-                                                                },
-                                                                options: {
-                                                                    responsive: false,
-                                                                    plugins: { legend: { display: false } },
-                                                                    scales: {
-                                                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                                                        y: { title: { display: true, text: '%' }, min: minY, max: maxY }
-                                                                    }
-                                                                }
-                                                            });
-                                                        });
-                                                }
-                                            });
-                                            sssTyottomyysSpan.addEventListener('mousemove', function (e) {
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                            });
-                                            sssTyottomyysSpan.addEventListener('mouseout', function () {
-                                                popup.style.display = 'none';
-                                            });
-                                        }
-                                        // ELY työttömät työnhakijat
-                                        const elyTyottomatSpan = document.getElementById('ely-tyottomat');
-                                        if (elyTyottomatSpan) {
-                                            let popup = document.createElement('div');
-                                            popup.id = 'ely-tyottomat-popup';
-                                            popup.style.display = 'none';
-                                            popup.style.position = 'fixed';
-                                            popup.style.zIndex = '1000';
-                                            popup.style.background = '#fff';
-                                            popup.style.border = '1px solid #ccc';
-                                            popup.style.padding = '10px';
-                                            popup.style.borderRadius = '8px';
-                                            popup.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
-                                            popup.innerHTML = '<canvas id="ely-tyottomat-chart" width="400" height="180"></canvas><div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">ELY-alueen työttömät työnhakijat - 24kk</div>';
-                                            document.body.appendChild(popup);
-                                            let chartInstance = null;
-                                            elyTyottomatSpan.addEventListener('mouseover', function (e) {
-                                                popup.style.display = 'block';
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                                if (!chartInstance) {
-                                                    fetch('tyollisyys_historia.php?stat_code=ELY04&field=tyottomatlopussa&limit=24')
-                                                        .then(resp => resp.json())
-                                                        .then(hist => {
-                                                            const labels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
-                                                                const kk = parseInt(m.slice(1), 10);
-                                                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
-                                                                return ' ' + (kuukausiNimet[kk - 1] || m);
-                                                            }));
-                                                            const data = hist.data;
-                                                            const minY = Math.floor(Math.min(...data) - 1);
-                                                            const maxY = Math.ceil(Math.max(...data) + 1);
-                                                            const ctx = document.getElementById('ely-tyottomat-chart').getContext('2d');
-                                                            chartInstance = new Chart(ctx, {
-                                                                type: 'line',
-                                                                data: {
-                                                                    labels: labels,
-                                                                    datasets: [{
-                                                                        label: 'Työttömät työnhakijat',
-                                                                        data: data,
-                                                                        borderColor: '#cc3300',
-                                                                        backgroundColor: 'rgba(204,51,0,0.1)',
-                                                                        fill: true,
-                                                                        pointRadius: 3
-                                                                    }]
-                                                                },
-                                                                options: {
-                                                                    responsive: false,
-                                                                    plugins: { legend: { display: false } },
-                                                                    scales: {
-                                                                        x: { title: { display: true, text: 'Kuukausi' } },
-                                                                        y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
-                                                                    }
-                                                                }
-                                                            });
-                                                        });
-                                                }
-                                            });
-                                            elyTyottomatSpan.addEventListener('mousemove', function (e) {
-                                                let x = e.clientX + 40;
-                                                let y = e.clientY - 220;
-                                                if (x + 400 > window.innerWidth) x = window.innerWidth - 408;
-                                                if (x < 8) x = 8;
-                                                if (y < 8) y = 8;
-                                                popup.style.left = x + 'px';
-                                                popup.style.top = y + 'px';
-                                            });
-                                            elyTyottomatSpan.addEventListener('mouseout', function () {
-                                                popup.style.display = 'none';
-                                            });
-                                        }
-                                    }, 0);
-                                }
-                            }
-                        })
-                        .catch(e => { /* virheenkäsittely, esim. näytä virheilmoitus */ });
-
-                    // Chart popup logic for ph-osuus
-                    document.addEventListener('DOMContentLoaded', function () {
-                        // Chart popup logic for Päijät-Häme työttömät työnhakijat
-                        const phTyottomatSpan = document.getElementById('ph-tyottomat');
-                        const phTyottomatChartPopup = document.getElementById('ph-tyottomat-chart-popup');
-                        let phTyottomatChartInstance = null;
-                        phTyottomatChartPopup.style.position = 'fixed';
-                        function positionPhTyottomatChartPopup(e) {
+                        // Chart popup logic for Päijät-Häme avoimet työpaikat
+                        const phAvoimetSpan = document.getElementById('ph-avoimet');
+                        const phAvoimetChartPopup = document.getElementById('ph-avoimet-chart-popup');
+                        let phAvoimetChartInstance = null;
+                        phAvoimetChartPopup.style.position = 'fixed';
+                        function positionPhAvoimetChartPopup(e) {
                             const popupWidth = 400;
                             const popupHeight = 220;
-                            let x = e.clientX - 50;
-                            let y = e.clientY - popupHeight - 30;
+                            let x = e.clientX + 40;
+                            let y = e.clientY - popupHeight;
                             if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
                             if (x < 8) x = 8;
                             if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
                             if (y < 8) y = 8;
-                            phTyottomatChartPopup.style.left = x + 'px';
-                            phTyottomatChartPopup.style.top = y + 'px';
+                            phAvoimetChartPopup.style.left = x + 'px';
+                            phAvoimetChartPopup.style.top = y + 'px';
                         }
-                        let phTyottomatChartDataLoaded = false;
-                        let phTyottomatChartLabels = [];
-                        let phTyottomatChartData = [];
-                        phTyottomatSpan.addEventListener('mouseover', function (e) {
-                            phTyottomatChartPopup.style.display = 'block';
-                            positionPhTyottomatChartPopup(e);
-                            if (!phTyottomatChartDataLoaded) {
-                                fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa')
+                        let phAvoimetChartDataLoaded = false;
+                        let phAvoimetChartLabels = [];
+                        let phAvoimetChartData = [];
+                        phAvoimetSpan.addEventListener('mouseover', function (e) {
+                            phAvoimetChartPopup.style.display = 'block';
+                            positionPhAvoimetChartPopup(e);
+                            if (!phAvoimetChartDataLoaded) {
+                                fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp')
                                     .then(resp => resp.json())
                                     .then(hist => {
-                                        phTyottomatChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                                        phAvoimetChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
                                             const kk = parseInt(m.slice(1), 10);
                                             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
                                             return ' ' + (kuukausiNimet[kk - 1] || m);
                                         }));
-                                        phTyottomatChartData = hist.data;
-                                        phTyottomatChartDataLoaded = true;
-                                        const minY = Math.floor(Math.min(...phTyottomatChartData) - 1);
-                                        const maxY = Math.ceil(Math.max(...phTyottomatChartData) + 1);
-                                        const ctx = document.getElementById('ph-tyottomat-chart').getContext('2d');
-                                        phTyottomatChartInstance = new Chart(ctx, {
+                                        phAvoimetChartData = hist.data;
+                                        phAvoimetChartDataLoaded = true;
+                                        const minY = Math.floor(Math.min(...phAvoimetChartData) - 1);
+                                        const maxY = Math.ceil(Math.max(...phAvoimetChartData) + 1);
+                                        const ctx = document.getElementById('ph-avoimet-chart').getContext('2d');
+                                        phAvoimetChartInstance = new Chart(ctx, {
                                             type: 'line',
                                             data: {
-                                                labels: phTyottomatChartLabels,
+                                                labels: phAvoimetChartLabels,
                                                 datasets: [{
-                                                    label: 'Työttömät työnhakijat',
-                                                    data: phTyottomatChartData,
-                                                    borderColor: '#cc3300',
-                                                    backgroundColor: 'rgba(204,51,0,0.1)',
+                                                    label: 'Uudet avoimet työpaikat',
+                                                    data: phAvoimetChartData,
+                                                    borderColor: '#009933',
+                                                    backgroundColor: 'rgba(0,153,51,0.1)',
                                                     fill: true,
                                                     pointRadius: 3
                                                 }]
                                             },
                                             options: {
                                                 responsive: false,
-                                                plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                                                plugins: { legend: { display: false } },
                                                 scales: {
-                                                    x: { display: false },
-                                                    y: { display: false, min: minY, max: maxY }
-                                                },
-                                                elements: { line: { borderCapStyle: 'round' } },
-                                                layout: { padding: 0 },
+                                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                                    y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
+                                                }
                                             }
                                         });
                                     });
                             }
                         });
-                        phTyottomatSpan.addEventListener('mousemove', function (e) {
-                            positionPhTyottomatChartPopup(e);
+                        phAvoimetSpan.addEventListener('mousemove', function (e) {
+                            positionPhAvoimetChartPopup(e);
                         });
-                        phTyottomatSpan.addEventListener('mouseout', function () {
-                            phTyottomatChartPopup.style.display = 'none';
+                        phAvoimetSpan.addEventListener('mouseout', function () {
+                            phAvoimetChartPopup.style.display = 'none';
+                        });
+
+                        // Chart popup logic for Kanta-Häme avoimet työpaikat
+                        const khAvoimetSpan = document.getElementById('kh-avoimet');
+                        const khAvoimetChartPopup = document.getElementById('kh-avoimet-chart-popup');
+                        let khAvoimetChartInstance = null;
+                        khAvoimetChartPopup.style.position = 'fixed';
+                        function positionKhAvoimetChartPopup(e) {
+                            const popupWidth = 400;
+                            const popupHeight = 220;
+                            let x = e.clientX + 40;
+                            let y = e.clientY - popupHeight;
+                            if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+                            if (x < 8) x = 8;
+                            if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+                            if (y < 8) y = 8;
+                            khAvoimetChartPopup.style.left = x + 'px';
+                            khAvoimetChartPopup.style.top = y + 'px';
+                        }
+                        let khAvoimetChartDataLoaded = false;
+                        let khAvoimetChartLabels = [];
+                        let khAvoimetChartData = [];
+                        khAvoimetSpan.addEventListener('mouseover', function (e) {
+                            khAvoimetChartPopup.style.display = 'block';
+                            positionKhAvoimetChartPopup(e);
+                            if (!khAvoimetChartDataLoaded) {
+                                fetch('tyollisyys_historia.php?stat_code=MK05&field=uudetavp&limit=24')
+                                    .then(resp => resp.json())
+                                    .then(hist => {
+                                        khAvoimetChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                                            const kk = parseInt(m.slice(1), 10);
+                                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                                        })).slice(-24);
+                                        khAvoimetChartData = hist.data.slice(-24);
+                                        khAvoimetChartDataLoaded = true;
+                                        const minY = Math.floor(Math.min(...khAvoimetChartData) - 1);
+                                        const maxY = Math.ceil(Math.max(...khAvoimetChartData) + 1);
+                                        const ctx = document.getElementById('kh-avoimet-chart').getContext('2d');
+                                        khAvoimetChartInstance = new Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                labels: khAvoimetChartLabels,
+                                                datasets: [{
+                                                    label: 'Uudet avoimet työpaikat',
+                                                    data: khAvoimetChartData,
+                                                    borderColor: '#009933',
+                                                    backgroundColor: 'rgba(0,153,51,0.1)',
+                                                    fill: true,
+                                                    pointRadius: 3
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: false,
+                                                plugins: { legend: { display: false } },
+                                                scales: {
+                                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                                    y: { title: { display: true, text: 'Lkm' }, min: minY, max: maxY }
+                                                }
+                                            }
+                                        });
+                                    });
+                            }
+                        });
+                        khAvoimetSpan.addEventListener('mousemove', function (e) {
+                            positionKhAvoimetChartPopup(e);
+                        });
+                        khAvoimetSpan.addEventListener('mouseout', function () {
+                            khAvoimetChartPopup.style.display = 'none';
+                        });
+                        // Kanta-Häme chart popup logic
+                        const khOsuusSpan = document.getElementById('kh-osuus');
+                        const khChartPopup = document.getElementById('kh-osuus-chart-popup');
+                        let khChartInstance = null;
+                        khChartPopup.style.position = 'fixed';
+                        function positionKhChartPopup(e) {
+                            const popupWidth = 400;
+                            const popupHeight = 220;
+                            let x = e.clientX + 40;
+                            let y = e.clientY - popupHeight;
+                            if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+                            if (x < 8) x = 8;
+                            if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+                            if (y < 8) y = 8;
+                            khChartPopup.style.left = x + 'px';
+                            khChartPopup.style.top = y + 'px';
+                        }
+                        let khChartDataLoaded = false;
+                        let khChartLabels = [];
+                        let khChartData = [];
+                        khOsuusSpan.addEventListener('mouseover', function (e) {
+                            khChartPopup.style.display = 'block';
+                            positionKhChartPopup(e);
+                            if (!khChartDataLoaded) {
+                                fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomien_osuus&limit=24')
+                                    .then(resp => resp.json())
+                                    .then(hist => {
+                                        khChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                                            const kk = parseInt(m.slice(1), 10);
+                                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                                        }));
+                                        khChartData = hist.data;
+                                        khChartDataLoaded = true;
+                                        // Dynamic scale
+                                        const minY = Math.floor(Math.min(...khChartData) - 1);
+                                        const maxY = Math.ceil(Math.max(...khChartData) + 1);
+                                        const ctx = document.getElementById('kh-osuus-chart').getContext('2d');
+                                        khChartInstance = new Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                labels: khChartLabels,
+                                                datasets: [{
+                                                    label: 'Työttömien osuus (%)',
+                                                    data: khChartData,
+                                                    borderColor: '#0077cc',
+                                                    backgroundColor: 'rgba(0,119,204,0.1)',
+                                                    fill: true,
+                                                    pointRadius: 3
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: false,
+                                                plugins: { legend: { display: false } },
+                                                scales: {
+                                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                                    y: { title: { display: true, text: '%' }, min: minY, max: maxY }
+                                                }
+                                            }
+                                        });
+                                    });
+                            }
+                        });
+                        khOsuusSpan.addEventListener('mousemove', function (e) {
+                            positionKhChartPopup(e);
+                        });
+                        khOsuusSpan.addEventListener('mouseout', function () {
+                            khChartPopup.style.display = 'none';
+                        });
+                        const phOsuusSpan = document.getElementById('ph-osuus');
+                        const chartPopup = document.getElementById('ph-osuus-chart-popup');
+                        let chartInstance = null;
+
+                        // Use fixed positioning for popup so it always appears next to mouse pointer, regardless of scroll/zoom/monitor
+                        chartPopup.style.position = 'fixed';
+                        function positionChartPopup(e) {
+                            const popupWidth = 400;
+                            const popupHeight = 220;
+                            let x = e.clientX + 40;
+                            let y = e.clientY - popupHeight;
+                            // Clamp to viewport horizontally
+                            if (x + popupWidth > window.innerWidth) x = window.innerWidth - popupWidth - 8;
+                            if (x < 8) x = 8;
+                            // Clamp to viewport vertically
+                            if (y + popupHeight > window.innerHeight) y = window.innerHeight - popupHeight - 8;
+                            if (y < 8) y = 8;
+                            chartPopup.style.left = x + 'px';
+                            chartPopup.style.top = y + 'px';
+                        }
+
+                        let chartDataLoaded = false;
+                        let chartLabels = [];
+                        let chartData = [];
+
+                        phOsuusSpan.addEventListener('mouseover', function (e) {
+                            chartPopup.style.display = 'block';
+                            positionChartPopup(e);
+                            // Fetch real data only once
+                            if (!chartDataLoaded) {
+                                fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomien_osuus&limit=24')
+                                    .then(resp => resp.json())
+                                    .then(hist => {
+                                        chartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
+                                            const kk = parseInt(m.slice(1), 10);
+                                            const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                                            return ' ' + (kuukausiNimet[kk - 1] || m);
+                                        })).slice(-24);
+                                        chartData = hist.data.slice(-24);
+                                        chartDataLoaded = true;
+                                        // Dynamic scale
+                                        const minY = Math.floor(Math.min(...chartData) - 1);
+                                        const maxY = Math.ceil(Math.max(...chartData) + 1);
+                                        // Draw chart
+                                        const ctx = document.getElementById('ph-osuus-chart').getContext('2d');
+                                        chartInstance = new Chart(ctx, {
+                                            type: 'line',
+                                            data: {
+                                                labels: chartLabels,
+                                                datasets: [{
+                                                    label: 'Työttömien osuus (%)',
+                                                    data: chartData,
+                                                    borderColor: '#009933',
+                                                    backgroundColor: 'rgba(0,153,51,0.10)',
+                                                    fill: true,
+                                                    pointRadius: 3
+                                                }]
+                                            },
+                                            options: {
+                                                responsive: false,
+                                                plugins: { legend: { display: false } },
+                                                scales: {
+                                                    x: { title: { display: true, text: 'Kuukausi' } },
+                                                    y: { title: { display: true, text: '%' }, min: minY, max: maxY }
+                                                }
+                                            }
+                                        });
+                                    });
+                            }
+                        });
+
+                        phOsuusSpan.addEventListener('mousemove', function (e) {
+                            positionChartPopup(e);
+                        });
+
+                        phOsuusSpan.addEventListener('mouseout', function () {
+                            chartPopup.style.display = 'none';
                         });
                     });
                 </script>
+
+</body>
+
+</html>
