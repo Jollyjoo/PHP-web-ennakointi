@@ -553,12 +553,9 @@
 
             <!-- 
             <br><br> <br>
-            <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>
-           
-            <div class="swiper">
-               
-                <div class="swiper-wrapper">
-                  
+            <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>          
+            <div class="swiper">               
+                <div class="swiper-wrapper">                  
                     <div class="swiper-slide" align="center" max-width="50%">
                         <div class="flourish-embed flourish-chart" data-src="visualisation/22517240">
                             <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
@@ -573,16 +570,211 @@
                                     alt="chart visualization" /></noscript>
                         </div>
                     </div>
-                </div>
-
-               
+                </div>            
                 <div class="swiper-pagination"></div>
-
-               
                 <div class="swiper-button-prev"></div>
                 <div class="swiper-button-next"></div>
-
             </div> -->
+
+
+
+
+<!-- Uusi Chart.js: Työttömät työnhakijat kunnittain -->
+<div id="bookmark-tyottomat" style="max-width:1240px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+    <h3 style="text-align:center;">Työttömät työnhakijat kunnittain</h3>
+    <div style="text-align:center;margin-bottom:12px;"><br><br>
+        <select id="tyottomat-region-select" style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
+            <option value="all" selected>Koko Häme</option>
+            <option value="1">Päijät-Häme</option>
+            <option value="2">Kanta-Häme</option>
+        </select>
+        <b>Kaaviotyyppi:</b>
+        <button id="tyottomat-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
+        <button id="tyottomat-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
+        <button id="tyottomat-toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki kunnat</button>
+    </div>
+    <canvas id="tyottomatChart" width="1100" height="600"></canvas>
+    <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="tyottomat-paivitys">-</span></div>
+</div>
+<script>
+let tyottomatChartObj = null;
+let tyottomatCurrentType = 'bar';
+let tyottomatAllHidden = false;
+let tyottomatCurrentRegion = 'all';
+const tyottomatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'];
+
+async function fetchTyottomat(region = 'all') {
+    try {
+        const url = region === 'all' ? 'tyonhakijat_historia.php' : `tyonhakijat_historia.php?maakunta_id=${region}`;
+        const res = await fetch(url);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        return data;
+    } catch (e) {
+        console.error('Virhe ladattaessa työttömät-dataa:', e);
+        return null;
+    }
+}
+
+function renderTyottomatChart(data, chartType = 'bar') {
+    const ctx = document.getElementById('tyottomatChart').getContext('2d');
+    // Find if we have a comparison line dataset (last one, type: 'line')
+    let comparisonLineIdx = -1;
+    if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
+        comparisonLineIdx = data.datasets.length - 1;
+        // Remove color from comparison line
+        data.datasets[comparisonLineIdx].borderColor = '#444';
+        data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
+    }
+    data.datasets.forEach((ds, i) => {
+        if (i !== comparisonLineIdx) {
+            ds.backgroundColor = tyottomatPalette[i % tyottomatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
+            ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
+        }
+        ds.stack = chartType === 'bar' && i !== comparisonLineIdx ? 'Stack 0' : undefined;
+        ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
+        ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
+        ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
+        ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
+    });
+    if (tyottomatChartObj) tyottomatChartObj.destroy();
+    tyottomatChartObj = new Chart(ctx, {
+        type: chartType,
+        data: {
+            labels: data.labels,
+            datasets: data.datasets
+        },
+        options: {
+            responsive: false,
+            plugins: {
+                legend: { display: true, position: 'top' },
+                tooltip: {
+                    mode: chartType === 'line' ? 'index' : 'nearest',
+                    intersect: chartType !== 'line',
+                    callbacks: {
+                        afterBody: function(context) {
+                            const yearIdx = context[0].dataIndex;
+                            // Sum selected region total (all bar datasets)
+                            let selectedTotal = 0;
+                            let comparisonTotal = null;
+                            context[0].chart.data.datasets.forEach((ds, i) => {
+                                if (ds.type === 'line') {
+                                    comparisonTotal = ds.data[yearIdx];
+                                } else if (typeof ds.data[yearIdx] === 'number') {
+                                    selectedTotal += ds.data[yearIdx];
+                                }
+                            });
+                            let lines = [];
+                            if (selectedTotal > 0) lines.push('Valittu alue yhteensä: ' + selectedTotal.toLocaleString('fi-FI'));
+                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push('Vertailualue yhteensä: ' + comparisonTotal.toLocaleString('fi-FI'));
+                            return lines.join('\n');
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
+                y: { title: { display: true, text: 'Työttömät työnhakijat' }, stacked: chartType === 'bar' }
+            },
+            layout: { padding: 10 },
+            backgroundColor: '#f7fbfc'
+        }
+    });
+    // After chart redraw, update dataset visibility and button label
+    if (tyottomatAllHidden) {
+        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = true; });
+        tyottomatChartObj.update();
+        document.getElementById('tyottomat-toggle-datasets').textContent = 'Näytä kaikki kunnat';
+    } else {
+        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = false; });
+        tyottomatChartObj.update();
+        document.getElementById('tyottomat-toggle-datasets').textContent = 'Piilota kaikki kunnat';
+    }
+}
+
+async function updateTyottomatChart(chartType = 'bar', region = 'all') {
+    // For region 1 or 2, fetch both regions' data for overlay
+    if (region === '1' || region === '2') {
+        const otherRegion = region === '1' ? '2' : '1';
+        const [mainData, otherData] = await Promise.all([
+            fetchTyottomat(region),
+            fetchTyottomat(otherRegion)
+        ]);
+        if (!mainData || !otherData) return;
+        // Sum other region's municipalities for each year
+        const yearCount = mainData.labels.length;
+        const otherTotals = Array(yearCount).fill(0);
+        otherData.datasets.forEach(ds => {
+            ds.data.forEach((val, idx) => {
+                otherTotals[idx] += typeof val === 'number' ? val : 0;
+            });
+        });
+        // Add as a line dataset
+        mainData.datasets.push({
+            label: otherRegion === '1' ? 'Päijät-Häme yhteensä (vertailu)' : 'Kanta-Häme yhteensä (vertailu)',
+            data: otherTotals,
+            type: 'line',
+            borderColor: '#222',
+            backgroundColor: 'rgba(0,0,0,0.08)',
+            borderWidth: 3,
+            pointRadius: 3,
+            fill: false,
+            tension: 0.15,
+            order: 99,
+            yAxisID: 'y',
+            datalabels: { display: false }
+        });
+        renderTyottomatChart(mainData, chartType);
+        document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
+    } else {
+        // Default: Koko Häme, no overlay
+        const data = await fetchTyottomat(region);
+        if (!data) return;
+        renderTyottomatChart(data, chartType);
+        document.getElementById('tyottomat-paivitys').textContent = data.latest_update || '-';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Button controls
+    const btnBar = document.getElementById('tyottomat-type-bar');
+    const btnLine = document.getElementById('tyottomat-type-line');
+    const btnToggle = document.getElementById('tyottomat-toggle-datasets');
+    const regionSelect = document.getElementById('tyottomat-region-select');
+    btnBar.style.fontWeight = 'bold';
+    btnLine.style.fontWeight = 'normal';
+    updateTyottomatChart('bar', 'all');
+    btnBar.addEventListener('click', function() {
+        tyottomatCurrentType = 'bar';
+        btnBar.style.fontWeight = 'bold';
+        btnLine.style.fontWeight = 'normal';
+        updateTyottomatChart('bar', tyottomatCurrentRegion);
+    });
+    btnLine.addEventListener('click', function() {
+        tyottomatCurrentType = 'line';
+        btnLine.style.fontWeight = 'bold';
+        btnBar.style.fontWeight = 'normal';
+        updateTyottomatChart('line', tyottomatCurrentRegion);
+    });
+    btnToggle.addEventListener('click', function() {
+        if (!tyottomatChartObj) return;
+        tyottomatAllHidden = !tyottomatAllHidden;
+        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = tyottomatAllHidden; });
+        tyottomatChartObj.update();
+        btnToggle.textContent = tyottomatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
+    });
+    regionSelect.addEventListener('change', function() {
+        tyottomatCurrentRegion = this.value;
+        updateTyottomatChart(tyottomatCurrentType, tyottomatCurrentRegion);
+    });
+});
+</script>
+<p align="center">Lähde: <a href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyokay/statfin_tyokay_pxt_115h.px/" target="_blank" title="115h -- Työttömät työnhakijat alueen, toimialan (TOL 2008), sukupuolen ja vuoden mukaan, 2007-2023">Tilastokeskus 115h</a> Työttömät työnhakijat, viimeisin tilasto tarkistettu lähteestä <b> <span id="tyottomat-paivitys">...</span></b></p>
+
+
+
+
+
 
 
             <p align="center"><br><br>
