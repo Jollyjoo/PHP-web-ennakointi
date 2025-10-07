@@ -81,7 +81,7 @@ foreach ($kunnat as $kunta) {
 
 // Get latest update date
 $latest_update = null;
-$updateRow = $pdo->query("SELECT MAX(paivitys) as latest_update FROM tyonhakijat")->fetch(PDO::FETCH_ASSOC);
+$updateRow = $pdo->query("SELECT MAX(paivitys) as latest_update FROM Tyonhakijat")->fetch(PDO::FETCH_ASSOC);
 if ($updateRow && $updateRow['latest_update']) {
     $latest_update = $updateRow['latest_update'];
 }
