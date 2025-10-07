@@ -580,6 +580,8 @@
 
 
 <!-- Uusi Chart.js: Työttömät työnhakijat kunnittain -->
+
+<br><br>
 <div id="bookmark-tyottomat" style="max-width:1240px;margin:0 auto 40px auto;background:#ffffff;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
     <h3 style="text-align:center;">Työttömät työnhakijat kunnittain</h3>
     <div style="text-align:center;margin-bottom:12px;"><br><br>
@@ -594,7 +596,7 @@
         <button id="tyottomat-toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki kunnat</button>
     </div>
     <canvas id="tyottomatChart" width="1100" height="600"></canvas>
-    <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="tyottomat-paivitys">-</span></div>
+    
 </div>
 <script>
 let tyottomatChartObj = null;
@@ -769,7 +771,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-<p align="center">Lähde: <a href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyokay/statfin_tyokay_pxt_115h.px/" target="_blank" title="115h -- Työttömät työnhakijat alueen, toimialan (TOL 2008), sukupuolen ja vuoden mukaan, 2007-2023">Tilastokeskus 115h</a> Työttömät työnhakijat, viimeisin tilasto tarkistettu lähteestä <b> <span id="tyottomat-paivitys">...</span></b></p>
+                <p>Lähde: <a
+                        href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12r5.px"
+                        target="_blank"
+                        title="12r5 -- Työttömät työnhakijat eri ryhmissä, palveluissa olevat ja avoimet työpaikat kuukauden lopussa">
+                        Tilastokeskus 12r5</a> (työnvälitystilasto, KEHA), viimeisin tilasto tarkistettu lähteestä <b>
+                        <span id="tyottomat-paivitys">...</span></b></p>
+
 
 
 
