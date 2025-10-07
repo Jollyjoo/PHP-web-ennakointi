@@ -17,7 +17,12 @@
 // Returns JSON for Chart.js: unemployed by municipality and region, grouped by year
 
 header('Content-Type: application/json; charset=utf-8');
-require_once 'db.php';
+
+// Use db.php for connection variables, then create PDO
+require_once '/cgi-bin/db.php';
+if (!isset($pdo)) {
+    $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
+}
 
 $maakunta_id = isset($_GET['maakunta_id']) ? $_GET['maakunta_id'] : null;
 
