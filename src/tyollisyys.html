@@ -446,7 +446,7 @@
                                 const raw = response.data || [];
                                 const latestUpdate = response.latest_update || '...';
                                 document.getElementById('avoimet-toimiala-update').textContent = latestUpdate;
-                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
+                                const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marraskuu', 'Joulukuu'];
                                 const months = [...new Set(raw.map(r => r.Tilastokuukausi))].sort();
                                 const toimialas = [...new Set(raw.map(r => r.Toimiala))];
                                 const colors = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666'];
@@ -627,6 +627,23 @@ function renderTyottomatChart(data, chartType = 'bar') {
         // Remove color from comparison line
         data.datasets[comparisonLineIdx].borderColor = '#444';
         data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
+    }
+    // Add comparison line for ulkomaalaiset työttömät (tyottomatulk)
+    if (data.ulkomaalaiset_sum) {
+        data.datasets.push({
+            label: 'Ulkomaalaiset työttömät (kaikki alueet)',
+            data: data.ulkomaalaiset_sum,
+            type: 'line',
+            borderColor: '#ff00cc',
+            backgroundColor: 'rgba(255,0,204,0.08)',
+            borderWidth: 3,
+            pointRadius: 3,
+            fill: false,
+            tension: 0.15,
+            order: 100,
+            yAxisID: 'y',
+            datalabels: { display: false }
+        });
     }
     data.datasets.forEach((ds, i) => {
         if (i !== comparisonLineIdx) {

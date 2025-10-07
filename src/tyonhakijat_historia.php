@@ -41,9 +41,9 @@ if ($maakunta_id === '1') {
 }
 
 
-// Query: get all rows, group by Aika (month) and stat_label (kunta)
 
-$sql = "SELECT Aika, stat_label AS kunta_nimi, SUM(tyottomatlopussa) AS tyottomat
+// Query: get all rows for chart and ulkomaalaiset sum
+$sql = "SELECT Aika, stat_label AS kunta_nimi, SUM(tyottomatlopussa) AS tyottomat, SUM(tyottomatulk) AS ulkomaalaiset
     FROM Tyonhakijat
     $where
     GROUP BY Aika, stat_label
@@ -56,6 +56,7 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $labels = [];
 $kunnat = [];
 $dataByKunta = [];
+$ulkomaalaisetByAika = [];
 foreach ($rows as $row) {
     if (!in_array($row['Aika'], $labels)) {
         $labels[] = $row['Aika'];
@@ -64,6 +65,11 @@ foreach ($rows as $row) {
         $kunnat[] = $row['kunta_nimi'];
     }
     $dataByKunta[$row['kunta_nimi']][$row['Aika']] = (int)$row['tyottomat'];
+    // Sum ulkomaalaiset by Aika
+    if (!isset($ulkomaalaisetByAika[$row['Aika']])) {
+        $ulkomaalaisetByAika[$row['Aika']] = 0;
+    }
+    $ulkomaalaisetByAika[$row['Aika']] += (int)$row['ulkomaalaiset'];
 }
 
 $datasets = [];
@@ -91,8 +97,15 @@ if ($updateRow && $updateRow['latest_update']) {
     $latest_update = $updateRow['latest_update'];
 }
 
+// Prepare ulkomaalaiset_sum array in label order
+$ulkomaalaiset_sum = [];
+foreach ($labels as $aika) {
+    $ulkomaalaiset_sum[] = isset($ulkomaalaisetByAika[$aika]) ? $ulkomaalaisetByAika[$aika] : 0;
+}
+
 echo json_encode([
     'labels' => $labels,
     'datasets' => $datasets,
+    'ulkomaalaiset_sum' => $ulkomaalaiset_sum,
     'latest_update' => $latest_update
 ]);
