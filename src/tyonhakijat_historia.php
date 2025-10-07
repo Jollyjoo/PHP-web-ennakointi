@@ -1,6 +1,8 @@
 <?php
 // tyonhakijat_historia.php
-/* 
+
+/* table: Tyonhakijat
+
 1	Maakunta_ID Indeksi	int(11)			
 	2	Aika	char(100)	latin1_swedish_ci	
 	3	tyottomatlopussa	int(11)				
@@ -14,7 +16,8 @@
 	11	stat_label	varchar(100)		
 	12	stat_update_date	timestamp			
      */
-// Returns JSON for Chart.js: unemployed by municipality and region, grouped by year
+
+    // Returns JSON for Chart.js: unemployed by municipality and region, grouped by year
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -26,23 +29,25 @@ if (!isset($pdo)) {
 
 $maakunta_id = isset($_GET['maakunta_id']) ? $_GET['maakunta_id'] : null;
 
+
 $where = '';
 $params = [];
 if ($maakunta_id === '1') {
-    $where = 'WHERE maakunta_id = 1';
+    $where = 'WHERE Maakunta_ID = 1';
     $params[] = 1;
 } elseif ($maakunta_id === '2') {
-    $where = 'WHERE maakunta_id = 2';
+    $where = 'WHERE Maakunta_ID = 2';
     $params[] = 2;
 }
 
 
 // Query: get all rows, group by Aika (month) and stat_label (kunta)
+
 $sql = "SELECT Aika, stat_label AS kunta_nimi, SUM(tyottomatlopussa) AS tyottomat
-        FROM Tyonhakijat
-        $where
-        GROUP BY Aika, stat_label
-        ORDER BY Aika, stat_label";
+    FROM Tyonhakijat
+    $where
+    GROUP BY Aika, stat_label
+    ORDER BY Aika, stat_label";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
