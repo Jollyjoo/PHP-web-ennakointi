@@ -42,8 +42,9 @@ if ($maakunta_id === '1') {
 
 
 
-// Query: get all rows for chart and ulkomaalaiset sum
-$sql = "SELECT Aika, stat_label AS kunta_nimi, SUM(tyottomatlopussa) AS tyottomat, SUM(tyottomatulk) AS ulkomaalaiset
+
+// Query: get all rows for chart
+$sql = "SELECT Aika, stat_label AS kunta_nimi, SUM(tyottomatlopussa) AS tyottomat
     FROM Tyonhakijat
     $where
     GROUP BY Aika, stat_label
@@ -56,7 +57,6 @@ $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $labels = [];
 $kunnat = [];
 $dataByKunta = [];
-$ulkomaalaisetByAika = [];
 foreach ($rows as $row) {
     if (!in_array($row['Aika'], $labels)) {
         $labels[] = $row['Aika'];
@@ -65,11 +65,15 @@ foreach ($rows as $row) {
         $kunnat[] = $row['kunta_nimi'];
     }
     $dataByKunta[$row['kunta_nimi']][$row['Aika']] = (int)$row['tyottomat'];
-    // Sum ulkomaalaiset by Aika
-    if (!isset($ulkomaalaisetByAika[$row['Aika']])) {
-        $ulkomaalaisetByAika[$row['Aika']] = 0;
-    }
-    $ulkomaalaisetByAika[$row['Aika']] += (int)$row['ulkomaalaiset'];
+}
+
+// Query: sum tyottomatulk for all selected areas per Aika
+$ulkomaalaisetByAika = [];
+$sql2 = "SELECT Aika, SUM(tyottomatulk) AS ulkomaalaiset_sum FROM Tyonhakijat $where GROUP BY Aika ORDER BY Aika";
+$stmt2 = $pdo->prepare($sql2);
+$stmt2->execute();
+foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $ulkomaalaisetByAika[$row['Aika']] = (int)$row['ulkomaalaiset_sum'];
 }
 
 $datasets = [];
