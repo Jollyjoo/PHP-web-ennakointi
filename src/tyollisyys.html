@@ -470,10 +470,12 @@
                                     return ds;
                                 });
                                 const labels = months.map(l => {
-                                    const m = l.match(/M(\d{2})/);
+                                    const m = l.match(/(\d{4})M(\d{2})/);
                                     if (m) {
-                                        const kk = parseInt(m[1], 10);
-                                        return kuukausiNimet[kk - 1] + ' ' + l.slice(0, 4);
+                                        const vuosi = m[1];
+                                        const kk = parseInt(m[2], 10);
+                                        const kuukausi = kuukausiNimet[kk - 1] + ' ' + vuosi;
+                                        return kuukausi;
                                     }
                                     return l;
                                 });
@@ -635,7 +637,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
             data: data.ulkomaalaiset_sum,
             type: 'line',
             borderColor: '#ff00cc',
-            backgroundColor: 'rgba(0,0,0,0.08)',
+            backgroundColor: 'rgba(0,0,0,0)', // No area color
             borderWidth: 3,
             pointRadius: 3,
             fill: false,
