@@ -636,7 +636,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
             label: 'Ulkomaalaiset työttömät (valittu alue)',
             data: data.ulkomaalaiset_sum,
             type: 'line',
-            borderColor: '#000', // Black line
+            borderColor: '#8B4513', // Brown line
             backgroundColor: 'rgba(0,0,0,0)', // No area color
             borderWidth: 3,
             pointRadius: 3,
@@ -662,11 +662,6 @@ function renderTyottomatChart(data, chartType = 'bar') {
         ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
         ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
     });
-    // Explicitly ensure ulkomaalaiset comparison line is never stacked
-    const ulkomaalaisetDs = data.datasets.find(ds => ds.label === 'Ulkomaalaiset työttömät (valittu alue)');
-    if (ulkomaalaisetDs) {
-        ulkomaalaisetDs.stack = null;
-    }
     if (tyottomatChartObj) tyottomatChartObj.destroy();
     tyottomatChartObj = new Chart(ctx, {
         type: chartType,
