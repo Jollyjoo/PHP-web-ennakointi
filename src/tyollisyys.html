@@ -653,7 +653,8 @@ function renderTyottomatChart(data, chartType = 'bar') {
             ds.backgroundColor = tyottomatPalette[i % tyottomatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
             ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
         }
-        ds.stack = (chartType === 'bar' && i !== comparisonLineIdx && ds.type !== 'line') ? 'Stack 0' : undefined;
+        // Only bar datasets are stacked, all lines (including ulkomaalaiset and region comparison) are not stacked
+        ds.stack = (chartType === 'bar' && ds.type !== 'line') ? 'Stack 0' : undefined;
         ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
         ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
         ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
