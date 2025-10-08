@@ -662,6 +662,11 @@ function renderTyottomatChart(data, chartType = 'bar') {
         ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
         ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
     });
+    // Explicitly ensure ulkomaalaiset comparison line is never stacked
+    const ulkomaalaisetDs = data.datasets.find(ds => ds.label === 'Ulkomaalaiset työttömät (valittu alue)');
+    if (ulkomaalaisetDs) {
+        ulkomaalaisetDs.stack = null;
+    }
     if (tyottomatChartObj) tyottomatChartObj.destroy();
     tyottomatChartObj = new Chart(ctx, {
         type: chartType,
