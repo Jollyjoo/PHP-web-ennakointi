@@ -645,7 +645,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
             order: 100,
             yAxisID: 'y',
             datalabels: { display: false },
-            stack: undefined // Ensure not stacked
+            stack: null // Explicitly set to null to avoid stacking
         });
     }
     data.datasets.forEach((ds, i) => {
@@ -654,7 +654,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
             ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
         }
         // Only bar datasets are stacked, all lines (including ulkomaalaiset and region comparison) are not stacked
-        ds.stack = (chartType === 'bar' && ds.type !== 'line') ? 'Stack 0' : undefined;
+        ds.stack = (chartType === 'bar' && ds.type !== 'line') ? 'Stack 0' : null;
         ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
         ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
         ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
@@ -1294,7 +1294,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         const minY = Math.floor(Math.min(...phTyottomatChartData) - 1);
                                         const maxY = Math.ceil(Math.max(...phTyottomatChartData) + 1);
                                         const ctx = document.getElementById('ph-tyottomat-chart').getContext('2d');
-                                        phTyottomatChartInstance = new Chart(ctx, {
+                                                                               phTyottomatChartInstance = new Chart(ctx, {
                                             type: 'line',
                                             data: {
                                                 labels: phTyottomatChartLabels,
