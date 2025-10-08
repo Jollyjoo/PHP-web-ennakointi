@@ -640,12 +640,12 @@ function renderTyottomatChart(data, chartType = 'bar') {
             backgroundColor: 'rgba(0,0,0,0)', // No area color
             borderWidth: 3,
             pointRadius: 3,
-            fill: false,
+            fill: false, // Ensure no area fill
             tension: 0.15,
             order: 100,
             yAxisID: 'y',
-            showLine: true,
-            datalabels: { display: false }
+            datalabels: { display: false },
+            stack: undefined // Ensure not stacked
         });
     }
     data.datasets.forEach((ds, i) => {
@@ -653,7 +653,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
             ds.backgroundColor = tyottomatPalette[i % tyottomatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
             ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
         }
-        ds.stack = chartType === 'bar' && i !== comparisonLineIdx ? 'Stack 0' : undefined;
+        ds.stack = (chartType === 'bar' && i !== comparisonLineIdx && ds.type !== 'line') ? 'Stack 0' : undefined;
         ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
         ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
         ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
@@ -1006,7 +1006,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                         if (match) {
                                             const vuosi = match[1];
                                             const kk = parseInt(match[2], 10);
-                                            const kuukausi = kuukausiNimet[kk - 1] || kk;
+                                            const kuukausi = kuukausiNimet[kk - 1] + ' ' + vuosi;
                                             return `${kuukausi} ${vuosi}`;
                                         }
                                         return aika;
