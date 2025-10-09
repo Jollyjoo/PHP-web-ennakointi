@@ -527,6 +527,25 @@
                             stack: null // Explicitly set to null to avoid stacking
                         });
                     }
+
+                    // Add independent line for Laaja työttömyys (palvelut_yht)
+                    if (data.palvelut_yht) {
+                        data.datasets.push({
+                            label: 'Laaja työttömyys',
+                            data: data.palvelut_yht.slice(-N),
+                            type: 'line',
+                            borderColor: '#d32f2f', // Red line
+                            backgroundColor: 'rgba(211,47,47,0.10)', // Red area
+                            borderWidth: 3,
+                            pointRadius: 3,
+                            fill: false,
+                            tension: 0.18,
+                            order: 101,
+                            yAxisID: 'y',
+                            datalabels: { display: false },
+                            stack: null
+                        });
+                    }
                     data.datasets.forEach((ds, i) => {
                         // Skip ulkomaalaiset line (comparison) so its style is not overwritten
                         if (ds.label === 'Ulkomaalaiset työttömät') return;

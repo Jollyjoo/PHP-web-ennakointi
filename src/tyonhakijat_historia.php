@@ -70,6 +70,7 @@ foreach ($rows as $row) {
     $dataByKunta[$row['kunta_nimi']][$row['Aika']] = (int)$row['tyottomat'];
 }
 
+
 // Query: sum tyottomatulk for all selected areas per Aika
 $ulkomaalaisetByAika = [];
 $sql2 = "SELECT Aika, SUM(tyottomatulk) AS ulkomaalaiset_sum FROM Tyonhakijat $where GROUP BY Aika ORDER BY Aika";
@@ -77,6 +78,15 @@ $stmt2 = $pdo->prepare($sql2);
 $stmt2->execute();
 foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
     $ulkomaalaisetByAika[$row['Aika']] = (int)$row['ulkomaalaiset_sum'];
+}
+
+// Query: sum palvelut_yht for all selected areas per Aika (Laaja työttömyys)
+$palvelutYhtByAika = [];
+$sql3 = "SELECT Aika, SUM(palvelut_yht) AS palvelut_yht_sum FROM Tyonhakijat $where GROUP BY Aika ORDER BY Aika";
+$stmt3 = $pdo->prepare($sql3);
+$stmt3->execute();
+foreach ($stmt3->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $palvelutYhtByAika[$row['Aika']] = (int)$row['palvelut_yht_sum'];
 }
 
 $datasets = [];
@@ -104,15 +114,19 @@ if ($updateRow && $updateRow['latest_update']) {
     $latest_update = $updateRow['latest_update'];
 }
 
-// Prepare ulkomaalaiset_sum array in label order
+
+// Prepare ulkomaalaiset_sum and palvelut_yht arrays in label order
 $ulkomaalaiset_sum = [];
+$palvelut_yht = [];
 foreach ($labels as $aika) {
     $ulkomaalaiset_sum[] = isset($ulkomaalaisetByAika[$aika]) ? $ulkomaalaisetByAika[$aika] : 0;
+    $palvelut_yht[] = isset($palvelutYhtByAika[$aika]) ? $palvelutYhtByAika[$aika] : 0;
 }
 
 echo json_encode([
     'labels' => $labels,
     'datasets' => $datasets,
     'ulkomaalaiset_sum' => $ulkomaalaiset_sum,
+    'palvelut_yht' => $palvelut_yht,
     'latest_update' => $latest_update
 ]);
