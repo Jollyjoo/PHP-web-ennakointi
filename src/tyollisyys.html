@@ -649,10 +649,10 @@ function renderTyottomatChart(data, chartType = 'bar') {
             data: data.ulkomaalaiset_sum.slice(-N),
             type: 'line',
             borderColor: '#8B4513', // Brown line
-            backgroundColor: 'rgba(0,0,0,0)', // No area color
+            backgroundColor: 'rgba(0,153,51,0.10)', // Greenish area
             borderWidth: 3,
             pointRadius: 3,
-            fill: false, // Ensure no area fill
+            fill: true, // Fill area under line
             tension: 0.15,
             order: 100,
             yAxisID: 'y',
