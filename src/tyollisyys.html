@@ -641,11 +641,14 @@ function renderTyottomatChart(data, chartType = 'bar') {
     });
     // If only SSS should be shown (Koko maa), filter datasets to only SSS
     if (tyottomatCurrentRegion === 'all') {
-        // Always keep the first dataset (bar chart for SSS), remove extra datasets
+        // Always keep the SSS dataset if present, otherwise fallback to first
         if (data.datasets.length > 1) {
             let sssIdx = data.datasets.findIndex(ds => ds.stat_code === 'SSS');
-            if (sssIdx === -1) sssIdx = 0;
-            data.datasets = [data.datasets[sssIdx]];
+            if (sssIdx !== -1) {
+                data.datasets = [data.datasets[sssIdx]];
+            } else {
+                data.datasets = [data.datasets[0]];
+            }
         }
     }
     // Find if we have a comparison line dataset (last one, type: 'line')
