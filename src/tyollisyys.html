@@ -95,11 +95,12 @@
                                 <td style="width:30%">
                                     <canvas id="tyollisyys-embed-chart" width="150" height="40"
                                         style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
-                                </td> <p>Päijät-Häme</p>
+                                </td>
+                                <p>Päijät-Häme</p>
                             </tr>
 
                             </h2>
-                           
+
                             <tr>
                                 <td style="width:70%">
                                     <h2><span id="kh-osuus" style="cursor:pointer;text-decoration:underline;">...</span>
@@ -111,10 +112,10 @@
                                             <div style="text-align:center;font-size:15px;margin-top:8px;color:#333;">
                                                 Työttömien osuus työvoimasta - historia</div>
                                         </div>
-                                         </td>
+                                </td>
                                 <td style="width:30%">
-                                        <canvas id="kh-embed-chart" width="150" height="40"
-                                            style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
+                                    <canvas id="kh-embed-chart" width="150" height="40"
+                                        style="vertical-align:middle;cursor:pointer;margin-left:12px;"></canvas>
                                     </h2>
                                 </td>
                             </tr>
@@ -431,6 +432,303 @@
 
 
 
+
+
+
+
+            <!-- Uusi Chart.js: Työttömät työnhakijat kunnittain -->
+
+            <br><br>
+            <div id="bookmark-tyottomat"
+                style="max-width:1240px;margin:0 auto 40px auto;background:#ffffff;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+                <h3 style="text-align:center;">Työttömät työnhakijat kunnittain</h3>
+                <div style="text-align:center;margin-bottom:12px;"><br><br>
+                    <select id="tyottomat-region-select"
+                        style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
+                        <option value="1000" selected>Koko maa</option>
+                        <option value="1">Päijät-Häme</option>
+                        <option value="2">Kanta-Häme</option>
+                    </select>
+                    <b>Kaaviotyyppi:</b>
+                    <button id="tyottomat-type-bar" type="button"
+                        style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu
+                        pylväs</button>
+                    <button id="tyottomat-type-line" type="button"
+                        style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
+                    <button id="tyottomat-toggle-datasets" type="button"
+                        style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota
+                        kaikki kunnat</button>
+                </div>
+                <canvas id="tyottomatChart" width="1100" height="600"></canvas>
+
+            </div>
+            <script>
+                let tyottomatChartObj = null;
+                let tyottomatCurrentType = 'bar';
+                let tyottomatAllHidden = false;
+                let tyottomatCurrentRegion = '1000';
+                const tyottomatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2', '#388e3c', '#fbc02d', '#d32f2f', '#7b1fa2', '#0288d1', '#c2185b', '#ffa000', '#689f38', '#f57c00', '#455a64', '#cddc39', '#e91e63', '#00bcd4', '#8bc34a', '#ff9800'];
+
+                async function fetchTyottomat(region = 'all') {
+                    try {
+                        let url = `tyonhakijat_historia.php?maakunta_id=${region}`;
+                        const res = await fetch(url);
+                        const data = await res.json();
+                        if (data.error) throw new Error(data.error);
+                        return data;
+                    } catch (e) {
+                        console.error('Virhe ladattaessa työttömät-dataa:', e);
+                        return null;
+                    }
+                }
+
+                function renderTyottomatChart(data, chartType = 'bar') {
+                    const ctx = document.getElementById('tyottomatChart').getContext('2d');
+                    const N = 48;
+                    // Always slice labels and all datasets to last 48 months
+                    data.labels = data.labels.slice(-N);
+                    data.datasets.forEach(ds => {
+                        if (Array.isArray(ds.data)) ds.data = ds.data.slice(-N);
+                    });
+                    // No special filtering for 'Kaikki' (1000), show all datasets
+                    // Find if we have a comparison line dataset (last one, type: 'line')
+                    let comparisonLineIdx = -1;
+                    if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
+                        comparisonLineIdx = data.datasets.length - 1;
+                        // Remove color from comparison line
+                        data.datasets[comparisonLineIdx].borderColor = '#444';
+                        data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
+                    }
+                    // Add comparison line for ulkomaalaiset työttömät (tyottomatulk)
+                    if (data.ulkomaalaiset_sum) {
+                        // Try to find the label of the 'Pitkäaikaistyöttömät' line dataset (if present)
+                        let pitkatLabel = null;
+                        for (const ds of data.datasets) {
+                            if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
+                                pitkatLabel = ds.label;
+                                break;
+                            }
+                        }
+                        // If not found, use a fallback label
+                        if (!pitkatLabel) pitkatLabel = 'Pitkäaikaistyöttömät';
+                        data.datasets.push({
+                            label: 'Ulkomaalaiset työttömät',
+                            data: data.ulkomaalaiset_sum.slice(-N),
+                            type: 'line',
+                            borderColor: '#8B4513', // Brown line
+                            backgroundColor: 'rgba(0,153,51,0.10)', // Greenish area
+                            borderWidth: 3,
+                            pointRadius: 3,
+                            fill: pitkatLabel ? { target: pitkatLabel, above: 'rgba(0,153,51,0.10)' } : true,
+                            tension: 0.15,
+                            order: 100,
+                            yAxisID: 'y',
+                            datalabels: { display: false },
+                            stack: null // Explicitly set to null to avoid stacking
+                        });
+                    }
+                    data.datasets.forEach((ds, i) => {
+                        // Skip ulkomaalaiset line (comparison) so its style is not overwritten
+                        if (ds.label === 'Ulkomaalaiset työttömät') return;
+                        if (i !== comparisonLineIdx) {
+                            ds.backgroundColor = tyottomatPalette[i % tyottomatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
+                            ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
+                        }
+                        // Only bar datasets are stacked, all lines (including ulkomaalaiset and region comparison) are not stacked
+                        ds.stack = (chartType === 'bar' && ds.type !== 'line') ? 'Stack 0' : null;
+                        ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
+                        ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
+                        ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
+                        ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
+                    });
+                    if (tyottomatChartObj) tyottomatChartObj.destroy();
+                    tyottomatChartObj = new Chart(ctx, {
+                        type: chartType,
+                        data: {
+                            labels: data.labels,
+                            datasets: data.datasets
+                        },
+                        options: {
+                            responsive: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    mode: chartType === 'line' ? 'index' : 'nearest',
+                                    intersect: chartType !== 'line',
+                                    callbacks: {
+                                        label: function (context) {
+                                            // Show real names for special lines
+                                            let label = context.dataset.label || '';
+                                            if (label.toLowerCase().includes('pitkäaikaistyöttömät')) {
+                                                label = 'Pitkäaikaistyöttömät';
+                                            } else if (label.toLowerCase().includes('ulkomaalaiset')) {
+                                                label = 'Ulkomaalaiset työttömät';
+                                            }
+                                            return label + ': ' + context.formattedValue;
+                                        },
+                                        afterBody: function (context) {
+                                            const yearIdx = context[0].dataIndex;
+                                            let selectedTotal = 0;
+                                            let comparisonTotal = null;
+                                            let comparisonLabel = '';
+                                            let regionIsKokoMaa = false;
+                                            // Try to detect if current region is 'Koko maa' (1000)
+                                            if (tyottomatCurrentRegion === '1000') regionIsKokoMaa = true;
+                                            // Find the 'Pitkäaikaistyöttömät' line dataset if present
+                                            let pitkatTotal = null;
+                                            let pitkatLabel = '';
+                                            let ulkomaalaisetTotal = null;
+                                            let ulkomaalaisetLabel = '';
+                                            context[0].chart.data.datasets.forEach((ds, i) => {
+                                                if (ds.type === 'line') {
+                                                    if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
+                                                        pitkatTotal = ds.data[yearIdx];
+                                                        pitkatLabel = 'Pitkäaikaistyöttömät';
+                                                    } else if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
+                                                        ulkomaalaisetTotal = ds.data[yearIdx];
+                                                        ulkomaalaisetLabel = 'Ulkomaalaiset työttömät';
+                                                    } else {
+                                                        comparisonTotal = ds.data[yearIdx];
+                                                        comparisonLabel = ds.label ? ds.label + ' ' : 'Yhteensä';
+                                                    }
+                                                } else if (typeof ds.data[yearIdx] === 'number') {
+                                                    selectedTotal += ds.data[yearIdx];
+                                                }
+                                            });
+                                            let lines = [];
+                                            // Always show pointed value (handled by label callback), then all sum lines
+                                            let selectedLabel = 'Kaikki yhteensä';
+                                            if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
+                                                selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
+                                            }
+                                            if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
+                                            if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
+                                            if (pitkatTotal !== null && typeof pitkatTotal === 'number') lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
+                                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
+                                            return lines.join('\n');
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
+                                y: { title: { display: true, text: 'Työttömät työnhakijat' }, stacked: chartType === 'bar' }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#f7fbfc'
+                        }
+                    });
+                    // After chart redraw, update dataset visibility and button label
+                    if (tyottomatAllHidden) {
+                        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = true; });
+                        tyottomatChartObj.update();
+                        document.getElementById('tyottomat-toggle-datasets').textContent = 'Näytä kaikki kunnat';
+                    } else {
+                        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = false; });
+                        tyottomatChartObj.update();
+                        document.getElementById('tyottomat-toggle-datasets').textContent = 'Piilota kaikki kunnat';
+                    }
+                }
+
+                async function updateTyottomatChart(chartType = 'bar', region = 'all') {
+                    if (region === '1' || region === '2') {
+                        // Fetch main region data and its pitkaaikaistyottomat
+                        const [mainData, pitkatData] = await Promise.all([
+                            fetchTyottomat(region),
+                            (async () => {
+                                // Fetch pitkaaikaistyottomat for selected region, with limit=48
+                                const stat_code = region === '1' ? 'MK07' : 'MK05';
+                                const res = await fetch(`tyollisyys_historia.php?stat_code=${stat_code}&field=pitkaaikaistyottomat&limit=48`);
+                                return await res.json();
+                            })()
+                        ]);
+                        if (!mainData || !pitkatData || !pitkatData.data) return;
+                        // Add pitkaaikaistyottomat as a line dataset
+                        mainData.datasets.push({
+                            label: 'Pitkäaikaistyöttömät',
+                            data: pitkatData.data,
+                            type: 'line',
+                            borderColor: '#8B4513', // brown
+                            backgroundColor: 'rgba(139,69,19,0.10)',
+                            fill: false,
+                            pointRadius: 3,
+                            borderWidth: 2,
+                            tension: 0.18,
+                            order: 10
+                        });
+                        renderTyottomatChart(mainData, chartType);
+                        document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
+                    } else if (region === '1000') {
+                        // Kaikki: show all data and pitkaaikaistyottomat for whole country
+                        const [data, kaikkiPitkat] = await Promise.all([
+                            fetchTyottomat(region),
+                            fetch('tyollisyys_historia.php?stat_code=SSS&field=pitkaaikaistyottomat&limit=48').then(r => r.json())
+                        ]);
+                        if (!data || !kaikkiPitkat || !kaikkiPitkat.data) return;
+                        data.datasets.push({
+                            label: 'Pitkäaikaistyöttömät',
+                            data: kaikkiPitkat.data,
+                            type: 'line',
+                            borderColor: '#8B4513',
+                            backgroundColor: 'rgba(139,69,19,0.10)',
+                            fill: false,
+                            pointRadius: 3,
+                            borderWidth: 2,
+                            tension: 0.18,
+                            order: 10
+                        });
+                        renderTyottomatChart(data, chartType);
+                        document.getElementById('tyottomat-paivitys').textContent = data.latest_update || '-';
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Button controls
+                    const btnBar = document.getElementById('tyottomat-type-bar');
+                    const btnLine = document.getElementById('tyottomat-type-line');
+                    const btnToggle = document.getElementById('tyottomat-toggle-datasets');
+                    const regionSelect = document.getElementById('tyottomat-region-select');
+                    btnBar.style.fontWeight = 'bold';
+                    btnLine.style.fontWeight = 'normal';
+                    tyottomatCurrentRegion = '1000';
+                    updateTyottomatChart('bar', '1000');
+                    btnBar.addEventListener('click', function () {
+                        tyottomatCurrentType = 'bar';
+                        btnBar.style.fontWeight = 'bold';
+                        btnLine.style.fontWeight = 'normal';
+                        updateTyottomatChart('bar', tyottomatCurrentRegion);
+                    });
+                    btnLine.addEventListener('click', function () {
+                        tyottomatCurrentType = 'line';
+                        btnLine.style.fontWeight = 'bold';
+                        btnBar.style.fontWeight = 'normal';
+                        updateTyottomatChart('line', tyottomatCurrentRegion);
+                    });
+                    btnToggle.addEventListener('click', function () {
+                        if (!tyottomatChartObj) return;
+                        tyottomatAllHidden = !tyottomatAllHidden;
+                        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = tyottomatAllHidden; });
+                        tyottomatChartObj.update();
+                        btnToggle.textContent = tyottomatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
+                    });
+                    regionSelect.addEventListener('change', function () {
+                        tyottomatCurrentRegion = this.value;
+                        updateTyottomatChart(tyottomatCurrentType, tyottomatCurrentRegion);
+                    });
+                });
+            </script>
+            <p>Lähde: <a href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12r5.px"
+                    target="_blank"
+                    title="12r5 -- Työttömät työnhakijat eri ryhmissä, palveluissa olevat ja avoimet työpaikat kuukauden lopussa">
+                    Tilastokeskus 12r5</a> (työnvälitystilasto, KEHA), viimeisin tilasto tarkistettu lähteestä <b>
+                    <span id="tyottomat-paivitys">...</span></b></p>
+
+
+
+
+
+
+
             <!-- Avoimet työpaikat toimialoittain Chart.js embedded chart -->
             <br><br>
             <div
@@ -586,294 +884,7 @@
 
 
 
-<!-- Uusi Chart.js: Työttömät työnhakijat kunnittain -->
-
-<br><br>
-<div id="bookmark-tyottomat" style="max-width:1240px;margin:0 auto 40px auto;background:#ffffff;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
-    <h3 style="text-align:center;">Työttömät työnhakijat kunnittain</h3>
-    <div style="text-align:center;margin-bottom:12px;"><br><br>
-        <select id="tyottomat-region-select" style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
-            <option value="1000" selected>Koko maa</option>
-            <option value="1">Päijät-Häme</option>
-            <option value="2">Kanta-Häme</option>
-        </select>
-        <b>Kaaviotyyppi:</b>
-        <button id="tyottomat-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
-        <button id="tyottomat-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
-        <button id="tyottomat-toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki kunnat</button>
-    </div>
-    <canvas id="tyottomatChart" width="1100" height="600"></canvas>
-    
-</div>
-<script>
-let tyottomatChartObj = null;
-let tyottomatCurrentType = 'bar';
-let tyottomatAllHidden = false;
-let tyottomatCurrentRegion = '1000';
-const tyottomatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'];
-
-async function fetchTyottomat(region = 'all') {
-    try {
-        let url = `tyonhakijat_historia.php?maakunta_id=${region}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        return data;
-    } catch (e) {
-        console.error('Virhe ladattaessa työttömät-dataa:', e);
-        return null;
-    }
-}
-
-function renderTyottomatChart(data, chartType = 'bar') {
-    const ctx = document.getElementById('tyottomatChart').getContext('2d');
-    const N = 48;
-    // Always slice labels and all datasets to last 48 months
-    data.labels = data.labels.slice(-N);
-    data.datasets.forEach(ds => {
-        if (Array.isArray(ds.data)) ds.data = ds.data.slice(-N);
-    });
-    // No special filtering for 'Kaikki' (1000), show all datasets
-    // Find if we have a comparison line dataset (last one, type: 'line')
-    let comparisonLineIdx = -1;
-    if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
-        comparisonLineIdx = data.datasets.length - 1;
-        // Remove color from comparison line
-        data.datasets[comparisonLineIdx].borderColor = '#444';
-        data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
-    }
-    // Add comparison line for ulkomaalaiset työttömät (tyottomatulk)
-    if (data.ulkomaalaiset_sum) {
-        // Try to find the label of the 'Pitkäaikaistyöttömät' line dataset (if present)
-        let pitkatLabel = null;
-        for (const ds of data.datasets) {
-            if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
-                pitkatLabel = ds.label;
-                break;
-            }
-        }
-        // If not found, use a fallback label
-        if (!pitkatLabel) pitkatLabel = 'Pitkäaikaistyöttömät';
-        data.datasets.push({
-            label: 'Ulkomaalaiset työttömät',
-            data: data.ulkomaalaiset_sum.slice(-N),
-            type: 'line',
-            borderColor: '#8B4513', // Brown line
-            backgroundColor: 'rgba(0,153,51,0.10)', // Greenish area
-            borderWidth: 3,
-            pointRadius: 3,
-            fill: pitkatLabel ? { target: pitkatLabel, above: 'rgba(0,153,51,0.10)' } : true,
-            tension: 0.15,
-            order: 100,
-            yAxisID: 'y',
-            datalabels: { display: false },
-            stack: null // Explicitly set to null to avoid stacking
-        });
-    }
-    data.datasets.forEach((ds, i) => {
-        // Skip ulkomaalaiset line (comparison) so its style is not overwritten
-        if (ds.label === 'Ulkomaalaiset työttömät') return;
-        if (i !== comparisonLineIdx) {
-            ds.backgroundColor = tyottomatPalette[i % tyottomatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
-            ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
-        }
-        // Only bar datasets are stacked, all lines (including ulkomaalaiset and region comparison) are not stacked
-        ds.stack = (chartType === 'bar' && ds.type !== 'line') ? 'Stack 0' : null;
-        ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
-        ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
-        ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
-        ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
-    });
-    if (tyottomatChartObj) tyottomatChartObj.destroy();
-    tyottomatChartObj = new Chart(ctx, {
-        type: chartType,
-        data: {
-            labels: data.labels,
-            datasets: data.datasets
-        },
-        options: {
-            responsive: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                tooltip: {
-                    mode: chartType === 'line' ? 'index' : 'nearest',
-                    intersect: chartType !== 'line',
-                    callbacks: {
-                        label: function(context) {
-                            // Show real names for special lines
-                            let label = context.dataset.label || '';
-                            if (label.toLowerCase().includes('pitkäaikaistyöttömät')) {
-                                label = 'Pitkäaikaistyöttömät';
-                            } else if (label.toLowerCase().includes('ulkomaalaiset')) {
-                                label = 'Ulkomaalaiset työttömät';
-                            }
-                            return label + ': ' + context.formattedValue;
-                        },
-                        afterBody: function(context) {
-                            const yearIdx = context[0].dataIndex;
-                            let selectedTotal = 0;
-                            let comparisonTotal = null;
-                            let comparisonLabel = '';
-                            let regionIsKokoMaa = false;
-                            // Try to detect if current region is 'Koko maa' (1000)
-                            if (tyottomatCurrentRegion === '1000') regionIsKokoMaa = true;
-                            // Find the 'Pitkäaikaistyöttömät' line dataset if present
-                            let pitkatTotal = null;
-                            let pitkatLabel = '';
-                            let ulkomaalaisetTotal = null;
-                            let ulkomaalaisetLabel = '';
-                            context[0].chart.data.datasets.forEach((ds, i) => {
-                                if (ds.type === 'line') {
-                                    if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
-                                        pitkatTotal = ds.data[yearIdx];
-                                        pitkatLabel = 'Pitkäaikaistyöttömät';
-                                    } else if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
-                                        ulkomaalaisetTotal = ds.data[yearIdx];
-                                        ulkomaalaisetLabel = 'Ulkomaalaiset työttömät';
-                                    } else {
-                                        comparisonTotal = ds.data[yearIdx];
-                                        comparisonLabel = ds.label ? ds.label + ' ' : 'Yhteensä';
-                                    }
-                                } else if (typeof ds.data[yearIdx] === 'number') {
-                                    selectedTotal += ds.data[yearIdx];
-                                }
-                            });
-                            let lines = [];
-                            // Always show pointed value (handled by label callback), then all sum lines
-                            let selectedLabel = 'Kaikki yhteensä';
-                            if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
-                                selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
-                            }
-                            if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
-                            if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
-                            if (pitkatTotal !== null && typeof pitkatTotal === 'number') lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
-                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
-                            return lines.join('\n');
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
-                y: { title: { display: true, text: 'Työttömät työnhakijat' }, stacked: chartType === 'bar' }
-            },
-            layout: { padding: 10 },
-            backgroundColor: '#f7fbfc'
-        }
-    });
-    // After chart redraw, update dataset visibility and button label
-    if (tyottomatAllHidden) {
-        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = true; });
-        tyottomatChartObj.update();
-        document.getElementById('tyottomat-toggle-datasets').textContent = 'Näytä kaikki kunnat';
-    } else {
-        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = false; });
-        tyottomatChartObj.update();
-        document.getElementById('tyottomat-toggle-datasets').textContent = 'Piilota kaikki kunnat';
-    }
-}
-
-async function updateTyottomatChart(chartType = 'bar', region = 'all') {
-    if (region === '1' || region === '2') {
-        // Fetch main region data and its pitkaaikaistyottomat
-        const [mainData, pitkatData] = await Promise.all([
-            fetchTyottomat(region),
-            (async () => {
-                // Fetch pitkaaikaistyottomat for selected region, with limit=48
-                const stat_code = region === '1' ? 'MK07' : 'MK05';
-                const res = await fetch(`tyollisyys_historia.php?stat_code=${stat_code}&field=pitkaaikaistyottomat&limit=48`);
-                return await res.json();
-            })()
-        ]);
-        if (!mainData || !pitkatData || !pitkatData.data) return;
-        // Add pitkaaikaistyottomat as a line dataset
-        mainData.datasets.push({
-            label: 'Pitkäaikaistyöttömät',
-            data: pitkatData.data,
-            type: 'line',
-            borderColor: '#8B4513', // brown
-            backgroundColor: 'rgba(139,69,19,0.10)',
-            fill: false,
-            pointRadius: 3,
-            borderWidth: 2,
-            tension: 0.18,
-            order: 10
-        });
-        renderTyottomatChart(mainData, chartType);
-        document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
-    } else if (region === '1000') {
-        // Kaikki: show all data and pitkaaikaistyottomat for whole country
-        const [data, kaikkiPitkat] = await Promise.all([
-            fetchTyottomat(region),
-            fetch('tyollisyys_historia.php?stat_code=SSS&field=pitkaaikaistyottomat&limit=48').then(r => r.json())
-        ]);
-        if (!data || !kaikkiPitkat || !kaikkiPitkat.data) return;
-        data.datasets.push({
-            label: 'Pitkäaikaistyöttömät',
-            data: kaikkiPitkat.data,
-            type: 'line',
-            borderColor: '#8B4513',
-            backgroundColor: 'rgba(139,69,19,0.10)',
-            fill: false,
-            pointRadius: 3,
-            borderWidth: 2,
-            tension: 0.18,
-            order: 10
-        });
-        renderTyottomatChart(data, chartType);
-        document.getElementById('tyottomat-paivitys').textContent = data.latest_update || '-';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Button controls
-    const btnBar = document.getElementById('tyottomat-type-bar');
-    const btnLine = document.getElementById('tyottomat-type-line');
-    const btnToggle = document.getElementById('tyottomat-toggle-datasets');
-    const regionSelect = document.getElementById('tyottomat-region-select');
-    btnBar.style.fontWeight = 'bold';
-    btnLine.style.fontWeight = 'normal';
-    tyottomatCurrentRegion = '1000';
-    updateTyottomatChart('bar', '1000');
-    btnBar.addEventListener('click', function() {
-        tyottomatCurrentType = 'bar';
-        btnBar.style.fontWeight = 'bold';
-        btnLine.style.fontWeight = 'normal';
-        updateTyottomatChart('bar', tyottomatCurrentRegion);
-    });
-    btnLine.addEventListener('click', function() {
-        tyottomatCurrentType = 'line';
-        btnLine.style.fontWeight = 'bold';
-        btnBar.style.fontWeight = 'normal';
-        updateTyottomatChart('line', tyottomatCurrentRegion);
-    });
-    btnToggle.addEventListener('click', function() {
-        if (!tyottomatChartObj) return;
-        tyottomatAllHidden = !tyottomatAllHidden;
-        tyottomatChartObj.data.datasets.forEach(ds => { ds.hidden = tyottomatAllHidden; });
-        tyottomatChartObj.update();
-        btnToggle.textContent = tyottomatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
-    });
-    regionSelect.addEventListener('change', function() {
-        tyottomatCurrentRegion = this.value;
-        updateTyottomatChart(tyottomatCurrentType, tyottomatCurrentRegion);
-    });
-});
-</script>
-                <p>Lähde: <a
-                        href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__tyonv/statfin_tyonv_pxt_12r5.px"
-                        target="_blank"
-                        title="12r5 -- Työttömät työnhakijat eri ryhmissä, palveluissa olevat ja avoimet työpaikat kuukauden lopussa">
-                        Tilastokeskus 12r5</a> (työnvälitystilasto, KEHA), viimeisin tilasto tarkistettu lähteestä <b>
-                        <span id="tyottomat-paivitys">...</span></b></p>
-
-
-
-
-
-
-
-    </div><br>
+        </div><br>
 
 
     </div>
