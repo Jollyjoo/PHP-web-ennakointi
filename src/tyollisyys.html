@@ -614,7 +614,13 @@ const tyottomatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900',
 
 async function fetchTyottomat(region = 'all') {
     try {
-        const url = region === 'all' ? 'tyonhakijat_historia.php' : `tyonhakijat_historia.php?maakunta_id=${region}`;
+        let url;
+        if (region === 'all') {
+            // Only fetch SSS for Koko maa
+            url = 'tyonhakijat_historia.php?stat_code=SSS';
+        } else {
+            url = `tyonhakijat_historia.php?maakunta_id=${region}`;
+        }
         const res = await fetch(url);
         const data = await res.json();
         if (data.error) throw new Error(data.error);
@@ -757,12 +763,14 @@ async function updateTyottomatChart(chartType = 'bar', region = 'all') {
         renderTyottomatChart(mainData, chartType);
         document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
     } else {
-        // Koko maa: fetch main data and pitkaaikaistyottomat for SSS
+        // Koko maa: only show SSS data and pitkaaikaistyottomat
         const [data, sssPitkat] = await Promise.all([
             fetchTyottomat(region),
             fetch('tyollisyys_historia.php?stat_code=SSS&field=pitkaaikaistyottomat&limit=48').then(r => r.json())
         ]);
         if (!data || !sssPitkat || !sssPitkat.data) return;
+        // Remove all other datasets except SSS (should only be one, but just in case)
+        data.datasets = data.datasets.filter(ds => ds.stat_code === 'SSS' || !ds.stat_code);
         data.datasets.push({
             label: 'Pitkäaikaistyöttömät (Koko maa)',
             data: sssPitkat.data,
