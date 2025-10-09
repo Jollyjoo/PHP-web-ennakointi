@@ -716,13 +716,13 @@ function renderTyottomatChart(data, chartType = 'bar') {
                                 if (ds.type === 'line') {
                                     if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
                                         pitkatTotal = ds.data[yearIdx];
-                                        pitkatLabel = 'Pitkäaikaistyöttömät yhteensä';
+                                        pitkatLabel = 'Pitkäaikaistyöttömät';
                                     } else if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
                                         ulkomaalaisetTotal = ds.data[yearIdx];
-                                        ulkomaalaisetLabel = 'Ulkomaalaiset työttömät yhteensä';
+                                        ulkomaalaisetLabel = 'Ulkomaalaiset työttömät';
                                     } else {
                                         comparisonTotal = ds.data[yearIdx];
-                                        comparisonLabel = ds.label ? ds.label + ' yhteensä' : 'Yhteensä';
+                                        comparisonLabel = ds.label ? ds.label + ' ' : 'Yhteensä';
                                     }
                                 } else if (typeof ds.data[yearIdx] === 'number') {
                                     selectedTotal += ds.data[yearIdx];
