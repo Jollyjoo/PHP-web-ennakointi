@@ -729,25 +729,15 @@ function renderTyottomatChart(data, chartType = 'bar') {
                                 }
                             });
                             let lines = [];
-                            if (regionIsKokoMaa) {
-                                // For 'Koko maa', show both 'Pitkäaikaistyöttömät' and 'Ulkomaalaiset työttömät' sum lines if present
-                                if (pitkatTotal !== null && typeof pitkatTotal === 'number') {
-                                    lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
-                                }
-                                if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') {
-                                    lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
-                                }
-                            } else {
-                                // Use real name for selected region sum
-                                let selectedLabel = 'Kaikki yhteensä';
-                                if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
-                                    selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
-                                }
-                                if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
-                                if (pitkatTotal !== null && typeof pitkatTotal === 'number') lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
-                                if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
-                                if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
+                            // Always show pointed value (handled by label callback), then all sum lines
+                            let selectedLabel = 'Kaikki yhteensä';
+                            if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
+                                selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
                             }
+                            if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
+                            if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
+                            if (pitkatTotal !== null && typeof pitkatTotal === 'number') lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
+                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
                             return lines.join('\n');
                         }
                     }
