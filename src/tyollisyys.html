@@ -499,6 +499,23 @@
                         data.datasets[comparisonLineIdx].borderColor = '#444';
                         data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
                     }
+
+                    // Add independent bar for Laaja työttömyys (palvelut_yht)
+                    if (data.palvelut_yht) {
+                        data.datasets.push({
+                            label: 'Palveluissa (laaja työttömyys)',
+                            data: data.palvelut_yht.slice(-N),
+                            type: 'bar',
+                            backgroundColor: 'rgba(211,47,47,0.60)', // Red bar
+                            borderColor: '#d32f2f',
+                            borderWidth: 2,
+                            stack: 'Stack 1', // Separate stack from main bars
+                            order: 99,
+                            yAxisID: 'y',
+                            datalabels: { display: false }
+                        });
+                    }
+
                     // Add comparison line for ulkomaalaiset työttömät (tyottomatulk)
                     if (data.ulkomaalaiset_sum) {
                         // Try to find the label of the 'Pitkäaikaistyöttömät' line dataset (if present)
@@ -528,21 +545,7 @@
                         });
                     }
 
-                    // Add independent bar for Laaja työttömyys (palvelut_yht)
-                    if (data.palvelut_yht) {
-                        data.datasets.push({
-                            label: 'Laaja työttömyys',
-                            data: data.palvelut_yht.slice(-N),
-                            type: 'bar',
-                            backgroundColor: 'rgba(211,47,47,0.60)', // Red bar
-                            borderColor: '#d32f2f',
-                            borderWidth: 2,
-                            stack: 'Stack 1', // Separate stack from main bars
-                            order: 99,
-                            yAxisID: 'y',
-                            datalabels: { display: false }
-                        });
-                    }
+
                     data.datasets.forEach((ds, i) => {
                         // Skip ulkomaalaiset line (comparison) so its style is not overwritten
                         if (ds.label === 'Ulkomaalaiset työttömät') return;
