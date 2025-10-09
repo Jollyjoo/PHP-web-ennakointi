@@ -710,18 +710,19 @@ function renderTyottomatChart(data, chartType = 'bar') {
                             // Find the 'Pitkäaikaistyöttömät' line dataset if present
                             let pitkatTotal = null;
                             let pitkatLabel = '';
+                            let ulkomaalaisetTotal = null;
+                            let ulkomaalaisetLabel = '';
                             context[0].chart.data.datasets.forEach((ds, i) => {
                                 if (ds.type === 'line') {
                                     if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
                                         pitkatTotal = ds.data[yearIdx];
                                         pitkatLabel = 'Pitkäaikaistyöttömät yhteensä';
+                                    } else if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
+                                        ulkomaalaisetTotal = ds.data[yearIdx];
+                                        ulkomaalaisetLabel = 'Ulkomaalaiset työttömät yhteensä';
                                     } else {
                                         comparisonTotal = ds.data[yearIdx];
-                                        if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
-                                            comparisonLabel = 'Ulkomaalaiset työttömät yhteensä';
-                                        } else {
-                                            comparisonLabel = ds.label ? ds.label + ' yhteensä' : 'Yhteensä';
-                                        }
+                                        comparisonLabel = ds.label ? ds.label + ' yhteensä' : 'Yhteensä';
                                     }
                                 } else if (typeof ds.data[yearIdx] === 'number') {
                                     selectedTotal += ds.data[yearIdx];
@@ -729,9 +730,12 @@ function renderTyottomatChart(data, chartType = 'bar') {
                             });
                             let lines = [];
                             if (regionIsKokoMaa) {
-                                // For 'Koko maa', show only 'Pitkäaikaistyöttömät' sum line if present
+                                // For 'Koko maa', show both 'Pitkäaikaistyöttömät' and 'Ulkomaalaiset työttömät' sum lines if present
                                 if (pitkatTotal !== null && typeof pitkatTotal === 'number') {
                                     lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
+                                }
+                                if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') {
+                                    lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
                                 }
                             } else {
                                 // Use real name for selected region sum
@@ -741,6 +745,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
                                 }
                                 if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
                                 if (pitkatTotal !== null && typeof pitkatTotal === 'number') lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
+                                if (ulkomaalaisetTotal !== null && typeof ulkomaalaisetTotal === 'number') lines.push(ulkomaalaisetLabel + ': ' + ulkomaalaisetTotal.toLocaleString('fi-FI'));
                                 if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
                             }
                             return lines.join('\n');
