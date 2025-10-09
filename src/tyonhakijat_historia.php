@@ -36,6 +36,9 @@ if ($maakunta_id === '1') {
     $where = 'WHERE Maakunta_ID = 1';
 } elseif ($maakunta_id === '2') {
     $where = 'WHERE Maakunta_ID = 2';
+} elseif ($maakunta_id === '1000') {
+    // Koko maa: sum all regions
+    $where = 'WHERE Maakunta_ID IS NOT NULL';
 } else {
     $where = 'WHERE Maakunta_ID IS NOT NULL';
 }

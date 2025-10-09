@@ -616,8 +616,8 @@ async function fetchTyottomat(region = 'all') {
     try {
         let url;
         if (region === 'SSS') {
-            // Only fetch SSS for Koko maa
-            url = 'tyonhakijat_historia.php?stat_code=SSS';
+            // Use maakunta_id=1000 for Koko maa
+            url = 'tyonhakijat_historia.php?maakunta_id=1000';
         } else {
             url = `tyonhakijat_historia.php?maakunta_id=${region}`;
         }
