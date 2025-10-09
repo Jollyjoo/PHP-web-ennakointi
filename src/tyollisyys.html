@@ -701,19 +701,32 @@ function renderTyottomatChart(data, chartType = 'bar') {
                         },
                         afterBody: function(context) {
                             const yearIdx = context[0].dataIndex;
-                            // Sum selected region total (all bar datasets)
                             let selectedTotal = 0;
                             let comparisonTotal = null;
+                            let comparisonLabel = '';
                             context[0].chart.data.datasets.forEach((ds, i) => {
                                 if (ds.type === 'line') {
                                     comparisonTotal = ds.data[yearIdx];
+                                    // Try to use real name for the comparison line
+                                    if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
+                                        comparisonLabel = 'Pitkäaikaistyöttömät yhteensä';
+                                    } else if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
+                                        comparisonLabel = 'Ulkomaalaiset työttömät yhteensä';
+                                    } else {
+                                        comparisonLabel = ds.label ? ds.label + ' yhteensä' : 'Yhteensä';
+                                    }
                                 } else if (typeof ds.data[yearIdx] === 'number') {
                                     selectedTotal += ds.data[yearIdx];
                                 }
                             });
                             let lines = [];
-                            if (selectedTotal > 0) lines.push('Valittu alue yhteensä: ' + selectedTotal.toLocaleString('fi-FI'));
-                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push('Vertailualue yhteensä: ' + comparisonTotal.toLocaleString('fi-FI'));
+                            // Use real name for selected region sum
+                            let selectedLabel = 'Kaikki yhteensä';
+                            if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
+                                selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
+                            }
+                            if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
+                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
                             return lines.join('\n');
                         }
                     }
