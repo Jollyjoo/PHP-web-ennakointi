@@ -593,7 +593,7 @@
     <h3 style="text-align:center;">Työttömät työnhakijat kunnittain</h3>
     <div style="text-align:center;margin-bottom:12px;"><br><br>
         <select id="tyottomat-region-select" style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
-            <option value="all" selected>Kaikki alueet</option>
+            <option value="all" selected>Koko maa</option>
             <option value="1">Päijät-Häme</option>
             <option value="2">Kanta-Häme</option>
         </select>
@@ -757,9 +757,24 @@ async function updateTyottomatChart(chartType = 'bar', region = 'all') {
         renderTyottomatChart(mainData, chartType);
         document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
     } else {
-        // Default: Koko Häme, no overlay
-        const data = await fetchTyottomat(region);
-        if (!data) return;
+        // Koko maa: fetch main data and pitkaaikaistyottomat for SSS
+        const [data, sssPitkat] = await Promise.all([
+            fetchTyottomat(region),
+            fetch('tyollisyys_historia.php?stat_code=SSS&field=pitkaaikaistyottomat&limit=48').then(r => r.json())
+        ]);
+        if (!data || !sssPitkat || !sssPitkat.data) return;
+        data.datasets.push({
+            label: 'Pitkäaikaistyöttömät (Koko maa)',
+            data: sssPitkat.data,
+            type: 'line',
+            borderColor: '#8B4513',
+            backgroundColor: 'rgba(139,69,19,0.10)',
+            fill: false,
+            pointRadius: 3,
+            borderWidth: 2,
+            tension: 0.18,
+            order: 10
+        });
         renderTyottomatChart(data, chartType);
         document.getElementById('tyottomat-paivitys').textContent = data.latest_update || '-';
     }
