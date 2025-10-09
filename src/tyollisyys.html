@@ -808,7 +808,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const regionSelect = document.getElementById('tyottomat-region-select');
     btnBar.style.fontWeight = 'bold';
     btnLine.style.fontWeight = 'normal';
-    updateTyottomatChart('bar', 'all');
+    tyottomatCurrentRegion = 'SSS';
+    updateTyottomatChart('bar', 'SSS');
     btnBar.addEventListener('click', function() {
         tyottomatCurrentType = 'bar';
         btnBar.style.fontWeight = 'bold';
