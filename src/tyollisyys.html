@@ -593,7 +593,7 @@
     <h3 style="text-align:center;">Työttömät työnhakijat kunnittain</h3>
     <div style="text-align:center;margin-bottom:12px;"><br><br>
         <select id="tyottomat-region-select" style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
-            <option value="all" selected>Koko maa</option>
+            <option value="SSS" selected>Koko maa</option>
             <option value="1">Päijät-Häme</option>
             <option value="2">Kanta-Häme</option>
         </select>
@@ -609,13 +609,13 @@
 let tyottomatChartObj = null;
 let tyottomatCurrentType = 'bar';
 let tyottomatAllHidden = false;
-let tyottomatCurrentRegion = 'all';
+let tyottomatCurrentRegion = 'SSS';
 const tyottomatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'];
 
 async function fetchTyottomat(region = 'all') {
     try {
         let url;
-        if (region === 'all') {
+        if (region === 'SSS') {
             // Only fetch SSS for Koko maa
             url = 'tyonhakijat_historia.php?stat_code=SSS';
         } else {
@@ -640,7 +640,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
         if (Array.isArray(ds.data)) ds.data = ds.data.slice(-N);
     });
     // If only SSS should be shown (Koko maa), filter datasets to only SSS
-    if (tyottomatCurrentRegion === 'all') {
+    if (tyottomatCurrentRegion === 'SSS') {
         // Always keep the SSS dataset if present, otherwise fallback to first
         if (data.datasets.length > 1) {
             let sssIdx = data.datasets.findIndex(ds => ds.stat_code === 'SSS');
@@ -774,7 +774,7 @@ async function updateTyottomatChart(chartType = 'bar', region = 'all') {
         });
         renderTyottomatChart(mainData, chartType);
         document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
-    } else {
+    } else if (region === 'SSS') {
         // Koko maa: only show SSS data and pitkaaikaistyottomat
         const [data, sssPitkat] = await Promise.all([
             fetchTyottomat(region),
