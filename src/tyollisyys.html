@@ -483,7 +483,7 @@
                 }
 
                 function renderTyottomatChart(data, chartType = 'bar') {
-                    const ctx = document.getElementById('tyottomatChart').getContext('3d');
+                    const ctx = document.getElementById('tyottomatChart').getContext('2d');
                     const N = 48;
                     // Always slice labels and all datasets to last 48 months
                     data.labels = data.labels.slice(-N);
