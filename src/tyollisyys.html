@@ -1312,20 +1312,20 @@ document.addEventListener('DOMContentLoaded', function() {
                             phTyottomatChartPopup.style.display = 'block';
                             positionPhTyottomatChartPopup(e);
                             if (!phTyottomatChartDataLoaded) {
-                                fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa')
+                                fetch('tyollisyys_historia.php?stat_code=MK07&field=tyottomatlopussa&limit=24')
                                     .then(resp => resp.json())
                                     .then(hist => {
                                         phTyottomatChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
                                             const kk = parseInt(m.slice(1), 10);
                                             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
                                             return ' ' + (kuukausiNimet[kk - 1] || m);
-                                        }));
-                                        phTyottomatChartData = hist.data;
+                                        })).slice(-24);
+                                        phTyottomatChartData = hist.data.slice(-24);
                                         phTyottomatChartDataLoaded = true;
                                         const minY = Math.floor(Math.min(...phTyottomatChartData) - 1);
                                         const maxY = Math.ceil(Math.max(...phTyottomatChartData) + 1);
                                         const ctx = document.getElementById('ph-tyottomat-chart').getContext('2d');
-                                                                               phTyottomatChartInstance = new Chart(ctx, {
+                                        phTyottomatChartInstance = new Chart(ctx, {
                                             type: 'line',
                                             data: {
                                                 labels: phTyottomatChartLabels,
@@ -1381,15 +1381,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             khTyottomatChartPopup.style.display = 'block';
                             positionKhTyottomatChartPopup(e);
                             if (!khTyottomatChartDataLoaded) {
-                                fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa')
+                                fetch('tyollisyys_historia.php?stat_code=MK05&field=tyottomatlopussa&limit=24')
                                     .then(resp => resp.json())
                                     .then(hist => {
                                         khTyottomatChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
                                             const kk = parseInt(m.slice(1), 10);
                                             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
                                             return ' ' + (kuukausiNimet[kk - 1] || m);
-                                        }));
-                                        khTyottomatChartData = hist.data;
+                                        })).slice(-24);
+                                        khTyottomatChartData = hist.data.slice(-24);
                                         khTyottomatChartDataLoaded = true;
                                         const minY = Math.floor(Math.min(...khTyottomatChartData) - 1);
                                         const maxY = Math.ceil(Math.max(...khTyottomatChartData) + 1);
