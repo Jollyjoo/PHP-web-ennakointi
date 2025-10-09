@@ -511,6 +511,7 @@
                         }
                         // If not found, use a fallback label
                         if (!pitkatLabel) pitkatLabel = 'Pitkäaikaistyöttömät';
+                        // Ulkomaalaiset työttömät line
                         data.datasets.push({
                             label: 'Ulkomaalaiset työttömät',
                             data: data.ulkomaalaiset_sum.slice(-N),
@@ -525,6 +526,22 @@
                             yAxisID: 'y',
                             datalabels: { display: false },
                             stack: null // Explicitly set to null to avoid stacking
+                        });
+                        // Laaja työttömyys line (copy for now)
+                        data.datasets.push({
+                            label: 'Laaja työttömyys',
+                            data: data.ulkomaalaiset_sum.slice(-N),
+                            type: 'line',
+                            borderColor: '#1976d2', // Blue line
+                            backgroundColor: 'rgba(25,118,210,0.10)', // Blue area
+                            borderWidth: 3,
+                            pointRadius: 3,
+                            fill: pitkatLabel ? { target: pitkatLabel, above: 'rgba(25,118,210,0.10)' } : true,
+                            tension: 0.15,
+                            order: 101,
+                            yAxisID: 'y',
+                            datalabels: { display: false },
+                            stack: null
                         });
                     }
                     data.datasets.forEach((ds, i) => {
