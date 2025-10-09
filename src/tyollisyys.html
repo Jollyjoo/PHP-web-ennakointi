@@ -704,29 +704,45 @@ function renderTyottomatChart(data, chartType = 'bar') {
                             let selectedTotal = 0;
                             let comparisonTotal = null;
                             let comparisonLabel = '';
+                            let regionIsKokoMaa = false;
+                            // Try to detect if current region is 'Koko maa' (1000)
+                            if (tyottomatCurrentRegion === '1000') regionIsKokoMaa = true;
+                            // Find the 'Pitkäaikaistyöttömät' line dataset if present
+                            let pitkatTotal = null;
+                            let pitkatLabel = '';
                             context[0].chart.data.datasets.forEach((ds, i) => {
                                 if (ds.type === 'line') {
-                                    comparisonTotal = ds.data[yearIdx];
-                                    // Try to use real name for the comparison line
                                     if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
-                                        comparisonLabel = 'Pitkäaikaistyöttömät yhteensä';
-                                    } else if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
-                                        comparisonLabel = 'Ulkomaalaiset työttömät yhteensä';
+                                        pitkatTotal = ds.data[yearIdx];
+                                        pitkatLabel = 'Pitkäaikaistyöttömät yhteensä';
                                     } else {
-                                        comparisonLabel = ds.label ? ds.label + ' yhteensä' : 'Yhteensä';
+                                        comparisonTotal = ds.data[yearIdx];
+                                        if (ds.label && ds.label.toLowerCase().includes('ulkomaalaiset')) {
+                                            comparisonLabel = 'Ulkomaalaiset työttömät yhteensä';
+                                        } else {
+                                            comparisonLabel = ds.label ? ds.label + ' yhteensä' : 'Yhteensä';
+                                        }
                                     }
                                 } else if (typeof ds.data[yearIdx] === 'number') {
                                     selectedTotal += ds.data[yearIdx];
                                 }
                             });
                             let lines = [];
-                            // Use real name for selected region sum
-                            let selectedLabel = 'Kaikki yhteensä';
-                            if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
-                                selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
+                            if (regionIsKokoMaa) {
+                                // For 'Koko maa', show only 'Pitkäaikaistyöttömät' sum line if present
+                                if (pitkatTotal !== null && typeof pitkatTotal === 'number') {
+                                    lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
+                                }
+                            } else {
+                                // Use real name for selected region sum
+                                let selectedLabel = 'Kaikki yhteensä';
+                                if (context[0].chart.options.plugins && context[0].chart.options.plugins.title && context[0].chart.options.plugins.title.text) {
+                                    selectedLabel = context[0].chart.options.plugins.title.text + ' yhteensä';
+                                }
+                                if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
+                                if (pitkatTotal !== null && typeof pitkatTotal === 'number') lines.push(pitkatLabel + ': ' + pitkatTotal.toLocaleString('fi-FI'));
+                                if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
                             }
-                            if (selectedTotal > 0) lines.push(selectedLabel + ': ' + selectedTotal.toLocaleString('fi-FI'));
-                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push(comparisonLabel + ': ' + comparisonTotal.toLocaleString('fi-FI'));
                             return lines.join('\n');
                         }
                     }
