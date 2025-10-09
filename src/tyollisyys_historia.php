@@ -24,7 +24,7 @@ $field = isset($_GET['field']) ? $_GET['field'] : 'tyotosuus';
 $limit = isset($_GET['limit']) ? intval($_GET['limit']) : 12;
 if ($limit < 1 || $limit > 120) { $limit = 12; } // sanity check
 // Validate field
-$allowed_fields = ['tyotosuus', 'uudetavp', 'tyottomatlopussa'];
+$allowed_fields = ['tyotosuus', 'uudetavp', 'tyottomatlopussa', 'pitkaaikaistyottomat'];
 if (!in_array($field, $allowed_fields)) {
     $field = 'tyotosuus';
 }
