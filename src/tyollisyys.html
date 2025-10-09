@@ -483,6 +483,28 @@
                 }
 
                 function renderTyottomatChart(data, chartType = 'bar') {
+    // Add comparison line for Laaja työttömyys (tyottomatlopussa + palvelut_yht)
+    if (data.tyottomatlopussa && data.palvelut_yht && Array.isArray(data.tyottomatlopussa) && Array.isArray(data.palvelut_yht)) {
+        const laajaTyottomyys = data.tyottomatlopussa.map((v, i) => {
+            const palvelut = data.palvelut_yht[i] || 0;
+            return (v || 0) + palvelut;
+        });
+        data.datasets.push({
+            label: 'Laaja työttömyys',
+            data: laajaTyottomyys.slice(-N),
+            type: 'line',
+            borderColor: '#1976d2', // Blue line
+            backgroundColor: 'rgba(25, 118, 210, 0.10)', // Blue area
+            borderWidth: 3,
+            pointRadius: 3,
+            fill: false,
+            tension: 0.18,
+            order: 110,
+            yAxisID: 'y',
+            datalabels: { display: false },
+            stack: null
+        });
+    }
                     const ctx = document.getElementById('tyottomatChart').getContext('2d');
                     const N = 48;
                     // Always slice labels and all datasets to last 48 months
