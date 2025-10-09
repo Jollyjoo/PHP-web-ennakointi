@@ -582,30 +582,6 @@
                         id="avoimet-toimiala-update">...</span></b></p>
 
 
-            <!-- 
-            <br><br> <br>
-            <h2 id="bookmark1">Tarkastele avoimia työpaikkoja toimialoittain:</h2><br>          
-            <div class="swiper">               
-                <div class="swiper-wrapper">                  
-                    <div class="swiper-slide" align="center" max-width="50%">
-                        <div class="flourish-embed flourish-chart" data-src="visualisation/22517240">
-                            <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
-                                    src="https://public.flourish.studio/visualisation/22517240/thumbnail"
-                                    alt="chart visualization" /></noscript>
-                        </div>
-                    </div>
-                    <div class="swiper-slide" id="bookmark4">
-                        <div class="flourish-embed flourish-chart" data-src="visualisation/22517613">
-                            <script src="https://public.flourish.studio/resources/embed.js"></script><noscript><img
-                                    src="https://public.flourish.studio/visualisation/22517613/thumbnail"
-                                    alt="chart visualization" /></noscript>
-                        </div>
-                    </div>
-                </div>            
-                <div class="swiper-pagination"></div>
-                <div class="swiper-button-prev"></div>
-                <div class="swiper-button-next"></div>
-            </div> -->
 
 
 
@@ -747,36 +723,30 @@ function renderTyottomatChart(data, chartType = 'bar') {
 }
 
 async function updateTyottomatChart(chartType = 'bar', region = 'all') {
-    // For region 1 or 2, fetch both regions' data for overlay
     if (region === '1' || region === '2') {
-        const otherRegion = region === '1' ? '2' : '1';
-        const [mainData, otherData] = await Promise.all([
+        // Fetch main region data and its pitkaaikaistyottomat
+        const [mainData, pitkatData] = await Promise.all([
             fetchTyottomat(region),
-            fetchTyottomat(otherRegion)
+            (async () => {
+                // Fetch pitkaaikaistyottomat for selected region
+                const stat_code = region === '1' ? 'MK07' : 'MK05';
+                const res = await fetch(`tyollisyys_historia.php?stat_code=${stat_code}&field=pitkaaikaistyottomat`);
+                return await res.json();
+            })()
         ]);
-        if (!mainData || !otherData) return;
-        // Sum other region's municipalities for each year
-        const yearCount = mainData.labels.length;
-        const otherTotals = Array(yearCount).fill(0);
-        otherData.datasets.forEach(ds => {
-            ds.data.forEach((val, idx) => {
-                otherTotals[idx] += typeof val === 'number' ? val : 0;
-            });
-        });
-        // Add as a line dataset
+        if (!mainData || !pitkatData || !pitkatData.data) return;
+        // Add pitkaaikaistyottomat as a line dataset
         mainData.datasets.push({
-            label: otherRegion === '1' ? 'Päijät-Häme yhteensä (vertailu)' : 'Kanta-Häme yhteensä (vertailu)',
-            data: otherTotals,
+            label: 'Pitkäaikaistyöttömät',
+            data: pitkatData.data,
             type: 'line',
-            borderColor: '#222',
-            backgroundColor: 'rgba(0,0,0,0.08)',
-            borderWidth: 3,
-            pointRadius: 3,
+            borderColor: '#8B4513', // brown
+            backgroundColor: 'rgba(139,69,19,0.10)',
             fill: false,
-            tension: 0.15,
-            order: 99,
-            yAxisID: 'y',
-            datalabels: { display: false }
+            pointRadius: 3,
+            borderWidth: 2,
+            tension: 0.18,
+            order: 10
         });
         renderTyottomatChart(mainData, chartType);
         document.getElementById('tyottomat-paivitys').textContent = mainData.latest_update || '-';
@@ -836,20 +806,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
-
-  <!--           <p align="center"><br><br>
-            <h2>Työllisyyslukuja kunnittain</h2><br>
-            </p>
-            <iframe title="Työllisyys_tunnusluvut" width="80%" height="400"
-                src="https://app.powerbi.com/view?r=eyJrIjoiN2VhZjEyMzAtZTY2Zi00ZDkzLWFiNDEtZmE3NjQwOWMzNzI0IiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9"
-                frameborder="0" allowFullScreen="true"></iframe><br><br>
- -->
-
-            <!--             <br><br><br>
-            <iframe title="TujoTilastot Ennuste" width="100%" height="720"
-                src="https://app.powerbi.com/view?r=eyJrIjoiNWFjYWYwZTMtODFkOS00ZmYzLWFhNTQtMTBmYmRhN2QyOTRhIiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9"
-                frameborder="0" allowFullScreen="true"></iframe> -->
-        </div><br>
+    </div><br>
 
 
     </div>
