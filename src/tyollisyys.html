@@ -1449,15 +1449,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             phAvoimetChartPopup.style.display = 'block';
                             positionPhAvoimetChartPopup(e);
                             if (!phAvoimetChartDataLoaded) {
-                                fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp')
+                                fetch('tyollisyys_historia.php?stat_code=MK07&field=uudetavp&limit=24')
                                     .then(resp => resp.json())
                                     .then(hist => {
                                         phAvoimetChartLabels = hist.labels.map(l => l.replace(/M(\d{2})/, m => {
                                             const kk = parseInt(m.slice(1), 10);
                                             const kuukausiNimet = ['Tammi', 'Helmi', 'Maalis', 'Huhti', 'Touko', 'Kesä', 'Heinä', 'Elo', 'Syys', 'Loka', 'Marras', 'Joulu'];
                                             return ' ' + (kuukausiNimet[kk - 1] || m);
-                                        }));
-                                        phAvoimetChartData = hist.data;
+                                        })).slice(-24);
+                                        phAvoimetChartData = hist.data.slice(-24);
                                         phAvoimetChartDataLoaded = true;
                                         const minY = Math.floor(Math.min(...phAvoimetChartData) - 1);
                                         const maxY = Math.ceil(Math.max(...phAvoimetChartData) + 1);
