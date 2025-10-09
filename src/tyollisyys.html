@@ -627,6 +627,12 @@ async function fetchTyottomat(region = 'all') {
 
 function renderTyottomatChart(data, chartType = 'bar') {
     const ctx = document.getElementById('tyottomatChart').getContext('2d');
+    const N = 48;
+    // Always slice labels and all datasets to last 48 months
+    data.labels = data.labels.slice(-N);
+    data.datasets.forEach(ds => {
+        if (Array.isArray(ds.data)) ds.data = ds.data.slice(-N);
+    });
     // Find if we have a comparison line dataset (last one, type: 'line')
     let comparisonLineIdx = -1;
     if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
@@ -639,7 +645,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
     if (data.ulkomaalaiset_sum) {
         data.datasets.push({
             label: 'Ulkomaalaiset työttömät (valittu alue)',
-            data: data.ulkomaalaiset_sum,
+            data: data.ulkomaalaiset_sum.slice(-N),
             type: 'line',
             borderColor: '#8B4513', // Brown line
             backgroundColor: 'rgba(0,0,0,0)', // No area color
