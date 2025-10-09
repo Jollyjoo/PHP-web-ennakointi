@@ -483,6 +483,17 @@
                 }
 
                 function renderTyottomatChart(data, chartType = 'bar') {
+                    // Sort bar datasets by total value descending (largest at bottom), keep lines at end
+                    if (chartType === 'bar') {
+                        const barDatasets = data.datasets.filter(ds => !ds.type || ds.type === 'bar');
+                        const lineDatasets = data.datasets.filter(ds => ds.type === 'line');
+                        barDatasets.sort((a, b) => {
+                            const sumA = Array.isArray(a.data) ? a.data.reduce((acc, v) => acc + (typeof v === 'number' ? v : 0), 0) : 0;
+                            const sumB = Array.isArray(b.data) ? b.data.reduce((acc, v) => acc + (typeof v === 'number' ? v : 0), 0) : 0;
+                            return sumB - sumA;
+                        });
+                        data.datasets = barDatasets.concat(lineDatasets);
+                    }
                     const ctx = document.getElementById('tyottomatChart').getContext('2d');
                     const N = 48;
                     // Always slice labels and all datasets to last 48 months
