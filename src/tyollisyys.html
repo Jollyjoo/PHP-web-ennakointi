@@ -728,9 +728,9 @@ async function updateTyottomatChart(chartType = 'bar', region = 'all') {
         const [mainData, pitkatData] = await Promise.all([
             fetchTyottomat(region),
             (async () => {
-                // Fetch pitkaaikaistyottomat for selected region
+                // Fetch pitkaaikaistyottomat for selected region, with limit=48
                 const stat_code = region === '1' ? 'MK07' : 'MK05';
-                const res = await fetch(`tyollisyys_historia.php?stat_code=${stat_code}&field=pitkaaikaistyottomat`);
+                const res = await fetch(`tyollisyys_historia.php?stat_code=${stat_code}&field=pitkaaikaistyottomat&limit=48`);
                 return await res.json();
             })()
         ]);
