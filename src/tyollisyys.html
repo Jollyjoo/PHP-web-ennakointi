@@ -644,6 +644,16 @@ function renderTyottomatChart(data, chartType = 'bar') {
     }
     // Add comparison line for ulkomaalaiset työttömät (tyottomatulk)
     if (data.ulkomaalaiset_sum) {
+        // Try to find the label of the 'Pitkäaikaistyöttömät' line dataset (if present)
+        let pitkatLabel = null;
+        for (const ds of data.datasets) {
+            if (ds.label && ds.label.toLowerCase().includes('pitkäaikaistyöttömät')) {
+                pitkatLabel = ds.label;
+                break;
+            }
+        }
+        // If not found, use a fallback label
+        if (!pitkatLabel) pitkatLabel = 'Pitkäaikaistyöttömät (Kaikki)';
         data.datasets.push({
             label: 'Ulkomaalaiset työttömät (valittu alue)',
             data: data.ulkomaalaiset_sum.slice(-N),
@@ -652,7 +662,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
             backgroundColor: 'rgba(0,153,51,0.10)', // Greenish area
             borderWidth: 3,
             pointRadius: 3,
-            fill: true, // Fill area under line
+            fill: pitkatLabel ? { target: pitkatLabel, above: 'rgba(0,153,51,0.10)' } : true,
             tension: 0.15,
             order: 100,
             yAxisID: 'y',
