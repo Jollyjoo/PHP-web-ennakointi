@@ -653,9 +653,9 @@ function renderTyottomatChart(data, chartType = 'bar') {
             }
         }
         // If not found, use a fallback label
-        if (!pitkatLabel) pitkatLabel = 'Pitkäaikaistyöttömät (Kaikki)';
+        if (!pitkatLabel) pitkatLabel = 'Pitkäaikaistyöttömät';
         data.datasets.push({
-            label: 'Ulkomaalaiset työttömät (valittu alue)',
+            label: 'Ulkomaalaiset työttömät',
             data: data.ulkomaalaiset_sum.slice(-N),
             type: 'line',
             borderColor: '#8B4513', // Brown line
@@ -672,7 +672,7 @@ function renderTyottomatChart(data, chartType = 'bar') {
     }
     data.datasets.forEach((ds, i) => {
         // Skip ulkomaalaiset line (comparison) so its style is not overwritten
-        if (ds.label === 'Ulkomaalaiset työttömät (valittu alue)') return;
+        if (ds.label === 'Ulkomaalaiset työttömät') return;
         if (i !== comparisonLineIdx) {
             ds.backgroundColor = tyottomatPalette[i % tyottomatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
             ds.borderColor = tyottomatPalette[i % tyottomatPalette.length];
@@ -809,7 +809,7 @@ async function updateTyottomatChart(chartType = 'bar', region = 'all') {
         ]);
         if (!data || !kaikkiPitkat || !kaikkiPitkat.data) return;
         data.datasets.push({
-            label: 'Pitkäaikaistyöttömät (Kaikki)',
+            label: 'Pitkäaikaistyöttömät',
             data: kaikkiPitkat.data,
             type: 'line',
             borderColor: '#8B4513',
