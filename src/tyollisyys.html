@@ -1104,7 +1104,8 @@
                                             const vuosi = match[1];
                                             const kk = parseInt(match[2], 10);
                                             const kuukausi = kuukausiNimet[kk - 1] + ' ' + vuosi;
-                                            return `${kuukausi} ${vuosi}`;
+                                            //return `${kuukausi} ${vuosi}`;
+                                            return kuukausi;
                                         }
                                         return aika;
                                     }
