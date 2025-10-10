@@ -5,16 +5,31 @@ require_once "db.php";
 
 try {
     $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
-    $sql = "SELECT kuukausi, stat_code, 
-                   SUM(kuluttajienluottamus) AS kuluttajienluottamus, 
-                   SUM(omatalous) AS omatalous, 
-                   SUM(kuluttajahinnat) AS kuluttajahinnat, 
-                   SUM(tyottomyydenuhka) AS tyottomyydenuhka
-            FROM Talous
-            GROUP BY kuukausi, stat_code
-            ORDER BY kuukausi, stat_code";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
+    $stat_code = isset($_GET['stat_code']) ? $_GET['stat_code'] : null;
+    if ($stat_code) {
+        $sql = "SELECT kuukausi, stat_code, 
+                       SUM(kuluttajienluottamus) AS kuluttajienluottamus, 
+                       SUM(omatalous) AS omatalous, 
+                       SUM(kuluttajahinnat) AS kuluttajahinnat, 
+                       SUM(tyottomyydenuhka) AS tyottomyydenuhka
+                FROM Talous
+                WHERE stat_code = :stat_code
+                GROUP BY kuukausi, stat_code
+                ORDER BY kuukausi";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['stat_code' => $stat_code]);
+    } else {
+        $sql = "SELECT kuukausi, stat_code, 
+                       SUM(kuluttajienluottamus) AS kuluttajienluottamus, 
+                       SUM(omatalous) AS omatalous, 
+                       SUM(kuluttajahinnat) AS kuluttajahinnat, 
+                       SUM(tyottomyydenuhka) AS tyottomyydenuhka
+                FROM Talous
+                GROUP BY kuukausi, stat_code
+                ORDER BY kuukausi, stat_code";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute();
+    }
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     $result = [
@@ -43,7 +58,18 @@ try {
         $dataByStat[$key]['kuluttajahinnat'][] = (float)$row['kuluttajahinnat'];
         $dataByStat[$key]['tyottomyydenuhka'][] = (float)$row['tyottomyydenuhka'];
     }
-    $result['data'] = $dataByStat;
+    // If stat_code is set, only return that stat_code's data
+    if ($stat_code) {
+        $result['data'] = [$stat_code => isset($dataByStat[$stat_code]) ? $dataByStat[$stat_code] : [
+            'labels' => [],
+            'kuluttajienluottamus' => [],
+            'omatalous' => [],
+            'kuluttajahinnat' => [],
+            'tyottomyydenuhka' => []
+        ]];
+    } else {
+        $result['data'] = $dataByStat;
+    }
     echo json_encode($result, JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
     echo json_encode(['error' => $e->getMessage()]);
