@@ -348,6 +348,98 @@ document.addEventListener('DOMContentLoaded', function() {
         <br><br>
         <h2>Ostovoimaa, kulutushalua ja kasvua osoittavia indikaattoreita</h2><br><br>
 
+
+<!-- 
+new embed charts here
+ -->
+
+<!-- Talous-indikaattorit Chart.js embedded chart -->
+<div id="talous-indikaattorit-chart-container" style="max-width:1240px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+    <h3 style="text-align:center;">Talousindikaattorit (viimeiset 4 vuotta)</h3>
+    <canvas id="talousIndikaattoritChart" width="1100" height="420"></canvas>
+    <div style="margin-top:8px; font-size:0.95em; color:#555;">Lähde: <b>Talous-tietokanta</b></div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('talous_historia.php')
+        .then(resp => resp.json())
+        .then(data => {
+            if (!data || !data.data) return;
+            // Use all stat_codes, but show only last 48 months for each
+            const statCodes = Object.keys(data.data);
+            // Find all unique months (labels) in order
+            let allLabels = [];
+            statCodes.forEach(code => {
+                data.data[code].labels.forEach(lab => {
+                    if (!allLabels.includes(lab)) allLabels.push(lab);
+                });
+            });
+            allLabels.sort();
+            const labels = allLabels.slice(-48);
+            // Build datasets for each stat_code and indicator
+            const indicatorNames = [
+                { key: 'kuluttajienluottamus', label: 'Kuluttajien luottamus', color: '#0077cc' },
+                { key: 'omatalous', label: 'Oma talous', color: '#cc3300' },
+                { key: 'kuluttajahinnat', label: 'Kuluttajahinnat', color: '#009933' },
+                { key: 'tyottomyydenuhka', label: 'Työttömyyden uhka', color: '#cc9900' }
+            ];
+            const datasets = indicatorNames.map((ind, i) => {
+                // Sum all stat_codes for each indicator per month
+                const dataArr = labels.map((lab, idx) => {
+                    let sum = 0;
+                    statCodes.forEach(code => {
+                        const idxInCode = data.data[code].labels.indexOf(lab);
+                        if (idxInCode !== -1) {
+                            sum += data.data[code][ind.key][idxInCode] || 0;
+                        }
+                    });
+                    return sum;
+                });
+                return {
+                    label: ind.label,
+                    data: dataArr,
+                    borderColor: ind.color,
+                    backgroundColor: ind.color + '22',
+                    fill: true,
+                    tension: 0.3,
+                    pointRadius: 2,
+                    borderWidth: 2,
+                    type: 'line',
+                    order: i
+                };
+            });
+            const ctx = document.getElementById('talousIndikaattoritChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: false,
+                    plugins: {
+                        legend: { display: true, position: 'top' },
+                        tooltip: { mode: 'index', intersect: false }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'Kuukausi' } },
+                        y: { title: { display: true, text: 'Indeksi' } }
+                    },
+                    layout: { padding: 10 },
+                    backgroundColor: '#f7fbfc'
+                }
+            });
+        });
+});
+</script>
+<!-- END Talous-indikaattorit Chart.js -->
+
+
+
+
+
+ 
         <div class="centerContainer">
             <iframe src='https://flo.uri.sh/visualisation/21822888/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
@@ -395,7 +487,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 src="https://app.powerbi.com/view?r=eyJrIjoiM2MxYTA2MzUtZWI3OS00YzU0LTg2YjUtYTQ4NmEzOWFiOWQ5IiwidCI6ImM3YjJjZGYxLTcxN2YtNGY3Mi04NGUwLWY2Nzg0Nzk5YTgzNiIsImMiOjh9"
                 frameborder="0" allowFullScreen="true"></iframe>
         </div><br><br>
-
 
 
         <div class="centerContainer">
