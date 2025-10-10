@@ -355,8 +355,8 @@ new embed charts here
 
 <!-- Talous-indikaattorit Chart.js embedded chart -->
 <div id="talous-indikaattorit-chart-container" style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
-    <h3 style="text-align:center;">Talousindikaattorit (viimeiset 4 vuotta)</h3>
-    <canvas id="talousIndikaattoritChart" width="1100" height="420"></canvas>
+    <h3 style="text-align:center;">Kuluttajien luottamus alueittain</h3>
+    <canvas id="talousIndikaattoritChart" width="560" height="260"></canvas>
     <div style="margin-top:8px; font-size:0.95em; color:#555;">Lähde: <b>Talous-tietokanta</b></div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             });
             allLabels.sort();
-            const labels = allLabels.slice(-48);
+            const labels = allLabels.slice(-60);
             // Build datasets for each stat_code and indicator
             const indicatorNames = [
                 { key: 'kuluttajienluottamus', label: 'Kuluttajien luottamus', color: '#0077cc' },
