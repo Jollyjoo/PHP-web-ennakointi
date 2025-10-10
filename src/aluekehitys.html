@@ -103,236 +103,249 @@
             <h2>Päijät-Häme</h2>
             <table>
                 <tr>
-                      <td style="width:45%"><img src="img/paijat-elinvoima.png" alt="Kanta-Hämeen elinkeinorakenne"
+                    <td style="width:45%"><img src="img/paijat-elinvoima.png" alt="Kanta-Hämeen elinkeinorakenne"
                             title="Kanta-Hämeen elinkeinorakenne" width="400"></td>
                     <td>
                         Päijät-Hämeessä työllistäviä toimialoja ovat erityisesti rakentamisen ja teollisuuden toimialat.
                         Talonrakentaminen ja erikoistunut rakennustoiminta sekä sahatavaran, metallituotteiden sekä
-                        koneiden ja laitteiden valmistus työllistävät alueella tuhansia henkilöitä. Maakunnassa toimii myös useita
+                        koneiden ja laitteiden valmistus työllistävät alueella tuhansia henkilöitä. Maakunnassa toimii
+                        myös useita
                         elinvoimaisia toimialakeskittymiä. Toimialakeskittymien kannalta on olennaista, että alueella
-                        toimivat elinvoimainen LUT-yliopisto ja LAB-ammattikorkeakoulu. Päijät-Hämeessä tavoitellaankin yritysten
-                        TKI-investointien kaksinkertaistamista kahteensataan miljoonaan euroon vuoteen 2027 mennessä. Lahden seudulla on
+                        toimivat elinvoimainen LUT-yliopisto ja LAB-ammattikorkeakoulu. Päijät-Hämeessä tavoitellaankin
+                        yritysten
+                        TKI-investointien kaksinkertaistamista kahteensataan miljoonaan euroon vuoteen 2027 mennessä.
+                        Lahden seudulla on
                         vahva perinne valmistavassa teollisuudessa, elintarviketeollisuudessa, muotoilussa ja
-                        ympäristövastuullisuudessa. Kestävä kehitys, ympäristöteknologian innovaatiot sekä hiilidioksidin talteenotto ja hyödyntäminen ovat
+                        ympäristövastuullisuudessa. Kestävä kehitys, ympäristöteknologian innovaatiot sekä
+                        hiilidioksidin talteenotto ja hyödyntäminen ovat
                         luomassa elinvoimaa ympäristöosaamisen keskittymälle. Lahdessa sijaitseva Muotoiluinstituutti on
-                        merkittävä toimija teollisen muotoilun alalla. Alueen elinvoimaveturina toimii sähköisen liikenteen klusteri ja sen
+                        merkittävä toimija teollisen muotoilun alalla. Alueen elinvoimaveturina toimii sähköisen
+                        liikenteen klusteri ja sen
                         kärkenä raskaan liikenteen sähköistämisratkaisuja valmistava Kempower. Myös liikunnan ympärille
                         rakentuva urheilumatkailu on merkittävä elinvoimatekijä.
                         <br>*LÄHDE: Alueelliset kehitysnäkymät • 2025:19
-                    </td>                  
+                    </td>
                 </tr>
             </table>
         </div>
 
-        
-
-<!-- uusi chart , Alueen työpaikat tähän -->
-<br><br>
-
-<div id="bookmark-alueentyopaikat" style="max-width:1240px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
-    <h3 style="text-align:center;">Alueella työssäkäyvät (työpaikat) kunnittain</h3>
-    <div style="text-align:center;margin-bottom:12px;"><br><br>
-       <!--  <label for="alueentyopaikat-region-select"><b>Valitse alue:</b></label> -->
-        <select id="alueentyopaikat-region-select" style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
-            <option value="all" selected>Koko Häme</option>
-            <option value="1">Päijät-Häme</option>
-            <option value="2">Kanta-Häme</option>
-        </select>
-        <b>Kaaviotyyppi:</b>
-        <button id="alueentyopaikat-type-bar" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu pylväs</button>
-        <button id="alueentyopaikat-type-line" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
-        <button id="alueentyopaikat-toggle-datasets" type="button" style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota kaikki kunnat</button>
-    </div>
-    <canvas id="alueentyopaikatChart" width="1100" height="600"></canvas>
-    <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="alueentyopaikat-paivitys">-</span></div>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-let alueentyopaikatChartObj = null;
-let alueentyopaikatCurrentType = 'bar';
-let alueentyopaikatAllHidden = false;
-let alueentyopaikatCurrentRegion = 'all';
-const alueentyopaikatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2','#388e3c','#fbc02d','#d32f2f','#7b1fa2','#0288d1','#c2185b','#ffa000','#689f38','#f57c00','#455a64','#cddc39','#e91e63','#00bcd4','#8bc34a','#ff9800'];
-
-async function fetchAlueenTyopaikat(region = 'all') {
-    try {
-        const url = region === 'all' ? 'alueentyopaikat_historia.php' : `alueentyopaikat_historia.php?maakunta_id=${region}`;
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-        return data;
-    } catch (e) {
-        console.error('Virhe ladattaessa työpaikkadataa:', e);
-        return null;
-    }
-}
 
 
+        <!-- uusi chart , Alueen työpaikat tähän -->
+        <br><br>
 
-function renderAlueenTyopaikatChart(data, chartType = 'bar') {
-    const ctx = document.getElementById('alueentyopaikatChart').getContext('2d');
-    // Find if we have a comparison line dataset (last one, type: 'line')
-    let comparisonLineIdx = -1;
-    if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
-        comparisonLineIdx = data.datasets.length - 1;
-        // Remove color from comparison line
-        data.datasets[comparisonLineIdx].borderColor = '#444';
-        data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
-    }
-    data.datasets.forEach((ds, i) => {
-        if (i !== comparisonLineIdx) {
-            ds.backgroundColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
-            ds.borderColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length];
-        }
-        ds.stack = chartType === 'bar' && i !== comparisonLineIdx ? 'Stack 0' : undefined;
-        ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
-        ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
-        ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
-        ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
-    });
-    if (alueentyopaikatChartObj) alueentyopaikatChartObj.destroy();
-    alueentyopaikatChartObj = new Chart(ctx, {
-        type: chartType,
-        data: {
-            labels: data.labels,
-            datasets: data.datasets
-        },
-        options: {
-            responsive: false,
-            plugins: {
-                legend: { display: true, position: 'top' },
-                tooltip: {
-                    mode: chartType === 'line' ? 'index' : 'nearest',
-                    intersect: chartType !== 'line',
-                    callbacks: {
-                        afterBody: function(context) {
-                            const yearIdx = context[0].dataIndex;
-                            // Sum selected region total (all bar datasets)
-                            let selectedTotal = 0;
-                            let comparisonTotal = null;
-                            context[0].chart.data.datasets.forEach((ds, i) => {
-                                if (ds.type === 'line') {
-                                    comparisonTotal = ds.data[yearIdx];
-                                } else if (typeof ds.data[yearIdx] === 'number') {
-                                    selectedTotal += ds.data[yearIdx];
-                                }
-                            });
-                            let lines = [];
-                            if (selectedTotal > 0) lines.push('Valittu alue yhteensä: ' + selectedTotal.toLocaleString('fi-FI'));
-                            if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push('Vertailualue yhteensä: ' + comparisonTotal.toLocaleString('fi-FI'));
-                            return lines.join('\n');
-                        }
-                    }
+        <div id="bookmark-alueentyopaikat"
+            style="max-width:1240px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+            <h3 style="text-align:center;">Alueella työssäkäyvät (työpaikat) kunnittain</h3>
+            <div style="text-align:center;margin-bottom:12px;"><br><br>
+                <!--  <label for="alueentyopaikat-region-select"><b>Valitse alue:</b></label> -->
+                <select id="alueentyopaikat-region-select"
+                    style="font-size:16px;padding:4px 12px;border-radius:6px;margin-right:24px;">
+                    <option value="all" selected>Koko Häme</option>
+                    <option value="1">Päijät-Häme</option>
+                    <option value="2">Kanta-Häme</option>
+                </select>
+                <b>Kaaviotyyppi:</b>
+                <button id="alueentyopaikat-type-bar" type="button"
+                    style="font-size:15px;padding:4px 16px;border-radius:6px;margin-right:8px;background:#eaf6fb;border:1px solid #cc3300;cursor:pointer;">Pinottu
+                    pylväs</button>
+                <button id="alueentyopaikat-type-line" type="button"
+                    style="font-size:15px;padding:4px 16px;border-radius:6px;background:#eaf6fb;border:1px solid #0077cc;cursor:pointer;">Viivakaavio</button>
+                <button id="alueentyopaikat-toggle-datasets" type="button"
+                    style="font-size:15px;padding:4px 16px;border-radius:6px;margin-left:8px;background:#f7fbfc;border:1px solid #666;cursor:pointer;">Piilota
+                    kaikki kunnat</button>
+            </div>
+            <canvas id="alueentyopaikatChart" width="1100" height="600"></canvas>
+            <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span
+                    id="alueentyopaikat-paivitys">-</span></div>
+        </div>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script>
+            let alueentyopaikatChartObj = null;
+            let alueentyopaikatCurrentType = 'bar';
+            let alueentyopaikatAllHidden = false;
+            let alueentyopaikatCurrentRegion = 'all';
+            const alueentyopaikatPalette = ['#0077cc', '#cc3300', '#009933', '#3366cc', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2', '#388e3c', '#fbc02d', '#d32f2f', '#7b1fa2', '#0288d1', '#c2185b', '#ffa000', '#689f38', '#f57c00', '#455a64', '#cddc39', '#e91e63', '#00bcd4', '#8bc34a', '#ff9800'];
+
+            async function fetchAlueenTyopaikat(region = 'all') {
+                try {
+                    const url = region === 'all' ? 'alueentyopaikat_historia.php' : `alueentyopaikat_historia.php?maakunta_id=${region}`;
+                    const res = await fetch(url);
+                    const data = await res.json();
+                    if (data.error) throw new Error(data.error);
+                    return data;
+                } catch (e) {
+                    console.error('Virhe ladattaessa työpaikkadataa:', e);
+                    return null;
                 }
-            },
-            scales: {
-                x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
-                y: { title: { display: true, text: 'Työpaikat' }, stacked: chartType === 'bar' }
-            },
-            layout: { padding: 10 },
-            backgroundColor: '#f7fbfc'
-        }
-    });
-    // After chart redraw, update dataset visibility and button label
-    if (alueentyopaikatAllHidden) {
-        alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = true; });
-        alueentyopaikatChartObj.update();
-        document.getElementById('alueentyopaikat-toggle-datasets').textContent = 'Näytä kaikki kunnat';
-    } else {
-        alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = false; });
-        alueentyopaikatChartObj.update();
-        document.getElementById('alueentyopaikat-toggle-datasets').textContent = 'Piilota kaikki kunnat';
-    }
-}
+            }
 
 
-async function updateAlueenTyopaikatChart(chartType = 'bar', region = 'all') {
-    // For region 1 or 2, fetch both regions' data for overlay
-    if (region === '1' || region === '2') {
-        const otherRegion = region === '1' ? '2' : '1';
-        const [mainData, otherData] = await Promise.all([
-            fetchAlueenTyopaikat(region),
-            fetchAlueenTyopaikat(otherRegion)
-        ]);
-        if (!mainData || !otherData) return;
-        // Sum other region's municipalities for each year
-        const yearCount = mainData.labels.length;
-        const otherTotals = Array(yearCount).fill(0);
-        otherData.datasets.forEach(ds => {
-            ds.data.forEach((val, idx) => {
-                otherTotals[idx] += typeof val === 'number' ? val : 0;
+
+            function renderAlueenTyopaikatChart(data, chartType = 'bar') {
+                const ctx = document.getElementById('alueentyopaikatChart').getContext('2d');
+                // Find if we have a comparison line dataset (last one, type: 'line')
+                let comparisonLineIdx = -1;
+                if (data.datasets.length > 0 && data.datasets[data.datasets.length - 1].type === 'line') {
+                    comparisonLineIdx = data.datasets.length - 1;
+                    // Remove color from comparison line
+                    data.datasets[comparisonLineIdx].borderColor = '#444';
+                    data.datasets[comparisonLineIdx].backgroundColor = 'rgba(0,0,0,0)';
+                }
+                data.datasets.forEach((ds, i) => {
+                    if (i !== comparisonLineIdx) {
+                        ds.backgroundColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length] + (chartType === 'bar' ? 'cc' : '22');
+                        ds.borderColor = alueentyopaikatPalette[i % alueentyopaikatPalette.length];
+                    }
+                    ds.stack = chartType === 'bar' && i !== comparisonLineIdx ? 'Stack 0' : undefined;
+                    ds.borderWidth = i === comparisonLineIdx ? 3 : 1;
+                    ds.fill = chartType === 'bar' && i !== comparisonLineIdx;
+                    ds.pointRadius = i === comparisonLineIdx ? 3 : 2;
+                    ds.tension = chartType === 'line' || i === comparisonLineIdx ? 0.15 : undefined;
+                });
+                if (alueentyopaikatChartObj) alueentyopaikatChartObj.destroy();
+                alueentyopaikatChartObj = new Chart(ctx, {
+                    type: chartType,
+                    data: {
+                        labels: data.labels,
+                        datasets: data.datasets
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                mode: chartType === 'line' ? 'index' : 'nearest',
+                                intersect: chartType !== 'line',
+                                callbacks: {
+                                    afterBody: function (context) {
+                                        const yearIdx = context[0].dataIndex;
+                                        // Sum selected region total (all bar datasets)
+                                        let selectedTotal = 0;
+                                        let comparisonTotal = null;
+                                        context[0].chart.data.datasets.forEach((ds, i) => {
+                                            if (ds.type === 'line') {
+                                                comparisonTotal = ds.data[yearIdx];
+                                            } else if (typeof ds.data[yearIdx] === 'number') {
+                                                selectedTotal += ds.data[yearIdx];
+                                            }
+                                        });
+                                        let lines = [];
+                                        if (selectedTotal > 0) lines.push('Valittu alue yhteensä: ' + selectedTotal.toLocaleString('fi-FI'));
+                                        if (comparisonTotal !== null && typeof comparisonTotal === 'number') lines.push('Vertailualue yhteensä: ' + comparisonTotal.toLocaleString('fi-FI'));
+                                        return lines.join('\n');
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            x: { title: { display: true, text: 'Vuosi' }, stacked: chartType === 'bar' },
+                            y: { title: { display: true, text: 'Työpaikat' }, stacked: chartType === 'bar' }
+                        },
+                        layout: { padding: 10 },
+                        backgroundColor: '#f7fbfc'
+                    }
+                });
+                // After chart redraw, update dataset visibility and button label
+                if (alueentyopaikatAllHidden) {
+                    alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = true; });
+                    alueentyopaikatChartObj.update();
+                    document.getElementById('alueentyopaikat-toggle-datasets').textContent = 'Näytä kaikki kunnat';
+                } else {
+                    alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = false; });
+                    alueentyopaikatChartObj.update();
+                    document.getElementById('alueentyopaikat-toggle-datasets').textContent = 'Piilota kaikki kunnat';
+                }
+            }
+
+
+            async function updateAlueenTyopaikatChart(chartType = 'bar', region = 'all') {
+                // For region 1 or 2, fetch both regions' data for overlay
+                if (region === '1' || region === '2') {
+                    const otherRegion = region === '1' ? '2' : '1';
+                    const [mainData, otherData] = await Promise.all([
+                        fetchAlueenTyopaikat(region),
+                        fetchAlueenTyopaikat(otherRegion)
+                    ]);
+                    if (!mainData || !otherData) return;
+                    // Sum other region's municipalities for each year
+                    const yearCount = mainData.labels.length;
+                    const otherTotals = Array(yearCount).fill(0);
+                    otherData.datasets.forEach(ds => {
+                        ds.data.forEach((val, idx) => {
+                            otherTotals[idx] += typeof val === 'number' ? val : 0;
+                        });
+                    });
+                    // Add as a line dataset
+                    mainData.datasets.push({
+                        label: otherRegion === '1' ? 'Päijät-Häme yhteensä (vertailu)' : 'Kanta-Häme yhteensä (vertailu)',
+                        data: otherTotals,
+                        type: 'line',
+                        borderColor: '#222',
+                        backgroundColor: 'rgba(0,0,0,0.08)',
+                        borderWidth: 3,
+                        pointRadius: 3,
+                        fill: false,
+                        tension: 0.15,
+                        order: 99,
+                        yAxisID: 'y',
+                        datalabels: { display: false }
+                    });
+                    renderAlueenTyopaikatChart(mainData, chartType);
+                    document.getElementById('alueentyopaikat-paivitys').textContent = mainData.latest_update || '-';
+                    const statPaivitys2 = document.getElementById('stat-paivitys-2');
+                    if (statPaivitys2) statPaivitys2.textContent = mainData.latest_update || '-';
+                } else {
+                    // Default: Koko Häme, no overlay
+                    const data = await fetchAlueenTyopaikat(region);
+                    if (!data) return;
+                    renderAlueenTyopaikatChart(data, chartType);
+                    document.getElementById('alueentyopaikat-paivitys').textContent = data.latest_update || '-';
+                    const statPaivitys2 = document.getElementById('stat-paivitys-2');
+                    if (statPaivitys2) statPaivitys2.textContent = data.latest_update || '-';
+                }
+            }
+
+            document.addEventListener('DOMContentLoaded', function () {
+                // Button controls
+                const btnBar = document.getElementById('alueentyopaikat-type-bar');
+                const btnLine = document.getElementById('alueentyopaikat-type-line');
+                const btnToggle = document.getElementById('alueentyopaikat-toggle-datasets');
+                const regionSelect = document.getElementById('alueentyopaikat-region-select');
+                btnBar.style.fontWeight = 'bold';
+                btnLine.style.fontWeight = 'normal';
+                updateAlueenTyopaikatChart('bar', 'all');
+                btnBar.addEventListener('click', function () {
+                    alueentyopaikatCurrentType = 'bar';
+                    btnBar.style.fontWeight = 'bold';
+                    btnLine.style.fontWeight = 'normal';
+                    updateAlueenTyopaikatChart('bar', alueentyopaikatCurrentRegion);
+                });
+                btnLine.addEventListener('click', function () {
+                    alueentyopaikatCurrentType = 'line';
+                    btnLine.style.fontWeight = 'bold';
+                    btnBar.style.fontWeight = 'normal';
+                    updateAlueenTyopaikatChart('line', alueentyopaikatCurrentRegion);
+                });
+                btnToggle.addEventListener('click', function () {
+                    if (!alueentyopaikatChartObj) return;
+                    alueentyopaikatAllHidden = !alueentyopaikatAllHidden;
+                    alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = alueentyopaikatAllHidden; });
+                    alueentyopaikatChartObj.update();
+                    btnToggle.textContent = alueentyopaikatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
+                });
+                regionSelect.addEventListener('change', function () {
+                    alueentyopaikatCurrentRegion = this.value;
+                    updateAlueenTyopaikatChart(alueentyopaikatCurrentType, alueentyopaikatCurrentRegion);
+                });
             });
-        });
-        // Add as a line dataset
-        mainData.datasets.push({
-            label: otherRegion === '1' ? 'Päijät-Häme yhteensä (vertailu)' : 'Kanta-Häme yhteensä (vertailu)',
-            data: otherTotals,
-            type: 'line',
-            borderColor: '#222',
-            backgroundColor: 'rgba(0,0,0,0.08)',
-            borderWidth: 3,
-            pointRadius: 3,
-            fill: false,
-            tension: 0.15,
-            order: 99,
-            yAxisID: 'y',
-            datalabels: { display: false }
-        });
-        renderAlueenTyopaikatChart(mainData, chartType);
-        document.getElementById('alueentyopaikat-paivitys').textContent = mainData.latest_update || '-';
-        const statPaivitys2 = document.getElementById('stat-paivitys-2');
-        if (statPaivitys2) statPaivitys2.textContent = mainData.latest_update || '-';
-    } else {
-        // Default: Koko Häme, no overlay
-        const data = await fetchAlueenTyopaikat(region);
-        if (!data) return;
-        renderAlueenTyopaikatChart(data, chartType);
-        document.getElementById('alueentyopaikat-paivitys').textContent = data.latest_update || '-';
-        const statPaivitys2 = document.getElementById('stat-paivitys-2');
-        if (statPaivitys2) statPaivitys2.textContent = data.latest_update || '-';
-    }
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Button controls
-    const btnBar = document.getElementById('alueentyopaikat-type-bar');
-    const btnLine = document.getElementById('alueentyopaikat-type-line');
-    const btnToggle = document.getElementById('alueentyopaikat-toggle-datasets');
-    const regionSelect = document.getElementById('alueentyopaikat-region-select');
-    btnBar.style.fontWeight = 'bold';
-    btnLine.style.fontWeight = 'normal';
-    updateAlueenTyopaikatChart('bar', 'all');
-    btnBar.addEventListener('click', function() {
-        alueentyopaikatCurrentType = 'bar';
-        btnBar.style.fontWeight = 'bold';
-        btnLine.style.fontWeight = 'normal';
-        updateAlueenTyopaikatChart('bar', alueentyopaikatCurrentRegion);
-    });
-    btnLine.addEventListener('click', function() {
-        alueentyopaikatCurrentType = 'line';
-        btnLine.style.fontWeight = 'bold';
-        btnBar.style.fontWeight = 'normal';
-        updateAlueenTyopaikatChart('line', alueentyopaikatCurrentRegion);
-    });
-    btnToggle.addEventListener('click', function() {
-        if (!alueentyopaikatChartObj) return;
-        alueentyopaikatAllHidden = !alueentyopaikatAllHidden;
-        alueentyopaikatChartObj.data.datasets.forEach(ds => { ds.hidden = alueentyopaikatAllHidden; });
-        alueentyopaikatChartObj.update();
-        btnToggle.textContent = alueentyopaikatAllHidden ? 'Näytä kaikki kunnat' : 'Piilota kaikki kunnat';
-    });
-    regionSelect.addEventListener('change', function() {
-        alueentyopaikatCurrentRegion = this.value;
-        updateAlueenTyopaikatChart(alueentyopaikatCurrentType, alueentyopaikatCurrentRegion);
-    });
-});
-</script>
-               <p align="center">Lähde: <a
-                        href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyokay/statfin_tyokay_pxt_115h.px/"
-                        target="_blank"
-                        title="115h -- Alueella työssäkäyvät (työpaikat) alueen, toimialan (TOL 2008), sukupuolen ja vuoden mukaan, 2007-2023">
-                        Tilastokeskus 115h</a> Alueella työssäkäyvät (työpaikat) , viimeisin tilasto tarkistettu lähteestä <b> <span
-                            id="stat-paivitys-2">...</span></b>
+        </script>
+        <p align="center">Lähde: <a
+                href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tyokay/statfin_tyokay_pxt_115h.px/"
+                target="_blank"
+                title="115h -- Alueella työssäkäyvät (työpaikat) alueen, toimialan (TOL 2008), sukupuolen ja vuoden mukaan, 2007-2023">
+                Tilastokeskus 115h</a> Alueella työssäkäyvät (työpaikat) , viimeisin tilasto tarkistettu lähteestä <b>
+                <span id="stat-paivitys-2">...</span></b>
 
 
         <div class="textContainer"><br>
@@ -349,112 +362,112 @@ document.addEventListener('DOMContentLoaded', function() {
         <h2>Ostovoimaa, kulutushalua ja kasvua osoittavia indikaattoreita</h2><br><br>
 
 
-<!-- 
+        <!-- 
 new embed charts here
  -->
-<div class="centerContainer">
-<!-- Talous-indikaattorit Chart.js embedded chart with stat_code selector -->
-<div id="talous-indikaattorit-chart-container" style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
-    <h3 style="text-align:center;">Kuluttajien luottamus</h3>
-    <div style="text-align:center;margin-bottom:12px;">
-         <span style="display:inline-block;">
-        <label><input type="radio" name="talous-statcode" value="SSS" checked> Koko maa</label>
-        <label style="margin-left:18px;"><input type="radio" name="talous-statcode" value="SA2_MK01XPK"> Etelä-Suomi</label>
-        </span>
-    </div>
-    <canvas id="talousIndikaattoritChart" width="560" height="260"></canvas>
-    
-</div>
+        <div class="centerContainer">
+            <!-- Talous-indikaattorit Chart.js embedded chart with stat_code selector -->
+            <div id="talous-indikaattorit-chart-container"
+                style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+                <h3 style="text-align:center;">Kuluttajien luottamus</h3>
+                <div style="text-align:center;margin-bottom:12px;">
+                    <span style="display:inline-block;">
+                        <label><input type="radio" name="talous-statcode" value="SSS" checked> Koko maa</label>
+                        <label style="margin-left:18px;"><input type="radio" name="talous-statcode" value="SA2_MK01XPK">
+                            Etelä-Suomi</label>
+                    </span>
+                </div>
+                <canvas id="talousIndikaattoritChart" width="560" height="260"></canvas>
+
+            </div>
 
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-let talousChartInstance = null;
-function renderTalousChart(statCode) {
-    fetch('talous_historia.php?stat_code=' + encodeURIComponent(statCode))
-        .then(resp => resp.json())
-        .then(data => {
-            if (!data || !data.data || !data.data[statCode]) return;
-            const labels = data.data[statCode].labels.slice(-60);
-            const indicatorNames = [
-                { key: 'kuluttajienluottamus', label: 'Kuluttajien luottamus', color: '#0077cc' },
-                { key: 'omatalous', label: 'Oma talous', color: '#cc3300' },
-                { key: 'kuluttajahinnat', label: 'Kuluttajahinnat', color: '#009933' },
-                { key: 'tyottomyydenuhka', label: 'Työttömyyden uhka', color: '#cc9900' }
-            ];
-            const datasets = indicatorNames.map((ind, i) => {
-                return {
-                    label: ind.label,
-                    data: data.data[statCode][ind.key].slice(-60),
-                    borderColor: ind.color,
-                    backgroundColor: ind.color + '22',
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 2,
-                    borderWidth: 2,
-                    type: 'line',
-                    order: i
-                };
-            });
-            const ctx = document.getElementById('talousIndikaattoritChart').getContext('2d');
-            if (talousChartInstance) talousChartInstance.destroy();
-            talousChartInstance = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: datasets
-                },
-                options: {
-                    responsive: false,
-                    plugins: {
-                        legend: { display: true, position: 'top' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        x: { title: { display: true, text: 'Kuukausi' } },
-                        y: { title: { display: true, text: 'Indeksi' } }
-                    },
-                    layout: { padding: 10 },
-                    backgroundColor: '#f7fbfc'
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script>
+                let talousChartInstance = null;
+                function renderTalousChart(statCode) {
+                    fetch('talous_historia.php?stat_code=' + encodeURIComponent(statCode))
+                        .then(resp => resp.json())
+                        .then(data => {
+                            if (!data || !data.data || !data.data[statCode]) return;
+                            const labels = data.data[statCode].labels.slice(-60);
+                            const indicatorNames = [
+                                { key: 'kuluttajienluottamus', label: 'Kuluttajien luottamus', color: '#0077cc' },
+                                { key: 'omatalous', label: 'Oma talous', color: '#cc3300' },
+                                { key: 'kuluttajahinnat', label: 'Kuluttajahinnat', color: '#009933' },
+                                { key: 'tyottomyydenuhka', label: 'Työttömyyden uhka', color: '#cc9900' }
+                            ];
+                            const datasets = indicatorNames.map((ind, i) => {
+                                return {
+                                    label: ind.label,
+                                    data: data.data[statCode][ind.key].slice(-60),
+                                    borderColor: ind.color,
+                                    backgroundColor: ind.color + '22',
+                                    fill: true,
+                                    tension: 0.3,
+                                    pointRadius: 2,
+                                    borderWidth: 2,
+                                    type: 'line',
+                                    order: i
+                                };
+                            });
+                            const ctx = document.getElementById('talousIndikaattoritChart').getContext('2d');
+                            if (talousChartInstance) talousChartInstance.destroy();
+                            talousChartInstance = new Chart(ctx, {
+                                type: 'line',
+                                data: {
+                                    labels: labels,
+                                    datasets: datasets
+                                },
+                                options: {
+                                    responsive: false,
+                                    plugins: {
+                                        legend: { display: true, position: 'top' },
+                                        tooltip: { mode: 'index', intersect: false }
+                                    },
+                                    scales: {
+                                        x: { title: { display: true, text: 'Kuukausi' } },
+                                        y: { title: { display: true, text: 'Indeksi' } }
+                                    },
+                                    layout: { padding: 10 },
+                                    backgroundColor: '#f7fbfc'
+                                }
+                            });
+                            // Show latest update
+                            if (data.latest_update) {
+                                document.getElementById('stat-paivitys').textContent = data.latest_update.split(' ')[0];
+                            }
+                        });
                 }
-            });
-            // Show latest update
-            if (data.latest_update) {
-                document.getElementById('stat-paivitys').textContent = data.latest_update.split(' ')[0];
-            }
-        });
-}
-document.addEventListener('DOMContentLoaded', function () {
-    // Initial chart
-    renderTalousChart('SSS');
-    // Radio button event
-    document.querySelectorAll('input[name="talous-statcode"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            renderTalousChart(this.value);
-        });
-    });
-});
-</script>
-        <p align="center">Lähde: <a
-                href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__kbar/statfin_kbar_pxt_11vs.px/"
-                target="_blank"
-                title="11vs -- Kuluttajien luottamus alueittain, 2019M05-2025M09">
-                Tilastokeskus 11vs</a> Kuluttajien luottamus alueittain, viimeisin tilasto tarkistettu lähteestä <b> <span
-                    id="stat-paivitys">...</span></b></p>
-<!-- END Talous-indikaattorit Chart.js -->
-</div>
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Initial chart
+                    renderTalousChart('SSS');
+                    // Radio button event
+                    document.querySelectorAll('input[name="talous-statcode"]').forEach(radio => {
+                        radio.addEventListener('change', function () {
+                            renderTalousChart(this.value);
+                        });
+                    });
+                });
+            </script>
 
-<div id="talous-indikaattorit-chart-container" style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+            <!-- END Talous-indikaattorit Chart.js -->
+            <div id="talous-indikaattorit-chart-container"
+                style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
 
-<iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
-                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
-                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+                <iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
+                    class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
+                    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
 
-</div>
+            </div>
+        </div>
+            <p align="center">Lähde: <a
+                    href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__kbar/statfin_kbar_pxt_11vs.px/"
+                    target="_blank" title="11vs -- Kuluttajien luottamus alueittain, 2019M05-2025M09">
+                    Tilastokeskus 11vs</a> Kuluttajien luottamus alueittain, viimeisin tilasto tarkistettu lähteestä <b>
+                    <span id="stat-paivitys">...</span></b></p>
 
-
- 
-<!--         <div class="centerContainer">
+        <!--         <div class="centerContainer">
             <iframe src='https://flo.uri.sh/visualisation/21822888/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
@@ -542,9 +555,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     <a href="opiskelu.html" class="footer-link">Tilannekuva</a>
                     <a href="ennakointi.html" class="footer-link">Tulevaisuuskuva</a>
                     <a href="info.html" class="footer-link">Tietoa meistä</a>
-                    <a href="mailto:info@tulevaisuusluotain.fi;christian@tulevaisuusluotain.fi?subject=Palautetta tulevaisuusluotain-sivuston kautta"" class="footer-link"><b>ANNA PALAUTETTA TAI KEHITYSEHDOTUKSIA</b></a>      
-                    <a href="mediaseuranta.html" class="footer-link" target="_blank"><b>HÄMEEN ELY-MEDIASEURANTA</b></a> 
-                     <a href="Saavutettavuusseloste.html" class="footer-link" target="_blank"><b>SAAVUTETTAVUUSSELOSTE</b></a>                     
+                    <a href="mailto:info@tulevaisuusluotain.fi;christian@tulevaisuusluotain.fi?subject=Palautetta tulevaisuusluotain-sivuston kautta"" class="
+                        footer-link"><b>ANNA PALAUTETTA TAI KEHITYSEHDOTUKSIA</b></a>
+                    <a href="mediaseuranta.html" class="footer-link" target="_blank"><b>HÄMEEN ELY-MEDIASEURANTA</b></a>
+                    <a href="Saavutettavuusseloste.html" class="footer-link"
+                        target="_blank"><b>SAAVUTETTAVUUSSELOSTE</b></a>
                 </div>
                 <div class="spc w-col w-col-4">
                     <h5>Tilannekuva - osio</h5>
