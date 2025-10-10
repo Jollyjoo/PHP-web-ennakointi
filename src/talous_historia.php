@@ -70,6 +70,15 @@ try {
     } else {
         $result['data'] = $dataByStat;
     }
+    // Get latest update timestamp
+    $latest_update = null;
+    $tsql = "SELECT MAX(timestamp) as latest_update FROM Talous";
+    $tstmt = $pdo->prepare($tsql);
+    $tstmt->execute();
+    $trow = $tstmt->fetch(PDO::FETCH_ASSOC);
+    if ($trow && $trow['latest_update']) {
+        $result['latest_update'] = $trow['latest_update'];
+    }
     echo json_encode($result, JSON_UNESCAPED_UNICODE);
 } catch (Exception $e) {
     echo json_encode(['error' => $e->getMessage()]);

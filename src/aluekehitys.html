@@ -416,6 +416,10 @@ function renderTalousChart(statCode) {
                     backgroundColor: '#f7fbfc'
                 }
             });
+            // Show latest update
+            if (data.latest_update) {
+                document.getElementById('stat-paivitys').textContent = data.latest_update.split(' ')[0];
+            }
         });
 }
 document.addEventListener('DOMContentLoaded', function () {
@@ -429,6 +433,12 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+        <p align="center">Lähde: <a
+                href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__kbar/statfin_kbar_pxt_11vs.px/"
+                target="_blank"
+                title="11vs -- Kuluttajien luottamus alueittain, 2019M05-2025M09">
+                Tilastokeskus 11vs</a> Kuluttajien luottamus alueittain, viimeisin tilasto tarkistettu lähteestä <b> <span
+                    id="stat-paivitys">...</span></b></p>
 <!-- END Talous-indikaattorit Chart.js -->
 
 
