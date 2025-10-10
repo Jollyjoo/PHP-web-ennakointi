@@ -80,39 +80,13 @@ foreach ($stmt2->fetchAll(PDO::FETCH_ASSOC) as $row) {
     $ulkomaalaisetByAika[$row['Aika']] = (int)$row['ulkomaalaiset_sum'];
 }
 
-// Query: get palvelut_yht for maakunta-level row only (not sum)
+// Query: sum palvelut_yht for all selected areas per Aika (Laaja työttömyys)
 $palvelutYhtByAika = [];
-$maakunta_labels = [
-    '1' => 'Päijät-Häme',
-    '2' => 'Kanta-Häme',
-    '1000' => 'Koko maa',
-];
-$maakunta_label = isset($maakunta_labels[$maakunta_id]) ? $maakunta_labels[$maakunta_id] : null;
-$palvelutYhtByAika = [];
-// Use stat_code for unique selection per region
-$stat_codes = [
-    '1' => 'MK07',
-    '2' => 'MK05',
-    '1000' => 'SSS',
-];
-$stat_code = isset($stat_codes[$maakunta_id]) ? $stat_codes[$maakunta_id] : null;
-if ($stat_code) {
-    $sql3 = "SELECT Aika, palvelut_yht FROM Tyonhakijat $where AND stat_code = :stat_code ORDER BY Aika";
-    $stmt3 = $pdo->prepare($sql3);
-    $stmt3->execute([':stat_code' => $stat_code]);
-    foreach ($stmt3->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $palvelutYhtByAika[$row['Aika']] = (int)$row['palvelut_yht'];
-    }
-} else {
-    // fallback: try to get one row per Aika (first found)
-    $sql3 = "SELECT Aika, palvelut_yht FROM Tyonhakijat $where ORDER BY Aika";
-    $stmt3 = $pdo->prepare($sql3);
-    $stmt3->execute();
-    foreach ($stmt3->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        if (!isset($palvelutYhtByAika[$row['Aika']])) {
-            $palvelutYhtByAika[$row['Aika']] = (int)$row['palvelut_yht'];
-        }
-    }
+$sql3 = "SELECT Aika, SUM(palvelut_yht) AS palvelut_yht_sum FROM Tyonhakijat $where GROUP BY Aika ORDER BY Aika";
+$stmt3 = $pdo->prepare($sql3);
+$stmt3->execute();
+foreach ($stmt3->fetchAll(PDO::FETCH_ASSOC) as $row) {
+    $palvelutYhtByAika[$row['Aika']] = (int)$row['palvelut_yht_sum'];
 }
 
 $datasets = [];
