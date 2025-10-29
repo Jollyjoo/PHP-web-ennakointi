@@ -36,14 +36,14 @@ if ($result->num_rows > 0) {
         $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
 
         // Truncate 'Hankkeen_luokitus' to 15 characters
-        $truncatedLuokitus = mb_substr($row["Teema"], 0, 25);
-        if (mb_strlen($row["Teema"]) > 25) {
+        $truncatedLuokitus = mb_substr($row["Teema"], 0, 18);
+        if (mb_strlen($row["Teema"]) > 18) {
             $truncatedLuokitus .= "..."; // Add ellipsis if text is truncated
         }
         
         echo "<div class='record'>";
         echo "<b> " . $formattedDate . "  </b> "; // Display the formatted date
-        echo "<b> " . $truncatedLuokitus . "</b>  "; // Display the truncated 'Hankkeen_luokitus'
+        echo "<b title='" . htmlspecialchars($row["Teema"], ENT_QUOTES, 'UTF-8') . "'> " . $truncatedLuokitus . "</b>  "; // Display the truncated 'Hankkeen_luokitus' with full text as tooltip
         echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a>, ";        
         echo "</div><br>";
     }
