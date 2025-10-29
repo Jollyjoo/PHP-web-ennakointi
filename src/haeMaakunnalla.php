@@ -43,9 +43,9 @@ if ($result->num_rows > 0) {
         // Replace '-?' with '-' in the 'Uutinen' field
         $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
 
-        // Truncate 'Hankkeen_luokitus' to 15 characters
-        $truncatedLuokitus = mb_substr($row["Hankkeen_luokitus"], 0, 15);
-        if (mb_strlen($row["Hankkeen_luokitus"]) > 15) {
+        // Truncate 'Teema' to 15 characters
+        $truncatedLuokitus = mb_substr($row["Teema"], 0, 25);
+        if (mb_strlen($row["Teema"]) > 25) {
             $truncatedLuokitus .= "..."; // Add ellipsis if text is truncated
         }
 
