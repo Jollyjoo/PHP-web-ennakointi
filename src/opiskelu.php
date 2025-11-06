@@ -47,18 +47,21 @@ $stmt->bind_param("s", $aika);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Haetaan viimeisin päivitysaika (stat_update_date)
+// Haetaan viimeisin päivitysaika (stat_update_date) ja viimeisin data (stat_latest)
 $paivitys = null;
-$sql2 = "SELECT MAX(stat_update_date) as paivitys FROM Opiskelijat WHERE stat_code IN ('MK05','MK07')";
+$stat_latest = null;
+$sql2 = "SELECT MAX(stat_update_date) as paivitys, MAX(stat_latest) as stat_latest FROM Opiskelijat WHERE stat_code IN ('MK05','MK07')";
 $res2 = $conn->query($sql2);
 if ($res2 && $row2 = $res2->fetch_assoc()) {
     $paivitys = $row2['paivitys'];
+    $stat_latest = $row2['stat_latest'];
 }
 
 // Muodostetaan palautettava data-taulukko
 $data = [
     "aika" => $aika, // tilastovuosi
     "paivitys" => $paivitys, // viimeisin päivitysaika
+    "stat_latest" => $stat_latest, // viimeisin data
     "maakunnat" => [] // tilastot maakunnittain
 ];
 $count = 0;

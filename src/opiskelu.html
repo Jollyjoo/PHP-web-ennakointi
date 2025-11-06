@@ -145,7 +145,8 @@
                 <p>Lähde: <a
                         href="https://pxdata.stat.fi/PXWeb/pxweb/fi/StatFin/StatFin__vkour/statfin_vkour_pxt_12bs.px"
                         target="_blank">Tilastokeskus 12bs</a>, viimeisin tilasto tarkistettu lähteestä <b><span
-                            id="koulutus-paivitys">...</span></b>
+                            id="koulutus-paivitys">...</span></b>, viimeisin data <b><span
+                            id="koulutus-latest">...</span></b>
                     <!--    <p></p>Lähde: Tilastokeskus 12bs -- 15 vuotta täyttänyt väestö koulutusasteen, maakunnan, kunnan, sukupuolen ja ikäryhmän mukaan
                 <p id="koulutus-paivitys" style="text-align:center; font-size: 0.9em; color: #555;"></p> -->
             </div>
@@ -772,6 +773,9 @@
                             if (data.paivitys) {
                                 document.getElementById('koulutus-paivitys').textContent = data.paivitys;
                             }
+                            if (data.stat_latest) {
+                                document.getElementById('koulutus-latest').textContent = data.stat_latest.split(' ')[0]; // Show only date part
+                            }
                         })
                         .catch(err => {
                             document.getElementById('toinen-mk07').textContent = '-';
@@ -781,6 +785,7 @@
                             document.getElementById('toinen-sss').textContent = '-';
                             document.getElementById('korkea-sss').textContent = '-';
                             document.getElementById('koulutus-paivitys').textContent = 'Tilastojen haku epäonnistui.';
+                            document.getElementById('koulutus-latest').textContent = '-';
                             document.getElementById('koulutus-vuosi').textContent = '-';
                             document.getElementById('koulutus-kokomaa').textContent = '-';
                             document.getElementById('koulutus-kantahame').textContent = '-';
