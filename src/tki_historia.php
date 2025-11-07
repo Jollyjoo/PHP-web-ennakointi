@@ -153,8 +153,12 @@ try {
                 $tktyovuodet_data[] = isset($yearData[$year][$sector]) ? $yearData[$year][$sector]['tktyovuodet'] : 0;
             }
             
+            // Determine label: if filtering by specific region, show only sector name
+            // If showing all regions or multiple regions, show region + sector
+            $label = (count($data) == 1 && !empty($stat_code)) ? $sector : $region_name . ' - ' . $sector;
+            
             $formatted_data['tkmenot'][] = [
-                'label' => $region_name . ' - ' . $sector,
+                'label' => $label,
                 'data' => $tkmenot_data,
                 'region' => $code,
                 'region_name' => $region_name,
@@ -162,7 +166,7 @@ try {
             ];
             
             $formatted_data['tkhenkilosto'][] = [
-                'label' => $region_name . ' - ' . $sector,
+                'label' => $label,
                 'data' => $tkhenkilosto_data,
                 'region' => $code,
                 'region_name' => $region_name,
@@ -170,7 +174,7 @@ try {
             ];
             
             $formatted_data['tktyovuodet'][] = [
-                'label' => $region_name . ' - ' . $sector,
+                'label' => $label,
                 'data' => $tktyovuodet_data,
                 'region' => $code,
                 'region_name' => $region_name,
