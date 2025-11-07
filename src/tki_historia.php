@@ -40,19 +40,21 @@ try {
         throw new Exception("Tki table is empty");
     }
     
-    // Build query
-    $query = "SELECT vuosi, stat_code, sektori, 
-                     SUM(tkmenot) as tkmenot, 
-                     SUM(tkhenkilosto) as tkhenkilosto, 
-                     SUM(tktyovuodet) as tktyovuodet,
-                     MAX(last_data) as latest_update
-              FROM Tki";
+    // Build query with JOIN to get region names
+    $query = "SELECT t.vuosi, t.stat_code, t.sektori, 
+                     SUM(t.tkmenot) as tkmenot, 
+                     SUM(t.tkhenkilosto) as tkhenkilosto, 
+                     SUM(t.tktyovuodet) as tktyovuodet,
+                     MAX(t.last_data) as latest_update,
+                     m.Maakunta as region_name
+              FROM Tki t
+              LEFT JOIN Maakunta m ON t.stat_code = m.stat_code";
     
     if (!empty($stat_code)) {
-        $query .= " WHERE stat_code = ?";
+        $query .= " WHERE t.stat_code = ?";
     }
     
-    $query .= " GROUP BY vuosi, stat_code, sektori ORDER BY vuosi ASC, stat_code ASC, sektori ASC";
+    $query .= " GROUP BY t.vuosi, t.stat_code, t.sektori, m.Maakunta ORDER BY t.vuosi ASC, t.stat_code ASC, t.sektori ASC";
     
     log_debug('SQL query: ' . $query);
     
@@ -74,12 +76,19 @@ try {
     $data = [];
     $latest_update = '';
     $row_count = 0;
+    $regions = []; // To store available regions
     
     while ($row = $result->fetch_assoc()) {
         $year = $row['vuosi'];
         $code = $row['stat_code'];
         $sector = $row['sektori'];
+        $region_name = $row['region_name'] ?: $code; // Fallback to code if name not found
         $row_count++;
+        
+        // Store region info
+        if (!isset($regions[$code])) {
+            $regions[$code] = $region_name;
+        }
         
         if (!isset($data[$code])) {
             $data[$code] = [];
@@ -101,6 +110,7 @@ try {
     }
     
     log_debug('Processed ' . $row_count . ' rows from database');
+    log_debug('Found regions: ' . implode(', ', array_keys($regions)));
     
     // Format data for Chart.js
     $formatted_data = [];
@@ -114,7 +124,7 @@ try {
     
     // Create datasets for each metric and region
     foreach ($data as $code => $yearData) {
-        $region_name = ($code === 'MK05') ? 'Kanta-Häme' : (($code === 'MK07') ? 'Päijät-Häme' : $code);
+        $region_name = $regions[$code]; // Use proper region name from Maakunta table
         
         // For each sector, create datasets
         $sectors = [];
@@ -141,6 +151,7 @@ try {
                 'label' => $region_name . ' - ' . $sector,
                 'data' => $tkmenot_data,
                 'region' => $code,
+                'region_name' => $region_name,
                 'sector' => $sector
             ];
             
@@ -148,6 +159,7 @@ try {
                 'label' => $region_name . ' - ' . $sector,
                 'data' => $tkhenkilosto_data,
                 'region' => $code,
+                'region_name' => $region_name,
                 'sector' => $sector
             ];
             
@@ -155,6 +167,7 @@ try {
                 'label' => $region_name . ' - ' . $sector,
                 'data' => $tktyovuodet_data,
                 'region' => $code,
+                'region_name' => $region_name,
                 'sector' => $sector
             ];
         }
@@ -164,6 +177,7 @@ try {
         'labels' => $years,
         'data' => $formatted_data,
         'latest_update' => $latest_update,
+        'regions' => $regions, // Available regions with proper names
         'raw_data' => $data,
         'debug_info' => [
             'total_rows' => $row_count,
