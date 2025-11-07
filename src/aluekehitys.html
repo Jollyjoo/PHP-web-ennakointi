@@ -460,7 +460,7 @@ new embed charts here
                 <div
                     style="text-align:center;margin-bottom:12px;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;">
                     <div>
-                        <label for="tki-region-select"><b>Alue:</b></label><br>
+                        <label for="tki-region-select"><b>Alue:</b></label>
                         <select id="tki-region-select"
                             style="font-size:14px;padding:4px 8px;border-radius:6px;width:140px;">
                             <!-- Options will be populated dynamically -->
@@ -612,6 +612,9 @@ new embed charts here
                     if (data.latest_update) {
                         document.getElementById('tki-paivitys').textContent = data.latest_update.split(' ')[0];
                     }
+                    if (data.timestamp) {
+                        document.getElementById('tki-timestamp').textContent = data.timestamp.split(' ')[0];
+                    }
                 }
 
                 async function updateTkiChart() {
@@ -653,7 +656,7 @@ new embed charts here
                 target="_blank"
                 title="13tn -- Tutkimus- ja kehittämistoiminnan menot, henkilöstö ja työvuodet alueittain, 2011-2024">
                 Tilastokeskus 13tn</a> viimeisin tilasto julkaistu:<b> <span
-                    id="tki-paivitys">...</span></b> , tarkistettu lähteestä: </p>
+                    id="tki-paivitys">...</span></b> , tarkistettu lähteestä: <b><span id="tki-timestamp">...</span></b></p>
 
            <!--  </div> -->
 

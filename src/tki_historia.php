@@ -46,6 +46,7 @@ try {
                      t.tkhenkilosto, 
                      t.tktyovuodet,
                      t.last_data as latest_update,
+                     t.timestamp,
                      m.Maakunta as region_name
               FROM Tki t
               LEFT JOIN Maakunnat m ON t.stat_code = m.stat_code";
@@ -75,6 +76,7 @@ try {
     
     $data = [];
     $latest_update = '';
+    $latest_timestamp = '';
     $row_count = 0;
     $regions = []; // To store available regions
     
@@ -106,6 +108,10 @@ try {
         
         if (empty($latest_update) || $row['latest_update'] > $latest_update) {
             $latest_update = $row['latest_update'];
+        }
+        
+        if (empty($latest_timestamp) || $row['timestamp'] > $latest_timestamp) {
+            $latest_timestamp = $row['timestamp'];
         }
     }
     
@@ -177,6 +183,7 @@ try {
         'labels' => $years,
         'data' => $formatted_data,
         'latest_update' => $latest_update,
+        'timestamp' => $latest_timestamp,
         'regions' => $regions, // Available regions with proper names
         'raw_data' => $data,
         'debug_info' => [
