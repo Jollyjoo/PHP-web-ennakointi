@@ -619,7 +619,7 @@ new embed charts here
 
                 async function updateTkiChart() {
                     const selectedMetric = document.querySelector('input[name="tki-metric"]:checked').value;
-                    const selectedRegion = document.getElementById('tki-region-select').value;
+                    const selectedRegion = document.getElementById('tki-region-select').value || 'SSS';
 
                     // Pass the selected region as is - let backend handle SSS specifically
                     const data = await fetchTkiData(selectedRegion);
