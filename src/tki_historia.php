@@ -153,9 +153,13 @@ try {
                 $tktyovuodet_data[] = isset($yearData[$year][$sector]) ? $yearData[$year][$sector]['tktyovuodet'] : 0;
             }
             
+            // Format sector name: remove 'YHTEENSÄ' and convert to proper case
+            $formatted_sector = str_replace(' YHTEENSÄ', '', $sector);
+            $formatted_sector = ucfirst(strtolower($formatted_sector));
+            
             // Determine label: if filtering by specific region, show only sector name
             // If showing all regions or multiple regions, show region + sector
-            $label = (count($data) == 1 && !empty($stat_code)) ? $sector : $region_name . ' - ' . $sector;
+            $label = (count($data) == 1 && !empty($stat_code)) ? $formatted_sector : $region_name . ' - ' . $formatted_sector;
             
             $formatted_data['tkmenot'][] = [
                 'label' => $label,

@@ -484,7 +484,7 @@ new embed charts here
                 let tkiRegionsData = {}; // Store all regions data
                 const tkiColors = ['#0077cc', '#cc3300', '#009933', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666', '#1976d2', '#388e3c', '#fbc02d', '#d32f2f', '#7b1fa2', '#0288d1', '#c2185b', '#ffa000'];
 
-                async function fetchTkiData(region = '') {
+                async function fetchTkiData(region = 'SSS') {
                     try {
                         const url = region ? `tki_historia.php?stat_code=${region}` : 'tki_historia.php';
                         console.log('Fetching TKI data from:', url);
