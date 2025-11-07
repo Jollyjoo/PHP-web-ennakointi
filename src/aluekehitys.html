@@ -629,8 +629,11 @@ new embed charts here
                     }
                 }
 
-                document.addEventListener('DOMContentLoaded', function () {
-                    // Initial chart load
+                document.addEventListener('DOMContentLoaded', async function () {
+                    // First fetch all regions data to populate dropdown
+                    const allRegionsData = await fetchTkiData('');
+                    
+                    // Then load SSS data for initial chart display
                     updateTkiChart();
 
                     // Event listeners for radio buttons
