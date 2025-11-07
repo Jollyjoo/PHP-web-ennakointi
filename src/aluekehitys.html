@@ -452,18 +452,13 @@ new embed charts here
             </script>
 
             <!-- END Talous-indikaattorit Chart.js -->
-            
+
             <!-- TKI (Tutkimus- ja kehittämistoiminta) Chart.js embedded chart -->
             <div id="tki-chart-container"
                 style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
                 <h3 style="text-align:center;">Tutkimus- ja kehittämistoiminta</h3>
-                <div style="text-align:center;margin-bottom:12px;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;">
-                    <div>
-                        <b>Mittari:</b><br>
-                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkmenot" checked> T&K-menot</label>
-                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkhenkilosto"> T&K-henkilöstö</label>
-                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tktyovuodet"> T&K-työvuodet</label>
-                    </div>
+                <div
+                    style="text-align:center;margin-bottom:12px;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;">
                     <div>
                         <label for="tki-region-select"><b>Alue:</b></label><br>
                         <select id="tki-region-select"
@@ -471,11 +466,19 @@ new embed charts here
                             <!-- Options will be populated dynamically -->
                         </select>
                     </div>
+                    <div>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkmenot" checked>
+                            T&K-menot</label>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkhenkilosto">
+                            T&K-henkilöstö</label>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tktyovuodet">
+                            T&K-työvuodet</label>
+                    </div>
                 </div>
                 <canvas id="tkiChart" width="560" height="260"></canvas>
-                
+
             </div>
-<div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="tki-paivitys">-</span></div>
+
             <script>
                 let tkiChartInstance = null;
                 let tkiRegionsData = {}; // Store all regions data
@@ -488,21 +491,21 @@ new embed charts here
                         const response = await fetch(url);
                         const text = await response.text();
                         console.log('Raw response:', text);
-                        
+
                         const data = JSON.parse(text);
                         console.log('Parsed data:', data);
-                        
+
                         if (data.error) {
                             console.error('Server error:', data.error);
                             if (data.debug) console.log('Debug info:', data.debug);
                             throw new Error(data.error);
                         }
-                        
+
                         // Populate regions dropdown if we have regions data
                         if (data.regions && Object.keys(data.regions).length > 0) {
                             populateRegionsDropdown(data.regions);
                         }
-                        
+
                         return data;
                     } catch (error) {
                         console.error('Virhe TKI-datan haussa:', error);
@@ -515,7 +518,7 @@ new embed charts here
                 function populateRegionsDropdown(regions) {
                     const select = document.getElementById('tki-region-select');
                     const currentValue = select.value;
-                    
+
                     // Only populate if dropdown is empty
                     if (select.children.length === 0) {
                         // Add region options
@@ -525,7 +528,7 @@ new embed charts here
                             option.textContent = regions[code];
                             select.appendChild(option);
                         });
-                        
+
                         // Set default to 'SSS' (Koko Suomi) if available
                         if (regions['SSS']) {
                             select.value = 'SSS';
@@ -540,12 +543,12 @@ new embed charts here
                         console.log('No data received');
                         return;
                     }
-                    
+
                     if (!data.data) {
                         console.log('No data.data property:', data);
                         return;
                     }
-                    
+
                     if (!data.data[metric]) {
                         console.log(`No data for metric '${metric}'. Available metrics:`, Object.keys(data.data));
                         return;
@@ -579,7 +582,7 @@ new embed charts here
                                     mode: 'index',
                                     intersect: false,
                                     callbacks: {
-                                        label: function(context) {
+                                        label: function (context) {
                                             let unit = '';
                                             if (metric === 'tkmenot') unit = ' milj.EUR';
                                             else if (metric === 'tkhenkilosto') unit = ' hlöä';
@@ -591,13 +594,13 @@ new embed charts here
                             },
                             scales: {
                                 x: { title: { display: true, text: 'Vuosi' } },
-                                y: { 
-                                    title: { 
-                                        display: true, 
-                                        text: metric === 'tkmenot' ? 'Milj. EUR' : 
-                                              metric === 'tkhenkilosto' ? 'Henkilöstö (lkm)' : 
-                                              'Työvuodet (htv)'
-                                    } 
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: metric === 'tkmenot' ? 'Milj. EUR' :
+                                            metric === 'tkhenkilosto' ? 'Henkilöstö (lkm)' :
+                                                'Työvuodet (htv)'
+                                    }
                                 }
                             },
                             layout: { padding: 10 },
@@ -614,10 +617,10 @@ new embed charts here
                 async function updateTkiChart() {
                     const selectedMetric = document.querySelector('input[name="tki-metric"]:checked').value;
                     const selectedRegion = document.getElementById('tki-region-select').value;
-                    
+
                     // Pass the selected region as is - let backend handle SSS specifically
                     const data = await fetchTkiData(selectedRegion);
-                    
+
                     if (data) {
                         renderTkiChart(data, selectedMetric);
                     }
@@ -638,13 +641,21 @@ new embed charts here
             </script>
             <!-- END TKI Chart.js -->
 
-        
+
         </div>
-            <p align="center">Lähde: <a
-                    href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__kbar/statfin_kbar_pxt_11vs.px/"
-                    target="_blank" title="11vs -- Kuluttajien luottamus alueittain, 2019M05-2025M09">
-                    Tilastokeskus 11vs</a> Kuluttajien luottamus alueittain, viimeisin tilasto tarkistettu lähteestä <b>
-                    <span id="stat-paivitys">...</span></b></p>
+        <p align="center">Lähde: <a
+                href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__kbar/statfin_kbar_pxt_11vs.px/"
+                target="_blank" title="11vs -- Kuluttajien luottamus alueittain, 2019M05-2025M09">
+                Tilastokeskus 11vs</a> Kuluttajien luottamus alueittain, viimeisin tilasto tarkistettu lähteestä <b>
+                <span id="stat-paivitys">...</span></b></p>
+        <p align="center">Lähde: <a
+                href="https://pxdata.stat.fi/PxWeb/pxweb/fi/StatFin/StatFin__tkke/statfin_tkke_pxt_13tn.px/"
+                target="_blank"
+                title="13tn -- Tutkimus- ja kehittämistoiminnan menot, henkilöstö ja työvuodet alueittain, 2011-2024">
+                Tilastokeskus 13tn</a> viimeisin tilasto julkaistu:<b> <span
+                    id="tki-paivitys">...</span></b> , tarkistettu lähteestä: </p>
+
+           <!--  </div> -->
 
         <!--         <div class="centerContainer">
             <iframe src='https://flo.uri.sh/visualisation/21822888/embed' title='Interactive or visual content'
@@ -662,12 +673,12 @@ new embed charts here
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
 
-                <iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
-                    class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:370px;'
-                    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-    
-    
-                <!--            <iframe src='https://flo.uri.sh/visualisation/21384722/embed' title='Interactive or visual content'
+            <iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
+                class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:370px;'
+                sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+
+
+            <!--            <iframe src='https://flo.uri.sh/visualisation/21384722/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
  -->
