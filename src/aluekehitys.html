@@ -615,9 +615,8 @@ new embed charts here
                     const selectedMetric = document.querySelector('input[name="tki-metric"]:checked').value;
                     const selectedRegion = document.getElementById('tki-region-select').value;
                     
-                    // If SSS is selected, show all data (don't filter by region)
-                    const regionParam = selectedRegion === 'SSS' ? '' : selectedRegion;
-                    const data = await fetchTkiData(regionParam);
+                    // Pass the selected region as is - let backend handle SSS specifically
+                    const data = await fetchTkiData(selectedRegion);
                     
                     if (data) {
                         renderTkiChart(data, selectedMetric);

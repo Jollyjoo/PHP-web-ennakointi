@@ -42,10 +42,10 @@ try {
     
     // Build query with JOIN to get region names
     $query = "SELECT t.vuosi, t.stat_code, t.sektori, 
-                     SUM(t.tkmenot) as tkmenot, 
-                     SUM(t.tkhenkilosto) as tkhenkilosto, 
-                     SUM(t.tktyovuodet) as tktyovuodet,
-                     MAX(t.last_data) as latest_update,
+                     t.tkmenot, 
+                     t.tkhenkilosto, 
+                     t.tktyovuodet,
+                     t.last_data as latest_update,
                      m.Maakunta as region_name
               FROM Tki t
               LEFT JOIN Maakunnat m ON t.stat_code = m.stat_code";
@@ -54,7 +54,7 @@ try {
         $query .= " WHERE t.stat_code = ?";
     }
     
-    $query .= " GROUP BY t.vuosi, t.stat_code, t.sektori, m.Maakunta ORDER BY t.vuosi ASC, t.stat_code ASC, t.sektori ASC";
+    $query .= " ORDER BY t.vuosi ASC, t.stat_code ASC, t.sektori ASC";
     
     log_debug('SQL query: ' . $query);
     
@@ -99,7 +99,7 @@ try {
         }
         
         $data[$code][$year][$sector] = [
-            'tkmenot' => intval($row['tkmenot']),
+            'tkmenot' => floatval($row['tkmenot']),
             'tkhenkilosto' => intval($row['tkhenkilosto']),
             'tktyovuodet' => floatval($row['tktyovuodet'])
         ];
