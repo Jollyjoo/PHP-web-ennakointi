@@ -486,18 +486,43 @@ new embed charts here
                 async function fetchTkiData(region = '') {
                     try {
                         const url = region ? `tki_historia.php?stat_code=${region}` : 'tki_historia.php';
+                        console.log('Fetching TKI data from:', url);
                         const response = await fetch(url);
-                        const data = await response.json();
-                        if (data.error) throw new Error(data.error);
+                        const text = await response.text();
+                        console.log('Raw response:', text);
+                        
+                        const data = JSON.parse(text);
+                        console.log('Parsed data:', data);
+                        
+                        if (data.error) {
+                            console.error('Server error:', data.error);
+                            if (data.debug) console.log('Debug info:', data.debug);
+                            throw new Error(data.error);
+                        }
                         return data;
                     } catch (error) {
                         console.error('Virhe TKI-datan haussa:', error);
+                        // Show error to user
+                        document.getElementById('tki-paivitys').textContent = 'Virhe: ' + error.message;
                         return null;
                     }
                 }
 
                 function renderTkiChart(data, metric) {
-                    if (!data || !data.data || !data.data[metric]) return;
+                    if (!data) {
+                        console.log('No data received');
+                        return;
+                    }
+                    
+                    if (!data.data) {
+                        console.log('No data.data property:', data);
+                        return;
+                    }
+                    
+                    if (!data.data[metric]) {
+                        console.log(`No data for metric '${metric}'. Available metrics:`, Object.keys(data.data));
+                        return;
+                    }
 
                     const ctx = document.getElementById('tkiChart').getContext('2d');
                     const datasets = data.data[metric].map((dataset, index) => ({
@@ -587,10 +612,6 @@ new embed charts here
             </script>
             <!-- END TKI Chart.js -->
 
-                <iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
-                    class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:370px;'
-                    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-
         
         </div>
             <p align="center">Lähde: <a
@@ -614,7 +635,13 @@ new embed charts here
             <iframe src='https://flo.uri.sh/visualisation/21386615/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
-            <!--            <iframe src='https://flo.uri.sh/visualisation/21384722/embed' title='Interactive or visual content'
+
+                <iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
+                    class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:370px;'
+                    sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
+    
+    
+                <!--            <iframe src='https://flo.uri.sh/visualisation/21384722/embed' title='Interactive or visual content'
                 class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:400px;'
                 sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
  -->
