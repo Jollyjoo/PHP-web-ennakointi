@@ -457,22 +457,21 @@ new embed charts here
             <div id="tki-chart-container"
                 style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
                 <h3 style="text-align:center;">Tutkimus- ja kehittämistoiminta</h3>
-                <div style="text-align:center;margin-bottom:12px;">
-                    <span style="display:inline-block;">
-                        <label><input type="radio" name="tki-metric" value="tkmenot" checked> T&K-menot (milj.EUR)</label>
-                        <label style="margin-left:18px;"><input type="radio" name="tki-metric" value="tkhenkilosto">
-                            T&K-henkilöstö (lkm)</label>
-                        <label style="margin-left:18px;"><input type="radio" name="tki-metric" value="tktyovuodet">
-                            T&K-työvuodet (htv)</label>
-                    </span>
-                </div>
-                <div style="text-align:center;margin-bottom:12px;">
-                    <label for="tki-region-select"><b>Valitse alue:</b></label>
-                    <select id="tki-region-select"
-                        style="font-size:16px;padding:4px 12px;border-radius:6px;margin-left:8px;">
-                        <option value="all" selected>Kaikki alueet</option>
-                        <!-- Options will be populated dynamically -->
-                    </select>
+                <div style="text-align:center;margin-bottom:12px;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;">
+                    <div>
+                        <b>Mittari:</b><br>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkmenot" checked> T&K-menot</label><br>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkhenkilosto"> T&K-henkilöstö</label><br>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tktyovuodet"> T&K-työvuodet</label>
+                    </div>
+                    <div>
+                        <label for="tki-region-select"><b>Alue:</b></label><br>
+                        <select id="tki-region-select"
+                            style="font-size:14px;padding:4px 8px;border-radius:6px;width:140px;">
+                            <option value="all" selected>Kaikki alueet</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
                 </div>
                 <canvas id="tkiChart" width="560" height="260"></canvas>
                 <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="tki-paivitys">-</span></div>

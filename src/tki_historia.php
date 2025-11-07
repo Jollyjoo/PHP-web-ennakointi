@@ -48,7 +48,7 @@ try {
                      MAX(t.last_data) as latest_update,
                      m.Maakunta as region_name
               FROM Tki t
-              LEFT JOIN Maakunta m ON t.stat_code = m.stat_code";
+              LEFT JOIN Maakunnat m ON t.stat_code = m.stat_code";
     
     if (!empty($stat_code)) {
         $query .= " WHERE t.stat_code = ?";
