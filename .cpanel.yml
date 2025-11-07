@@ -23,6 +23,7 @@ deployment:
     - /bin/cp src/opiskelu.php $DEPLOYPATH    
     - /bin/cp src/opiskelu_historia.php $DEPLOYPATH
     - /bin/cp src/aluekehitys.html $DEPLOYPATH
+    - /bin/cp src/tki_historia.php $DEPLOYPATH
     - /bin/cp src/talous_historia.php $DEPLOYPATH
     - /bin/cp src/alueentyopaikat_historia.php $DEPLOYPATH
     - /bin/cp src/db.php $DEPLOYPATH

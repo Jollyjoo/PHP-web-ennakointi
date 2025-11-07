@@ -453,6 +453,140 @@ new embed charts here
 
             <!-- END Talous-indikaattorit Chart.js -->
             
+            <!-- TKI (Tutkimus- ja kehittämistoiminta) Chart.js embedded chart -->
+            <div id="tki-chart-container"
+                style="max-width:600px;margin:0 auto 40px auto;background:#f7fbfc;padding:20px;border-radius:12px;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+                <h3 style="text-align:center;">Tutkimus- ja kehittämistoiminta</h3>
+                <div style="text-align:center;margin-bottom:12px;">
+                    <span style="display:inline-block;">
+                        <label><input type="radio" name="tki-metric" value="tkmenot" checked> T&K-menot (milj.EUR)</label>
+                        <label style="margin-left:18px;"><input type="radio" name="tki-metric" value="tkhenkilosto">
+                            T&K-henkilöstö (lkm)</label>
+                        <label style="margin-left:18px;"><input type="radio" name="tki-metric" value="tktyovuodet">
+                            T&K-työvuodet (htv)</label>
+                    </span>
+                </div>
+                <div style="text-align:center;margin-bottom:12px;">
+                    <span style="display:inline-block;">
+                        <label><input type="radio" name="tki-region" value="all" checked> Molemmat alueet</label>
+                        <label style="margin-left:18px;"><input type="radio" name="tki-region" value="MK05">
+                            Kanta-Häme</label>
+                        <label style="margin-left:18px;"><input type="radio" name="tki-region" value="MK07">
+                            Päijät-Häme</label>
+                    </span>
+                </div>
+                <canvas id="tkiChart" width="560" height="260"></canvas>
+                <div style="margin-top:8px; font-size:0.95em; color:#555;">Päivitetty: <span id="tki-paivitys">-</span></div>
+            </div>
+
+            <script>
+                let tkiChartInstance = null;
+                const tkiColors = ['#0077cc', '#cc3300', '#009933', '#cc9900', '#9900cc', '#00cc99', '#ff6600', '#666666'];
+
+                async function fetchTkiData(region = '') {
+                    try {
+                        const url = region ? `tki_historia.php?stat_code=${region}` : 'tki_historia.php';
+                        const response = await fetch(url);
+                        const data = await response.json();
+                        if (data.error) throw new Error(data.error);
+                        return data;
+                    } catch (error) {
+                        console.error('Virhe TKI-datan haussa:', error);
+                        return null;
+                    }
+                }
+
+                function renderTkiChart(data, metric) {
+                    if (!data || !data.data || !data.data[metric]) return;
+
+                    const ctx = document.getElementById('tkiChart').getContext('2d');
+                    const datasets = data.data[metric].map((dataset, index) => ({
+                        label: dataset.label,
+                        data: dataset.data,
+                        borderColor: tkiColors[index % tkiColors.length],
+                        backgroundColor: tkiColors[index % tkiColors.length] + '22',
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 3,
+                        borderWidth: 2
+                    }));
+
+                    if (tkiChartInstance) tkiChartInstance.destroy();
+
+                    tkiChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: datasets
+                        },
+                        options: {
+                            responsive: false,
+                            plugins: {
+                                legend: { display: true, position: 'top' },
+                                tooltip: {
+                                    mode: 'index',
+                                    intersect: false,
+                                    callbacks: {
+                                        label: function(context) {
+                                            let unit = '';
+                                            if (metric === 'tkmenot') unit = ' milj.EUR';
+                                            else if (metric === 'tkhenkilosto') unit = ' hlöä';
+                                            else if (metric === 'tktyovuodet') unit = ' htv';
+                                            return context.dataset.label + ': ' + context.parsed.y + unit;
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                x: { title: { display: true, text: 'Vuosi' } },
+                                y: { 
+                                    title: { 
+                                        display: true, 
+                                        text: metric === 'tkmenot' ? 'Milj. EUR' : 
+                                              metric === 'tkhenkilosto' ? 'Henkilöstö (lkm)' : 
+                                              'Työvuodet (htv)'
+                                    } 
+                                }
+                            },
+                            layout: { padding: 10 },
+                            backgroundColor: '#f7fbfc'
+                        }
+                    });
+
+                    // Update timestamp
+                    if (data.latest_update) {
+                        document.getElementById('tki-paivitys').textContent = data.latest_update.split(' ')[0];
+                    }
+                }
+
+                async function updateTkiChart() {
+                    const selectedMetric = document.querySelector('input[name="tki-metric"]:checked').value;
+                    const selectedRegion = document.querySelector('input[name="tki-region"]:checked').value;
+                    
+                    const regionParam = selectedRegion === 'all' ? '' : selectedRegion;
+                    const data = await fetchTkiData(regionParam);
+                    
+                    if (data) {
+                        renderTkiChart(data, selectedMetric);
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', function () {
+                    // Initial chart load
+                    updateTkiChart();
+
+                    // Event listeners for radio buttons
+                    document.querySelectorAll('input[name="tki-metric"]').forEach(radio => {
+                        radio.addEventListener('change', updateTkiChart);
+                    });
+
+                    document.querySelectorAll('input[name="tki-region"]').forEach(radio => {
+                        radio.addEventListener('change', updateTkiChart);
+                    });
+                });
+            </script>
+            <!-- END TKI Chart.js -->
+
                 <iframe src='https://flo.uri.sh/visualisation/21825714/embed' title='Interactive or visual content'
                     class='flourish-embed-iframe' frameborder='0' scrolling='no' style='width:40%;height:370px;'
                     sandbox='allow-same-origin allow-forms allow-scripts allow-downloads allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation'></iframe>
