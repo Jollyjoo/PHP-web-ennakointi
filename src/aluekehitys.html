@@ -460,15 +460,14 @@ new embed charts here
                 <div style="text-align:center;margin-bottom:12px;display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;">
                     <div>
                         <b>Mittari:</b><br>
-                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkmenot" checked> T&K-menot</label><br>
-                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkhenkilosto"> T&K-henkilöstö</label><br>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkmenot" checked> T&K-menot</label>
+                        <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tkhenkilosto"> T&K-henkilöstö</label>
                         <label style="font-size:14px;"><input type="radio" name="tki-metric" value="tktyovuodet"> T&K-työvuodet</label>
                     </div>
                     <div>
                         <label for="tki-region-select"><b>Alue:</b></label><br>
                         <select id="tki-region-select"
                             style="font-size:14px;padding:4px 8px;border-radius:6px;width:140px;">
-                            <option value="all" selected>Kaikki alueet</option>
                             <!-- Options will be populated dynamically -->
                         </select>
                     </div>
@@ -517,22 +516,22 @@ new embed charts here
                     const select = document.getElementById('tki-region-select');
                     const currentValue = select.value;
                     
-                    // Clear existing options except "all"
-                    while (select.children.length > 1) {
-                        select.removeChild(select.lastChild);
-                    }
-                    
-                    // Add region options
-                    Object.keys(regions).forEach(code => {
-                        const option = document.createElement('option');
-                        option.value = code;
-                        option.textContent = regions[code];
-                        select.appendChild(option);
-                    });
-                    
-                    // Restore selected value if it still exists
-                    if (currentValue && [...select.options].some(opt => opt.value === currentValue)) {
-                        select.value = currentValue;
+                    // Only populate if dropdown is empty
+                    if (select.children.length === 0) {
+                        // Add region options
+                        Object.keys(regions).forEach(code => {
+                            const option = document.createElement('option');
+                            option.value = code;
+                            option.textContent = regions[code];
+                            select.appendChild(option);
+                        });
+                        
+                        // Set default to 'SSS' (Koko Suomi) if available
+                        if (regions['SSS']) {
+                            select.value = 'SSS';
+                        } else if (Object.keys(regions).length > 0) {
+                            select.value = Object.keys(regions)[0];
+                        }
                     }
                 }
 
@@ -616,7 +615,8 @@ new embed charts here
                     const selectedMetric = document.querySelector('input[name="tki-metric"]:checked').value;
                     const selectedRegion = document.getElementById('tki-region-select').value;
                     
-                    const regionParam = selectedRegion === 'all' ? '' : selectedRegion;
+                    // If SSS is selected, show all data (don't filter by region)
+                    const regionParam = selectedRegion === 'SSS' ? '' : selectedRegion;
                     const data = await fetchTkiData(regionParam);
                     
                     if (data) {
