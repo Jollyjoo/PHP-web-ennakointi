@@ -206,7 +206,6 @@ class DatabaseNewsCollector {
         $rss_sources = [
             'YLE Uutiset' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET',
             'YLE News' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_NEWS',
-            'YLE Urheilu' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_URHEILU',
             'YLE Talous' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET&categories=18-276'
         ];
         

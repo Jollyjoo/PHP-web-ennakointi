@@ -18,8 +18,7 @@ function testRealNewsFeeds() {
         // Use correct YLE RSS URLs based on server test results
         $working_rss_sources = [
             'YLE Uutiset' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_UUTISET',
-            'YLE News (English)' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_NEWS',
-            'YLE Urheilu' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_URHEILU'
+            'YLE News (English)' => 'https://feeds.yle.fi/uutiset/v1/recent.rss?publisherIds=YLE_NEWS'
         ];
         
         $all_articles = [];

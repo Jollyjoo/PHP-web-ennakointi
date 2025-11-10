@@ -177,6 +177,8 @@
         <button class="btn" onclick="viewStoredNews()" style="background: #6c757d;" title="Näytä viimeisimmät tallennetut uutiset tietokannasta">📋 View Stored News</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Working Test</button>
         <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennetut uutiset AI:lla erissä (5 artikkelia kerrallaan)">🤖 Analyze Articles</button>
+        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältö AI:lla">📰 Analyze Mediaseuranta</button>
+        <button class="btn" onclick="viewMediaseurantaInsights()" style="background: #34495e;" title="Näytä Mediaseurannan AI-analyysien tulokset">📊 Mediaseuranta Insights</button>
         <span class="loading" id="loading">⏳ Processing...</span>
         
         <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
@@ -882,6 +884,175 @@
                         <small>This might be due to timeout, network issues, or server overload.</small><br>
                         <button class="btn" onclick="analyzeStoredArticles()" style="margin-top: 10px;">🔄 Try Again</button>
                         <button class="btn" onclick="getDatabaseStats()" style="margin-top: 10px;">📊 Check Status</button>
+                    </div>
+                `;
+            }
+            showLoading(false);
+        }
+
+        // Analyze Mediaseuranta entries with AI
+        async function analyzeMediaseuranta() {
+            showLoading(true);
+            updateStatus('Analyzing Mediaseuranta entries with AI...', 'warning');
+            
+            try {
+                // Check stats first
+                const statsResponse = await fetch('mediaseuranta_analyzer.php?action=stats');
+                const statsData = await statsResponse.json();
+                
+                if (statsData.mediaseuranta_stats) {
+                    const stats = statsData.mediaseuranta_stats;
+                    const pending = stats.by_status?.pending || 0;
+                    
+                    if (pending === 0) {
+                        updateStatus('All Mediaseuranta entries are already analyzed', 'success');
+                        showLoading(false);
+                        return;
+                    }
+                    
+                    updateStatus(`Found ${pending} Mediaseuranta entries to analyze...`, 'info');
+                }
+                
+                // Start analysis
+                const response = await fetch('mediaseuranta_analyzer.php?action=analyze&batch_size=5');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.mediaseuranta_analysis && data.mediaseuranta_analysis.success) {
+                    const result = data.mediaseuranta_analysis;
+                    updateStatus(`✅ Mediaseuranta analysis completed! ${result.analyzed} entries analyzed`, 'success');
+                    
+                    const alertsContainer = document.getElementById('alerts-container');
+                    alertsContainer.innerHTML = `
+                        <h4>📰 Mediaseuranta Analysis Completed</h4>
+                        <div class="alert medium" style="background: #d4edda; border-color: #c3e6cb;">
+                            <strong>✅ Analysis Results:</strong><br>
+                            Entries Analyzed: ${result.analyzed}<br>
+                            Failed: ${result.failed}<br>
+                            Success Rate: ${result.success_rate}%<br>
+                            Processing Time: ${result.processing_time}<br>
+                            Batch Size: ${result.batch_size}
+                        </div>
+                    `;
+                    
+                    // Show continue button if needed
+                    if (result.analyzed > 0) {
+                        alertsContainer.innerHTML += `
+                            <div class="alert medium" style="background: #e7f3ff;">
+                                <strong>💡 Continue Processing?</strong><br>
+                                <button class="btn" onclick="analyzeMediaseuranta()" style="margin-top: 10px;">🔄 Analyze Next Batch</button>
+                                <button class="btn" onclick="viewMediaseurantaInsights()" style="margin-top: 10px;">📊 View Insights</button>
+                            </div>
+                        `;
+                    }
+                    
+                } else {
+                    const error = data.error || 'Unknown error occurred';
+                    updateStatus(`Mediaseuranta analysis failed: ${error}`, 'error');
+                    
+                    const alertsContainer = document.getElementById('alerts-container');
+                    alertsContainer.innerHTML = `
+                        <div class="alert high">
+                            <strong>❌ Analysis Failed</strong><br>
+                            Error: ${error}<br>
+                            <small>Check database connection and OpenAI API configuration.</small>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error in Mediaseuranta analysis:', error);
+                updateStatus('Mediaseuranta analysis failed - check console', 'error');
+                
+                const alertsContainer = document.getElementById('alerts-container');
+                alertsContainer.innerHTML = `
+                    <div class="alert high">
+                        <strong>❌ Network Error</strong><br>
+                        Error: ${error.message}<br>
+                        <small>Check your connection and try again.</small>
+                    </div>
+                `;
+            }
+            showLoading(false);
+        }
+
+        // View Mediaseuranta AI insights
+        async function viewMediaseurantaInsights() {
+            showLoading(true);
+            updateStatus('Loading Mediaseuranta AI insights...', 'info');
+            
+            try {
+                const response = await fetch('mediaseuranta_analyzer.php?action=insights&limit=15&min_relevance=5');
+                const data = await response.json();
+                
+                if (data.mediaseuranta_insights) {
+                    const insights = data.mediaseuranta_insights;
+                    updateStatus(`✅ Loaded ${insights.length} analyzed Mediaseuranta entries`, 'success');
+                    
+                    const alertsContainer = document.getElementById('alerts-container');
+                    alertsContainer.innerHTML = `
+                        <h4>📊 Mediaseuranta AI Insights</h4>
+                    `;
+                    
+                    if (insights.length === 0) {
+                        alertsContainer.innerHTML += `
+                            <div class="alert medium">
+                                <strong>No analyzed entries found</strong><br>
+                                <small>Run analysis first to generate insights.</small><br>
+                                <button class="btn" onclick="analyzeMediaseuranta()" style="margin-top: 10px;">📰 Start Analysis</button>
+                            </div>
+                        `;
+                    } else {
+                        insights.slice(0, 10).forEach(entry => {
+                            const sectors = entry.ai_key_sectors_parsed ? entry.ai_key_sectors_parsed.slice(0, 3).join(', ') : 'N/A';
+                            const keywords = entry.ai_keywords_parsed ? entry.ai_keywords_parsed.slice(0, 5).join(', ') : 'N/A';
+                            
+                            const alertClass = entry.ai_relevance_score >= 8 ? 'high' : 
+                                               entry.ai_relevance_score >= 6 ? 'medium' : 'low';
+                            
+                            alertsContainer.innerHTML += `
+                                <div class="alert ${alertClass}">
+                                    <strong>${entry.Maakunta_Nimi} - ${entry.Teema}</strong><br>
+                                    <small><strong>Date:</strong> ${entry.uutisen_pvm}</small><br>
+                                    <small><strong>News:</strong> ${entry.Uutinen.substring(0, 150)}...</small><br>
+                                    <small><strong>Relevance:</strong> ${entry.ai_relevance_score}/10 | 
+                                    <strong>Impact:</strong> ${entry.ai_economic_impact} | 
+                                    <strong>Sentiment:</strong> ${entry.ai_sentiment}</small><br>
+                                    <small><strong>Sectors:</strong> ${sectors}</small><br>
+                                    <small><strong>Keywords:</strong> ${keywords}</small><br>
+                                    ${entry.ai_summary ? `<small><strong>Summary:</strong> ${entry.ai_summary}</small><br>` : ''}
+                                    ${entry.Url ? `<small><a href="${entry.Url}" target="_blank">🔗 Read more</a></small>` : ''}
+                                </div>
+                            `;
+                        });
+                        
+                        if (insights.length > 10) {
+                            alertsContainer.innerHTML += `
+                                <div class="alert medium">
+                                    <small>Showing 10 of ${insights.length} entries. Use API for complete data.</small>
+                                </div>
+                            `;
+                        }
+                    }
+                    
+                } else {
+                    updateStatus('Failed to load Mediaseuranta insights', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Error loading insights:', error);
+                updateStatus('Failed to load insights - check console', 'error');
+                
+                const alertsContainer = document.getElementById('alerts-container');
+                alertsContainer.innerHTML = `
+                    <div class="alert high">
+                        <strong>❌ Failed to Load Insights</strong><br>
+                        Error: ${error.message}<br>
+                        <small>Check database connection and try again.</small>
                     </div>
                 `;
             }
