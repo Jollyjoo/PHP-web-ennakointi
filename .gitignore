@@ -1,6 +1,5 @@
 # Sensitive Configuration Files - DO NOT COMMIT TO VERSION CONTROL
 src/Ai/ai_config.json
-src/Ai/config.php
 
 # Environment Variables
 .env

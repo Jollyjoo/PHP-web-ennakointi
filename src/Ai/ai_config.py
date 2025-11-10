@@ -16,6 +16,7 @@ def get_openai_config():
     # Try environment variable first (most secure)
     api_key = os.getenv('OPENAI_API_KEY')
     
+
     
     if api_key:
         return {

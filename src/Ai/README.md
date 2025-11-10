@@ -50,6 +50,7 @@ Ai/
 └── ... other AI files
 ```
 
+
 ## Security Best Practices
 1. ✅ API key stored in separate config file
 2. ✅ Config files excluded from version control
