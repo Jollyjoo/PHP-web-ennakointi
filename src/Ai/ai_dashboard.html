@@ -94,10 +94,43 @@
             border-radius: 4px;
             cursor: pointer;
             margin-right: 10px;
+            margin-bottom: 8px;
+            position: relative;
+            transition: background-color 0.3s ease;
         }
         
         .btn:hover {
             background: #1e3c72;
+            transform: translateY(-1px);
+        }
+        
+        /* Enhanced tooltip styling */
+        .btn[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: normal;
+            max-width: 200px;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .btn[title]:hover::before {
+            content: '';
+            position: absolute;
+            bottom: 110%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-top-color: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
         }
         
         .loading {
@@ -136,24 +169,20 @@
     </div>
 
     <div class="controls">
-        <button class="btn" onclick="loadAlerts()">🚨 Check Alerts</button>
-        <button class="btn" onclick="testAPI()">🔧 Test API</button>
-        <button class="btn" onclick="loadWeeklyReport()">📊 Weekly Report</button>
-        <button class="btn" onclick="loadCompetitiveIntel()">🔍 Competitive Intelligence</button>
-        <button class="btn" onclick="runAnalysis()">🧠 Run AI Analysis</button>
-        <button class="btn" onclick="collectNews()" style="background: #28a745;">📰 Collect News</button>
-        <button class="btn" onclick="collectToDatabase()" style="background: #007bff;">💾 Collect to Database</button>
-        <button class="btn" onclick="viewStoredNews()" style="background: #6c757d;">📋 View Stored News</button>
-        <button class="btn" onclick="testNews()" style="background: #17a2b8;">🧪 Test Collection</button>
-        <button class="btn" onclick="workingTest()" style="background: #28a745;">✅ Working Test</button>
-        <button class="btn" onclick="mockTest()" style="background: #fd7e14;">📋 Mock Data</button>
+        <button class="btn" onclick="loadAlerts()" title="Tarkista kriittisiä hälytyksiä ja signaaleja uutisvirrasta">� Check Alerts</button>
+        <button class="btn" onclick="loadWeeklyReport()" title="Luo viikkoinen AI-analyysi kerätystä uutismateriaalista">📊 Weekly Report</button>
+        <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi kilpailijoiden ja markkinoiden toimintaa">🔍 Competitive Intelligence</button>
+        <button class="btn" onclick="runAnalysis()" title="Suorita AI-analyysi ja päivitä visualisoinnit">🧠 Run AI Analysis</button>
+        <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutiset YLE:stä ja tallenna tietokantaan">💾 Collect to Database</button>
+        <button class="btn" onclick="viewStoredNews()" style="background: #6c757d;" title="Näytä viimeisimmät tallennetut uutiset tietokannasta">📋 View Stored News</button>
+        <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Working Test</button>
         <span class="loading" id="loading">⏳ Processing...</span>
         
         <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
-            <strong>ℹ️ Testing Options:</strong> 
-            <strong>🔗 cURL Test</strong> tries alternative network method | 
-            <strong>📋 Mock Data</strong> tests AI system with sample news | 
-            Network collection may need server configuration (allow_url_fopen or cURL).
+            <strong>ℹ️ Quick Guide:</strong> 
+            <strong>� Collect to Database</strong> = Production use | 
+            <strong>✅ Working Test</strong> = Test without saving | 
+            Hover buttons for detailed descriptions.
         </div>
     </div>
 
@@ -327,79 +356,6 @@
             } catch (error) {
                 console.error('Error loading alerts:', error);
                 updateStatus('Failed to load alerts', 'error');
-            }
-            showLoading(false);
-        }
-
-        // Test API function
-        async function testAPI() {
-            showLoading(true);
-            updateStatus('Testing API connection...', 'warning');
-            
-            try {
-                const response = await fetch('news_intelligence_api.php?action=test');
-                const data = await response.json();
-                
-                updateStatus('API test completed', 'success');
-                
-                const container = document.getElementById('alerts-container');
-                container.innerHTML = '<h4>🔧 API Test Results:</h4>';
-                
-                const statusIcon = data.status === 'API Working' ? '✅' : '❌';
-                const dbIcon = data.database_connected ? '✅' : '❌';
-                const aiIcon = data.openai_configured ? '✅' : '❌';
-                
-                container.innerHTML += `
-                    <div class="alert medium">
-                        ${statusIcon} <strong>API Status:</strong> ${data.status}<br>
-                        ${dbIcon} <strong>Database:</strong> ${data.database_connected ? 'Connected' : 'Failed'}<br>
-                        ${aiIcon} <strong>OpenAI:</strong> ${data.openai_configured ? 'Configured' : 'Not configured'}<br>
-                        <strong>Config Method:</strong> ${data.config_method}<br>
-                        <strong>Timestamp:</strong> ${data.timestamp}
-                    </div>
-                `;
-                
-                if (!data.openai_configured) {
-                    container.innerHTML += `
-                        <div class="alert high">
-                            <strong>⚠️ OpenAI Not Configured</strong><br>
-                            Weekly Report and AI analysis features will not work.<br>
-                            <strong>Solution:</strong> Upload ai_config.json file to server's Ai/ folder.
-                        </div>
-                    `;
-                }
-                
-                if (!data.database_connected) {
-                    container.innerHTML += `
-                        <div class="alert high">
-                            <strong>❌ Database Connection Failed</strong><br>
-                            Most features will not work without database connection.<br>
-                            Please check database credentials and server status.
-                        </div>
-                    `;
-                }
-                
-                if (data.status === 'API Working' && data.database_connected && data.openai_configured) {
-                    container.innerHTML += `
-                        <div class="alert medium" style="background: #d4edda; border-color: #c3e6cb;">
-                            <strong>🎉 All Systems Working!</strong><br>
-                            API, Database, and AI configuration are all working properly.
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Error testing API:', error);
-                updateStatus('API test failed', 'error');
-                
-                const container = document.getElementById('alerts-container');
-                container.innerHTML = `
-                    <div class="alert high">
-                        <strong>❌ API Test Failed</strong><br>
-                        Error: ${error.message}<br>
-                        This suggests the news_intelligence_api.php file is not accessible or has errors.
-                    </div>
-                `;
             }
             showLoading(false);
         }
@@ -804,280 +760,6 @@
                 console.error('Error in working test:', error);
                 updateStatus('Working test failed - trying mock data', 'warning');
                 setTimeout(() => mockTest(), 1000);
-            }
-            showLoading(false);
-        }
-
-        // cURL test function
-        async function curlTest() {
-            showLoading(true);
-            updateStatus('Testing with cURL method...', 'warning');
-            
-            try {
-                const response = await fetch('news_test_curl.php?action=curl_test');
-                const data = await response.json();
-                
-                if (data.success) {
-                    updateStatus(`cURL test successful: ${data.total_found} articles found!`, 'success');
-                    
-                    const alertsContainer = document.getElementById('alerts-container');
-                    alertsContainer.innerHTML = `
-                        <h4>🔗 cURL Test Results:</h4>
-                        <div class="alert medium">
-                            <strong>✅ Success!</strong><br>
-                            Method: ${data.method}<br>
-                            Total Found: ${data.total_found}<br>
-                            Relevant to Häme: ${data.relevant_articles}<br>
-                            HTTP Code: ${data.http_code}
-                        </div>
-                    `;
-                    
-                    if (data.sample_articles && data.sample_articles.length > 0) {
-                        data.sample_articles.forEach((article, index) => {
-                            const relevanceIcon = article.relevant_to_hame ? '🎯' : '📰';
-                            alertsContainer.innerHTML += `
-                                <div class="alert ${article.relevant_to_hame ? 'medium' : 'low'}">
-                                    ${relevanceIcon} <strong>${article.title}</strong><br>
-                                    <small>${article.description}</small><br>
-                                    <small>Source: ${article.source} | ${article.pub_date}</small>
-                                </div>
-                            `;
-                        });
-                    }
-                } else {
-                    updateStatus(`cURL test failed: ${data.error}`, 'error');
-                    
-                    const alertsContainer = document.getElementById('alerts-container');
-                    alertsContainer.innerHTML = `
-                        <div class="alert high">
-                            <strong>❌ cURL Test Failed</strong><br>
-                            <strong>Error:</strong> ${data.error}<br>
-                            <h4>Debug Info:</h4>
-                            <ul>
-                                <li>cURL Available: ${data.debug_info?.curl_available ? 'Yes' : 'No'}</li>
-                                <li>allow_url_fopen: ${data.debug_info?.allow_url_fopen}</li>
-                                <li>OpenSSL: ${data.debug_info?.openssl_available ? 'Yes' : 'No'}</li>
-                            </ul>
-                            <button class="btn" onclick="mockTest()" style="margin-top: 10px;">📋 Try Mock Data Instead</button>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Error in cURL test:', error);
-                updateStatus('cURL test failed - trying mock data', 'warning');
-                setTimeout(() => mockTest(), 1000);
-            }
-            showLoading(false);
-        }
-
-        // Mock data test function
-        async function mockTest() {
-            showLoading(true);
-            updateStatus('Loading sample data for testing...', 'warning');
-            
-            try {
-                const response = await fetch('news_test_curl.php?action=mock_test');
-                const data = await response.json();
-                
-                updateStatus('Sample data loaded - testing AI analysis features', 'success');
-                
-                const alertsContainer = document.getElementById('alerts-container');
-                alertsContainer.innerHTML = `
-                    <h4>📋 Mock Data Test - AI System Ready!</h4>
-                    <div class="alert medium">
-                        <strong>✅ System Working with Sample Data</strong><br>
-                        Method: ${data.method}<br>
-                        Sample Articles: ${data.total_found}<br>
-                        All Relevant to Häme: ${data.relevant_articles}
-                    </div>
-                `;
-                
-                if (data.sample_articles) {
-                    data.sample_articles.forEach((article, index) => {
-                        alertsContainer.innerHTML += `
-                            <div class="alert medium">
-                                🎯 <strong>${article.title}</strong><br>
-                                <small>${article.description}</small><br>
-                                <small>Source: ${article.source} | ${article.pub_date}</small>
-                            </div>
-                        `;
-                    });
-                }
-                
-                alertsContainer.innerHTML += `
-                    <div class="alert" style="background: #e8f5e8; border-color: #28a745;">
-                        <strong>✨ What This Means:</strong><br>
-                        • AI analysis system is working<br>
-                        • Dashboard visualization ready<br>
-                        • Can test all AI features with sample data<br>
-                        • Real news collection needs server configuration
-                    </div>
-                `;
-                
-                // Automatically update charts with sample data
-                setTimeout(() => {
-                    runAnalysis();
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error in mock test:', error);
-                updateStatus('Mock test failed', 'error');
-            }
-            showLoading(false);
-        }
-
-        // Simple test function - guaranteed to work
-        async function simpleTest() {
-            showLoading(true);
-            updateStatus('Running simple RSS test...', 'warning');
-            
-            try {
-                const response = await fetch('simple_news_test.php?action=test');
-                const data = await response.json();
-                
-                if (data.success) {
-                    updateStatus(`Simple test successful: ${data.total_found} articles found`, 'success');
-                    
-                    // Show sample results
-                    const alertsContainer = document.getElementById('alerts-container');
-                    alertsContainer.innerHTML = '<h4>⚡ Simple Test Results:</h4>';
-                    
-                    if (data.sample_articles && data.sample_articles.length > 0) {
-                        data.sample_articles.forEach((article, index) => {
-                            alertsContainer.innerHTML += `
-                                <div class="alert medium">
-                                    <strong>${index + 1}. ${article.title}</strong><br>
-                                    <small>${article.description}</small><br>
-                                    <small>Source: ${article.source} | ${article.pub_date}</small>
-                                </div>
-                            `;
-                        });
-                    }
-                    
-                    alertsContainer.innerHTML += `<p><strong>Total found:</strong> ${data.total_found} articles</p>`;
-                } else {
-                    updateStatus(`Simple test failed: ${data.error}`, 'error');
-                    
-                    const alertsContainer = document.getElementById('alerts-container');
-                    alertsContainer.innerHTML = `
-                        <div class="alert high">
-                            <strong>❌ Simple Test Failed</strong><br>
-                            <strong>Error:</strong> ${data.error}<br>
-                            <strong>Suggestions:</strong><br>
-                            ${data.suggestions ? data.suggestions.map(s => '• ' + s).join('<br>') : 'Check server configuration'}
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Error in simple test:', error);
-                updateStatus('Simple test failed - check console', 'error');
-                
-                const alertsContainer = document.getElementById('alerts-container');
-                alertsContainer.innerHTML = `
-                    <div class="alert high">
-                        <strong>❌ Request Failed</strong><br>
-                        The simple_news_test.php file may be missing or there's a network issue.<br>
-                        <small>Error: ${error.message}</small>
-                    </div>
-                `;
-            }
-            showLoading(false);
-        }
-
-        // Test news collection function
-        async function testNews() {
-            showLoading(true);
-            updateStatus('Testing news collection...', 'warning');
-            
-            try {
-                const response = await fetch('news_collector.php?action=test');
-                const data = await response.json();
-                
-                if (data.error) {
-                    updateStatus(`Test failed: ${data.error}`, 'error');
-                    console.error('Test error:', data);
-                } else {
-                    updateStatus(`Test successful: ${data.total_collected} articles found`, 'success');
-                    console.log('Test results:', data);
-                    
-                    // Show sample results
-                    if (data.articles_sample && data.articles_sample.length > 0) {
-                        const alertsContainer = document.getElementById('alerts-container');
-                        alertsContainer.innerHTML = '<h4>✅ Test Results - Sample Articles:</h4>';
-                        
-                        data.articles_sample.forEach((article, index) => {
-                            alertsContainer.innerHTML += `
-                                <div class="alert medium">
-                                    <strong>Sample ${index + 1}:</strong> ${article.title}<br>
-                                    <small>Source: ${article.source} | ${article.published_date}</small>
-                                </div>
-                            `;
-                        });
-                    }
-                }
-                
-            } catch (error) {
-                console.error('Error testing news:', error);
-                updateStatus('Test failed - check console', 'error');
-            }
-            showLoading(false);
-        }
-
-        // Collect news function
-        async function collectNews() {
-            showLoading(true);
-            updateStatus('Collecting news from sources...', 'warning');
-            
-            try {
-                const response = await fetch('news_collector.php?action=collect', { method: 'POST' });
-                const data = await response.json();
-                
-                if (data.error) {
-                    updateStatus(`Collection failed: ${data.error}`, 'error');
-                    
-                    // Show suggestion
-                    if (data.suggestion) {
-                        const alertsContainer = document.getElementById('alerts-container');
-                        alertsContainer.innerHTML = `
-                            <div class="alert high">
-                                <strong>Collection Error:</strong> ${data.error}<br>
-                                <strong>Suggestion:</strong> ${data.suggestion}<br>
-                                <button class="btn" onclick="testNews()" style="margin-top: 10px;">🧪 Try Test Mode</button>
-                            </div>
-                        `;
-                    }
-                    
-                    console.error('Collection error details:', data);
-                } else {
-                    updateStatus(`Collected ${data.successfully_stored} new articles`, 'success');
-                    
-                    // Show collection details
-                    const alertsContainer = document.getElementById('alerts-container');
-                    let errorInfo = '';
-                    if (data.errors && data.errors.length > 0) {
-                        errorInfo = '<br><small>Errors: ' + data.errors.join(', ') + '</small>';
-                    }
-                    
-                    alertsContainer.innerHTML = `
-                        <div class="alert medium">
-                            <strong>✅ Collection Complete</strong><br>
-                            Total Found: ${data.total_collected}<br>
-                            Successfully Stored: ${data.successfully_stored}${errorInfo}
-                        </div>
-                    `;
-                    
-                    // Optionally refresh other widgets
-                    setTimeout(() => {
-                        loadAlerts();
-                        runAnalysis();
-                    }, 1000);
-                }
-                
-            } catch (error) {
-                console.error('Error collecting news:', error);
-                updateStatus('Failed to collect news - check console', 'error');
             }
             showLoading(false);
         }
