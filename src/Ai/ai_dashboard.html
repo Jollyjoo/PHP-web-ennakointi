@@ -176,7 +176,7 @@
         <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutiset YLE:stä ja tallenna tietokantaan">💾 Collect to Database</button>
         <button class="btn" onclick="viewStoredNews()" style="background: #6c757d;" title="Näytä viimeisimmät tallennetut uutiset tietokannasta">📋 View Stored News</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Working Test</button>
-        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennetut uutiset AI:lla ja tallenna analyysi">🤖 Analyze Articles</button>
+        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennetut uutiset AI:lla erissä (5 artikkelia kerrallaan)">🤖 Analyze Articles</button>
         <span class="loading" id="loading">⏳ Processing...</span>
         
         <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
@@ -767,37 +767,85 @@
 
         async function analyzeStoredArticles() {
             showLoading(true);
-            updateStatus('Analyzing stored articles with AI...', 'warning');
+            updateStatus('Analyzing stored articles with AI (batch processing)...', 'warning');
             
             try {
-                const response = await fetch('database_news_collector.php?action=analyze');
+                // First, check how many articles need analysis
+                const statsResponse = await fetch('database_news_collector.php?action=stats');
+                const statsData = await statsResponse.json();
+                
+                if (statsData.database_stats && statsData.database_stats.pending_analysis > 0) {
+                    updateStatus(`Found ${statsData.database_stats.pending_analysis} articles to analyze...`, 'info');
+                } else {
+                    updateStatus('No articles need analysis', 'success');
+                    showLoading(false);
+                    return;
+                }
+                
+                // Start analysis with small batch size for reliability
+                const response = await fetch('database_news_collector.php?action=analyze&batch_size=5', {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                // Check if response is ok
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                // Check content type
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    const text = await response.text();
+                    console.error('Non-JSON response:', text);
+                    throw new Error('Server returned non-JSON response. Check server logs.');
+                }
+                
                 const data = await response.json();
                 
                 if (data.analysis_result && data.analysis_result.success) {
                     const result = data.analysis_result;
-                    updateStatus(`✅ Analysis completed! ${result.analyzed} articles analyzed`, 'success');
+                    updateStatus(`✅ Batch completed! ${result.analyzed} articles analyzed`, 'success');
                     
                     const alertsContainer = document.getElementById('alerts-container');
                     alertsContainer.innerHTML = `
-                        <h4>🤖 AI Analysis Completed</h4>
+                        <h4>🤖 AI Analysis Batch Completed</h4>
                         <div class="alert medium" style="background: #d4edda; border-color: #c3e6cb;">
-                            <strong>✅ Analysis Results:</strong><br>
-                            Total Articles Analyzed: ${result.analyzed}<br>
+                            <strong>✅ Batch Results:</strong><br>
+                            Articles Analyzed: ${result.analyzed}<br>
+                            Failed: ${result.failed}<br>
                             Skipped (Already Analyzed): ${result.skipped}<br>
                             Success Rate: ${result.success_rate}%<br>
-                            Processing Time: ${result.processing_time || 'N/A'}
+                            Processing Time: ${result.processing_time}<br>
+                            Batch Size: ${result.batch_size}
                         </div>
                     `;
                     
-                    // Show analysis summary if available
-                    if (result.analysis_summary) {
+                    // Show errors if any
+                    if (result.errors && result.errors.length > 0) {
                         alertsContainer.innerHTML += `
-                            <h4>📊 Analysis Summary:</h4>
-                            <div class="alert medium">
-                                High Impact Articles: ${result.analysis_summary.high_impact || 0}<br>
-                                Economic Impact: ${result.analysis_summary.economic_impact || 'Not calculated'}<br>
-                                Key Sectors: ${(result.analysis_summary.sectors || []).join(', ') || 'None identified'}<br>
-                                Average Relevance: ${result.analysis_summary.avg_relevance || 'N/A'}/10
+                            <h4>⚠️ Issues Encountered:</h4>
+                            <div class="alert medium" style="background: #fff3cd;">
+                        `;
+                        result.errors.slice(0, 5).forEach(error => {
+                            alertsContainer.innerHTML += `<small>• ${error}</small><br>`;
+                        });
+                        if (result.errors.length > 5) {
+                            alertsContainer.innerHTML += `<small>... and ${result.errors.length - 5} more errors</small><br>`;
+                        }
+                        alertsContainer.innerHTML += `</div>`;
+                    }
+                    
+                    // Check if more articles need analysis
+                    if (result.analyzed > 0) {
+                        alertsContainer.innerHTML += `
+                            <div class="alert medium" style="background: #e7f3ff;">
+                                <strong>💡 Continue Processing?</strong><br>
+                                <small>This batch processed ${result.batch_size} articles. More may need analysis.</small><br>
+                                <button class="btn" onclick="analyzeStoredArticles()" style="margin-top: 10px;">🔄 Analyze Next Batch</button>
+                                <button class="btn" onclick="getDatabaseStats()" style="margin-top: 10px;">📊 Check Status</button>
                             </div>
                         `;
                     }
@@ -808,7 +856,7 @@
                     }, 2000);
                     
                 } else {
-                    const error = data.error || 'Unknown error occurred';
+                    const error = data.error || data.analysis_result?.errors?.join(', ') || 'Unknown error occurred';
                     updateStatus(`Analysis failed: ${error}`, 'error');
                     
                     const alertsContainer = document.getElementById('alerts-container');
@@ -816,7 +864,8 @@
                         <div class="alert high">
                             <strong>❌ Analysis Failed</strong><br>
                             Error: ${error}<br>
-                            <small>Try collecting more articles first or check your OpenAI API key configuration.</small>
+                            <small>Try with a smaller batch or check your OpenAI API key configuration.</small><br>
+                            <button class="btn" onclick="getDatabaseStats()" style="margin-top: 10px;">📊 Check Database Status</button>
                         </div>
                     `;
                 }
@@ -828,9 +877,11 @@
                 const alertsContainer = document.getElementById('alerts-container');
                 alertsContainer.innerHTML = `
                     <div class="alert high">
-                        <strong>❌ Network or API Error</strong><br>
+                        <strong>❌ Network or Processing Error</strong><br>
                         Error: ${error.message}<br>
-                        <small>Check your internet connection and OpenAI API configuration.</small>
+                        <small>This might be due to timeout, network issues, or server overload.</small><br>
+                        <button class="btn" onclick="analyzeStoredArticles()" style="margin-top: 10px;">🔄 Try Again</button>
+                        <button class="btn" onclick="getDatabaseStats()" style="margin-top: 10px;">📊 Check Status</button>
                     </div>
                 `;
             }

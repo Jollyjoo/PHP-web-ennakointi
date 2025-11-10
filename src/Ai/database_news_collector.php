@@ -101,14 +101,24 @@ class DatabaseNewsCollector {
      * Run AI analysis on unanalyzed articles
      */
     public function analyzeUnanalyzedArticles() {
-        $unanalyzed = $this->getUnanalyzedArticles(20); // Process in batches
+        set_time_limit(300); // 5 minutes max
+        
+        // Get batch size from request parameter, default to 5 for stability
+        $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 5;
+        $unanalyzed = $this->getUnanalyzedArticles($batch_size);
+        
         $results = [
+            'success' => true,
             'total_unanalyzed' => count($unanalyzed),
-            'analyzed_count' => 0,
-            'failed_count' => 0,
-            'skipped_count' => 0,
-            'analysis_results' => []
+            'analyzed' => 0,
+            'failed' => 0,
+            'skipped' => 0,
+            'errors' => [],
+            'processing_time' => null,
+            'batch_size' => $batch_size
         ];
+        
+        $start_time = microtime(true);
         
         if (empty($unanalyzed)) {
             $results['message'] = 'No articles need analysis';
@@ -116,33 +126,41 @@ class DatabaseNewsCollector {
         }
         
         foreach ($unanalyzed as $article) {
-            // Check if analysis already exists (double-check)
-            if ($this->hasAnalysis($article['id'])) {
-                $results['skipped_count']++;
-                continue;
-            }
-            
-            // Run basic analysis 
-            $analysis_result = $this->runBasicAnalysis($article);
-            
-            if ($analysis_result && !isset($analysis_result['error'])) {
-                // Store successful analysis
-                if ($this->storeAnalysis($article['id'], $analysis_result)) {
-                    $results['analyzed_count']++;
-                    $results['analysis_results'][] = [
-                        'article_id' => $article['id'],
-                        'title' => substr($article['title'], 0, 100) . '...',
-                        'sentiment' => $analysis_result['sentiment'] ?? 'unknown',
-                        'crisis_probability' => $analysis_result['crisis_probability'] ?? 0,
-                        'status' => 'success'
-                    ];
-                } else {
-                    $results['failed_count']++;
+            try {
+                // Check if analysis already exists (double-check)
+                if ($this->hasAnalysis($article['id'])) {
+                    $results['skipped']++;
+                    continue;
                 }
-            } else {
-                $results['failed_count']++;
+                
+                // Run basic analysis 
+                $analysis_result = $this->runBasicAnalysis($article);
+                
+                if ($analysis_result && !isset($analysis_result['error'])) {
+                    // Store successful analysis
+                    if ($this->storeAnalysis($article['id'], $analysis_result)) {
+                        $results['analyzed']++;
+                    } else {
+                        $results['failed']++;
+                        $results['errors'][] = "Failed to store analysis for article {$article['id']}";
+                    }
+                } else {
+                    $results['failed']++;
+                    $error_msg = $analysis_result['error'] ?? 'Analysis failed with unknown error';
+                    $results['errors'][] = "Article {$article['id']}: {$error_msg}";
+                }
+                
+                // Add small delay to prevent API rate limiting
+                usleep(500000); // 0.5 seconds
+                
+            } catch (Exception $e) {
+                $results['failed']++;
+                $results['errors'][] = "Article {$article['id']}: Exception - " . $e->getMessage();
             }
         }
+        
+        $results['processing_time'] = round(microtime(true) - $start_time, 2) . ' seconds';
+        $results['success_rate'] = $results['analyzed'] > 0 ? round(($results['analyzed'] / ($results['analyzed'] + $results['failed'])) * 100, 1) : 0;
         
         return $results;
     }
