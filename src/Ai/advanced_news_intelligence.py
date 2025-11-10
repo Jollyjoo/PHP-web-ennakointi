@@ -9,8 +9,10 @@ import json
 import requests
 from datetime import datetime, timedelta
 import re
+from ai_config import get_api_key
 
-OPENAI_API_KEY = "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"
+# Load configuration securely
+OPENAI_API_KEY = get_api_key()
 
 def analyze_news_portfolio(news_articles):
     """

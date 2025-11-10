@@ -52,3 +52,6 @@ deployment:
     - /bin/cp src/Ai/news_test_curl.php $DEPLOYPATHAI
     - /bin/cp src/Ai/simple_news_test.php $DEPLOYPATHAI
     - /bin/cp src/Ai/news_collector.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/config.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/ai_config.py $DEPLOYPATHAI
+    - /bin/cp src/Ai/README.md $DEPLOYPATHAI

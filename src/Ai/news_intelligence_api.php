@@ -1,4 +1,5 @@
 <?php
+require_once 'config.php';
 header('Content-Type: application/json; charset=utf-8');
 
 /**
@@ -558,6 +559,13 @@ class NewsIntelligenceSystem {
 
 // API endpoints
 try {
+    // Get secure configuration
+    $db_config = getDatabaseConfig();
+    $db_connection = new mysqli($db_config['host'], $db_config['username'], $db_config['password'], $db_config['database']);
+    $db_connection->set_charset($db_config['charset']);
+    
+    $openai_api_key = getOpenAIKey();
+    
     $intelligence_system = new NewsIntelligenceSystem($db_connection, $openai_api_key);
     
     $action = $_GET['action'] ?? $_POST['action'] ?? 'status';

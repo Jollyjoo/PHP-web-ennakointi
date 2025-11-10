@@ -27,8 +27,19 @@ import re
 news_text = ' . json_encode($newsText) . '
 analysis_type = ' . json_encode($analysisType) . '
 
-# OpenAI API Configuration
-OPENAI_API_KEY = "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"  # Replace with your actual API key
+# OpenAI API Configuration - Load from secure config
+import sys
+import os
+
+# Add current directory to path for config import
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+try:
+    from ai_config import get_api_key
+    OPENAI_API_KEY = get_api_key()
+except Exception as e:
+    print(f"Error loading secure config: {e}")
+    OPENAI_API_KEY = "YOUR_OPENAI_API_KEY_HERE"  # Fallback
 
 def analyze_with_openai(text, analysis_type):
     """Advanced AI analysis using OpenAI GPT"""
