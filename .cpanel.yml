@@ -53,5 +53,8 @@ deployment:
     - /bin/cp src/Ai/news_collector.php $DEPLOYPATHAI
     - /bin/cp src/Ai/config.php $DEPLOYPATHAI
     - /bin/cp src/Ai/ai_config.py $DEPLOYPATHAI
+    - /bin/cp src/Ai/mediaseuranta_analyzer.php $DEPLOYPATHAI
     - /bin/cp src/Ai/README.md $DEPLOYPATHAI
+    - /bin/cp src/Ai/MEDIASEURANTA_SETUP.md $DEPLOYPATHAI
+    - /bin/cp src/SQL/add_mediaseuranta_ai_columns.sql $DEPLOYPATH
     # NOTE: ai_config.json must be uploaded manually for security (not in version control)
