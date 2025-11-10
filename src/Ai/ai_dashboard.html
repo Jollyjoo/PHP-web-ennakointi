@@ -137,6 +137,7 @@
 
     <div class="controls">
         <button class="btn" onclick="loadAlerts()">🚨 Check Alerts</button>
+        <button class="btn" onclick="testAPI()">🔧 Test API</button>
         <button class="btn" onclick="loadWeeklyReport()">📊 Weekly Report</button>
         <button class="btn" onclick="loadCompetitiveIntel()">🔍 Competitive Intelligence</button>
         <button class="btn" onclick="runAnalysis()">🧠 Run AI Analysis</button>
@@ -326,6 +327,79 @@
             } catch (error) {
                 console.error('Error loading alerts:', error);
                 updateStatus('Failed to load alerts', 'error');
+            }
+            showLoading(false);
+        }
+
+        // Test API function
+        async function testAPI() {
+            showLoading(true);
+            updateStatus('Testing API connection...', 'warning');
+            
+            try {
+                const response = await fetch('news_intelligence_api.php?action=test');
+                const data = await response.json();
+                
+                updateStatus('API test completed', 'success');
+                
+                const container = document.getElementById('alerts-container');
+                container.innerHTML = '<h4>🔧 API Test Results:</h4>';
+                
+                const statusIcon = data.status === 'API Working' ? '✅' : '❌';
+                const dbIcon = data.database_connected ? '✅' : '❌';
+                const aiIcon = data.openai_configured ? '✅' : '❌';
+                
+                container.innerHTML += `
+                    <div class="alert medium">
+                        ${statusIcon} <strong>API Status:</strong> ${data.status}<br>
+                        ${dbIcon} <strong>Database:</strong> ${data.database_connected ? 'Connected' : 'Failed'}<br>
+                        ${aiIcon} <strong>OpenAI:</strong> ${data.openai_configured ? 'Configured' : 'Not configured'}<br>
+                        <strong>Config Method:</strong> ${data.config_method}<br>
+                        <strong>Timestamp:</strong> ${data.timestamp}
+                    </div>
+                `;
+                
+                if (!data.openai_configured) {
+                    container.innerHTML += `
+                        <div class="alert high">
+                            <strong>⚠️ OpenAI Not Configured</strong><br>
+                            Weekly Report and AI analysis features will not work.<br>
+                            <strong>Solution:</strong> Upload ai_config.json file to server's Ai/ folder.
+                        </div>
+                    `;
+                }
+                
+                if (!data.database_connected) {
+                    container.innerHTML += `
+                        <div class="alert high">
+                            <strong>❌ Database Connection Failed</strong><br>
+                            Most features will not work without database connection.<br>
+                            Please check database credentials and server status.
+                        </div>
+                    `;
+                }
+                
+                if (data.status === 'API Working' && data.database_connected && data.openai_configured) {
+                    container.innerHTML += `
+                        <div class="alert medium" style="background: #d4edda; border-color: #c3e6cb;">
+                            <strong>🎉 All Systems Working!</strong><br>
+                            API, Database, and AI configuration are all working properly.
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error testing API:', error);
+                updateStatus('API test failed', 'error');
+                
+                const container = document.getElementById('alerts-container');
+                container.innerHTML = `
+                    <div class="alert high">
+                        <strong>❌ API Test Failed</strong><br>
+                        Error: ${error.message}<br>
+                        This suggests the news_intelligence_api.php file is not accessible or has errors.
+                    </div>
+                `;
             }
             showLoading(false);
         }
