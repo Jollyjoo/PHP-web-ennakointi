@@ -8,7 +8,7 @@
 require_once 'config.php';
 
 class MediaseurantaAnalyzer {
-    private $db;
+    public $db; // Changed from private to public for debugging
     
     public function __construct() {
         try {
@@ -21,6 +21,19 @@ class MediaseurantaAnalyzer {
             }
             
             $this->db->set_charset('utf8mb4');
+            
+            // Check if Mediaseuranta table exists
+            $result = $this->db->query("SHOW TABLES LIKE 'Mediaseuranta'");
+            if ($result->num_rows === 0) {
+                throw new Exception('Mediaseuranta table not found in database');
+            }
+            
+            // Check if AI analysis columns exist
+            $result = $this->db->query("SHOW COLUMNS FROM Mediaseuranta LIKE 'ai_analysis_status'");
+            if ($result->num_rows === 0) {
+                throw new Exception('AI analysis columns not found. Please run the SQL script: add_mediaseuranta_ai_columns.sql');
+            }
+            
         } catch (Exception $e) {
             throw new Exception('Database initialization failed: ' . $e->getMessage());
         }
@@ -225,6 +238,7 @@ Vastaa JSON-muodossa:
      */
     private function storeAnalysisResult($entry, $analysis) {
         try {
+            // Use a more reliable WHERE clause with LIMIT to handle potential duplicates
             $stmt = $this->db->prepare("
                 UPDATE Mediaseuranta SET
                     ai_analysis_status = 'completed',
@@ -238,26 +252,38 @@ Vastaa JSON-muodossa:
                     ai_summary = ?,
                     ai_keywords = ?,
                     ai_full_analysis = ?
-                WHERE Maakunta_ID = ? AND uutisen_pvm = ? AND Uutinen = ?
+                WHERE Maakunta_ID = ? AND uutisen_pvm = ? AND Uutinen LIKE ? 
+                LIMIT 1
             ");
             
             $sectors_json = isset($analysis['key_sectors']) ? json_encode($analysis['key_sectors']) : null;
             $keywords_json = isset($analysis['keywords']) ? json_encode($analysis['keywords']) : null;
             $full_analysis_json = json_encode($analysis);
             
+            // Extract values to variables for bind_param
+            $relevance_score = $analysis['relevance_score'] ?? 5;
+            $economic_impact = $analysis['economic_impact'] ?? 'neutral';
+            $employment_impact = $analysis['employment_impact'] ?? '';
+            $sentiment = $analysis['sentiment'] ?? 'neutral';
+            $crisis_probability = $analysis['crisis_probability'] ?? 0.0;
+            $summary = $analysis['summary'] ?? '';
+            
+            // Use first 100 characters for LIKE pattern to avoid length issues
+            $news_pattern = substr($entry['Uutinen'], 0, 100) . '%';
+            
             $stmt->bind_param("issssdssssss",
-                $analysis['relevance_score'] ?? 5,
-                $analysis['economic_impact'] ?? 'neutral',
-                $analysis['employment_impact'] ?? '',
+                $relevance_score,
+                $economic_impact,
+                $employment_impact,
                 $sectors_json,
-                $analysis['sentiment'] ?? 'neutral',
-                $analysis['crisis_probability'] ?? 0.0,
-                $analysis['summary'] ?? '',
+                $sentiment,
+                $crisis_probability,
+                $summary,
                 $keywords_json,
                 $full_analysis_json,
                 $entry['Maakunta_ID'],
                 $entry['uutisen_pvm'],
-                $entry['Uutinen']
+                $news_pattern
             );
             
             return $stmt->execute();
@@ -275,10 +301,12 @@ Vastaa JSON-muodossa:
             $stmt = $this->db->prepare("
                 UPDATE Mediaseuranta SET
                     ai_analysis_status = ?
-                WHERE Maakunta_ID = ? AND uutisen_pvm = ? AND Uutinen = ?
+                WHERE Maakunta_ID = ? AND uutisen_pvm = ? AND Uutinen LIKE ?
+                LIMIT 1
             ");
             
-            $stmt->bind_param("siss", $status, $maakunta_id, $date, $news_text);
+            $news_pattern = substr($news_text, 0, 100) . '%';
+            $stmt->bind_param("siss", $status, $maakunta_id, $date, $news_pattern);
             return $stmt->execute();
             
         } catch (Exception $e) {
@@ -379,6 +407,84 @@ try {
     $action = $_GET['action'] ?? 'stats';
     
     switch ($action) {
+        case 'debug':
+            // Simple debug to check database connection and table structure
+            $debug_info = [];
+            try {
+                $analyzer = new MediaseurantaAnalyzer();
+                $debug_info['database_connection'] = 'OK';
+                
+                // Check table existence
+                $result = $analyzer->db->query("SHOW TABLES LIKE 'Mediaseuranta'");
+                $debug_info['table_exists'] = $result->num_rows > 0;
+                
+                // Check columns
+                $result = $analyzer->db->query("SHOW COLUMNS FROM Mediaseuranta");
+                $columns = [];
+                while ($row = $result->fetch_assoc()) {
+                    $columns[] = $row['Field'];
+                }
+                $debug_info['columns'] = $columns;
+                
+                // Check if AI columns exist
+                $ai_columns = ['ai_analysis_status', 'ai_relevance_score', 'ai_economic_impact'];
+                $debug_info['ai_columns_exist'] = [];
+                foreach ($ai_columns as $col) {
+                    $debug_info['ai_columns_exist'][$col] = in_array($col, $columns);
+                }
+                
+                // Count total entries
+                $result = $analyzer->db->query("SELECT COUNT(*) as total FROM Mediaseuranta");
+                $debug_info['total_entries'] = $result->fetch_assoc()['total'];
+                
+            } catch (Exception $e) {
+                $debug_info['error'] = $e->getMessage();
+            }
+            
+            echo json_encode([
+                'debug_info' => $debug_info,
+                'timestamp' => date('Y-m-d H:i:s')
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            break;
+            
+        case 'test':
+            // Simple test to try getting a few entries
+            try {
+                $analyzer = new MediaseurantaAnalyzer();
+                
+                // Test getting unanalyzed entries
+                $entries = $analyzer->getUnanalyzedEntries(3);
+                
+                $test_info = [
+                    'connection' => 'OK',
+                    'entries_found' => count($entries),
+                    'sample_entries' => []
+                ];
+                
+                // Show sample of what we found
+                foreach (array_slice($entries, 0, 2) as $entry) {
+                    $test_info['sample_entries'][] = [
+                        'Maakunta_ID' => $entry['Maakunta_ID'],
+                        'Teema' => substr($entry['Teema'], 0, 50) . '...',
+                        'uutisen_pvm' => $entry['uutisen_pvm'],
+                        'Uutinen_preview' => substr($entry['Uutinen'], 0, 100) . '...',
+                        'ai_status' => $entry['ai_analysis_status']
+                    ];
+                }
+                
+                echo json_encode([
+                    'test_result' => $test_info,
+                    'timestamp' => date('Y-m-d H:i:s')
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                
+            } catch (Exception $e) {
+                echo json_encode([
+                    'test_result' => ['error' => $e->getMessage()],
+                    'timestamp' => date('Y-m-d H:i:s')
+                ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            }
+            break;
+            
         case 'analyze':
             $analyzer = new MediaseurantaAnalyzer();
             $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 5;
@@ -413,6 +519,8 @@ try {
         default:
             echo json_encode([
                 'available_actions' => [
+                    'debug' => 'Debug database connection and table structure',
+                    'test' => 'Test basic data retrieval from Mediaseuranta',
                     'analyze' => 'Analyze unanalyzed Mediaseuranta entries with AI',
                     'stats' => 'Get analysis statistics',
                     'insights' => 'Get analyzed entries with insights'
