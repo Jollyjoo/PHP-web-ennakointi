@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 AI Uutisanalysaattori</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .input-section { background: #f8f9fa; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+        .result-section { background: #e8f5e8; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+        .error-section { background: #f8d7da; border-radius: 6px; padding: 20px; margin-bottom: 20px; }
+        textarea { width: 100%; min-height: 150px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; }
+        .button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin: 5px; }
+        .button:hover { background: #0056b3; }
+        .button.secondary { background: #6c757d; }
+        .button.secondary:hover { background: #545b62; }
+        pre { background: #2d3748; color: #e2e8f0; padding: 15px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+        .analysis-result { background: white; border: 1px solid #dee2e6; border-radius: 4px; padding: 15px; margin: 10px 0; }
+        .sentiment-positive { border-left: 4px solid #28a745; }
+        .sentiment-negative { border-left: 4px solid #dc3545; }
+        .sentiment-neutral { border-left: 4px solid #6c757d; }
+        .loading { color: #6c757d; font-style: italic; }
+        .themes { display: flex; flex-wrap: wrap; gap: 5px; margin: 10px 0; }
+        .theme-tag { background: #007bff; color: white; padding: 4px 8px; border-radius: 12px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 AI Uutisanalysaattori</h1>
+        <p>Analysoi mediaseuranta-uutisia tekoälyn avulla. Tunnista tunnelma, teemat ja tee yhteenvetoja.</p>
+        
+        <div class="input-section">
+            <h3>📝 Syötä uutisteksti</h3>
+            <textarea id="newsText" placeholder="Liitä tähän uutisteksti analyysiä varten...">Hämeen ELY-keskus myönsi avustuksia paikallisille yrityksille vihreän siirtymän edistämiseksi. Avustukset tukevat yritysten investointeja uusiin teknologioihin ja ympäristöystävällisiin ratkaisuihin. Yhteensä myönnettiin 2,5 miljoonaa euroa avustuksia 15 yritykselle. Yritysten on tarkoitus käyttää rahoitus muun muassa aurinkovoimaloiden rakentamiseen ja energiatehokkuuden parantamiseen.</textarea>
+            
+            <div style="margin-top: 15px;">
+                <button class="button" onclick="analyzeNews('sentiment')">📊 Analysoi tunnelma</button>
+                <button class="button secondary" onclick="analyzeNews('themes')">🏷️ Tunnista teemat</button>
+                <button class="button secondary" onclick="analyzeNews('summary')">📋 Tee yhteenveto</button>
+            </div>
+        </div>
+        
+        <div id="results"></div>
+        
+        <!-- Sample news for testing -->
+        <div class="input-section">
+            <h3>📰 Esimerkkiuutiset testausta varten</h3>
+            <button class="button secondary" onclick="loadSample(1)">Positiivinen uutinen</button>
+            <button class="button secondary" onclick="loadSample(2)">Negatiivinen uutinen</button>
+            <button class="button secondary" onclick="loadSample(3)">Neutraali uutinen</button>
+        </div>
+    </div>
+
+    <script>
+        const sampleNews = {
+            1: "Lahden kaupunki on saanut merkittävän EU-rahoituksen vihreän siirtymän hankkeisiin. Rahoitus mahdollistaa uusien työpaikkojen luomisen ja ympäristöteknologian kehittämisen. Hanke työllistää arvioilta 200 henkilöä ja parantaa alueen kilpailukykyä merkittävästi. Yritysten kiinnostus alueeseen on kasvanut ja uusia investointeja odotetaan lähiaikoina.",
+            
+            2: "Riihimäen tehdas ilmoitti työntekijöiden irtisanomisista taloudellisten haasteiden vuoksi. Yhteensä 150 työpaikkaa on uhattuna ja päätös vaikuttaa koko alueen työllisyystilanteeseen. Ammattiliitto kritisoi yrityksen päätöstä ja vaatii neuvotteluja työpaikkojen säilyttämiseksi. Tilanne heijastaa laajempia haasteita teollisuussektorilla.",
+            
+            3: "Hämeenlinnan kaupunginvaltuusto käsitteli budjettiehdotusta ensi vuodelle. Kokouksessa keskusteltiin eri toimialojen rahoituksesta ja palvelujen järjestämisestä. Päätöksiä siirrettiin seuraavaan kokoukseen lisäselvitysten vuoksi. Kaupunkilaiset voivat vaikuttaa budjettisuunnitteluun antamalla palautetta verkkosivujen kautta."
+        };
+
+        function loadSample(number) {
+            document.getElementById('newsText').value = sampleNews[number];
+        }
+
+        async function analyzeNews(analysisType) {
+            const newsText = document.getElementById('newsText').value.trim();
+            const resultsDiv = document.getElementById('results');
+            
+            if (!newsText) {
+                resultsDiv.innerHTML = '<div class="error-section">❌ Syötä ensin uutisteksti</div>';
+                return;
+            }
+            
+            resultsDiv.innerHTML = '<div class="loading">🔄 Analysoidaan uutista...</div>';
+            
+            try {
+                const response = await fetch('/cgi-bin/ai_analyzer_api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        news_text: newsText,
+                        analysis_type: analysisType
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayResults(data, analysisType);
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="error-section">
+                            <h3>❌ Analyysi epäonnistui</h3>
+                            <p><strong>Virhe:</strong> ${data.error}</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <div class="error-section">
+                        <h3>❌ Verkkovirhe</h3>
+                        <p><strong>Virhe:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function displayResults(data, analysisType) {
+            const resultsDiv = document.getElementById('results');
+            let html = '';
+            
+            if (analysisType === 'sentiment') {
+                const analysis = data.analysis;
+                const sentimentClass = `sentiment-${analysis.sentiment === 'positiivinen' ? 'positive' : analysis.sentiment === 'negatiivinen' ? 'negative' : 'neutral'}`;
+                
+                html = `
+                    <div class="result-section">
+                        <h3>📊 Tunnelma-analyysi</h3>
+                        <div class="analysis-result ${sentimentClass}">
+                            <h4>Tunnelma: ${analysis.sentiment.toUpperCase()}</h4>
+                            <p><strong>Luottamus:</strong> ${(analysis.confidence * 100).toFixed(1)}%</p>
+                            <p><strong>Positiiviset indikaattorit:</strong> ${analysis.positive_indicators}</p>
+                            <p><strong>Negatiiviset indikaattorit:</strong> ${analysis.negative_indicators}</p>
+                            <p><strong>Menetelmä:</strong> ${analysis.analysis_method}</p>
+                        </div>
+                    </div>
+                `;
+                
+            } else if (analysisType === 'themes') {
+                const analysis = data.analysis;
+                
+                html = `
+                    <div class="result-section">
+                        <h3>🏷️ Teema-analyysi</h3>
+                        <div class="analysis-result">
+                            <h4>Tunnistetut teemat (${analysis.theme_count} kpl)</h4>
+                            <div class="themes">
+                                ${analysis.main_themes.map(theme => `<span class="theme-tag">${theme}</span>`).join('')}
+                            </div>
+                            <p><strong>Menetelmä:</strong> ${analysis.analysis_method}</p>
+                        </div>
+                    </div>
+                `;
+                
+            } else {
+                const analysis = data.analysis;
+                
+                html = `
+                    <div class="result-section">
+                        <h3>📋 Yhteenveto</h3>
+                        <div class="analysis-result">
+                            <p><strong>Tiivistelmä:</strong> ${analysis.summary}</p>
+                            <p><strong>Tekstin pituus:</strong> ${analysis.length} merkkiä</p>
+                            <p><strong>Menetelmä:</strong> ${analysis.analysis_method}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Add technical details
+            html += `
+                <div class="result-section">
+                    <h4>🔧 Tekniset tiedot</h4>
+                    <p><strong>Analysointiaika:</strong> ${data.timestamp}</p>
+                    <p><strong>Menetelmä:</strong> ${data.method}</p>
+                    <p><strong>Huomio:</strong> ${data.note}</p>
+                </div>
+            `;
+            
+            resultsDiv.innerHTML = html;
+        }
+    </script>
+</body>
+</html>

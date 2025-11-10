@@ -3,6 +3,8 @@ deployment:
   tasks:
     - export DEPLOYPATH=/home/catbxjbt/public_html/
     - export DEPLOYPATHSWIPER=/home/catbxjbt/public_html/swiper/
+    - export DEPLOYPATHAI=/home/catbxjbt/public_html/Ai/
+    - /bin/mkdir -p $DEPLOYPATHAI
     - /bin/cp src/header.html $DEPLOYPATH    
     - /bin/cp src/ennakointi.html $DEPLOYPATH
     - /bin/cp src/footer.html $DEPLOYPATH    
@@ -39,3 +41,14 @@ deployment:
     - /bin/cp src/swiper/effect-carousel.min.js $DEPLOYPATHSWIPER
     - /bin/cp src/swiper/swiper.html $DEPLOYPATHSWIPER
     - /bin/cp src/swiper/megatrendit.html $DEPLOYPATHSWIPER
+    - /bin/cp src/Ai/ai_dashboard.html $DEPLOYPATHAI
+    - /bin/cp src/Ai/database_news_collector.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/news_working_test.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/ai_analyzer_api.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/ai_analyzer_demo.html $DEPLOYPATHAI
+    - /bin/cp src/Ai/ai_news_analyzer.py $DEPLOYPATHAI
+    - /bin/cp src/Ai/advanced_news_intelligence.py $DEPLOYPATHAI
+    - /bin/cp src/Ai/news_intelligence_api.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/news_test_curl.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/simple_news_test.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/news_collector.php $DEPLOYPATHAI
