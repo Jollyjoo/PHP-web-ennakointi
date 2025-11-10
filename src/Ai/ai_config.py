@@ -17,10 +17,10 @@ def get_openai_config():
     api_key = os.getenv('OPENAI_API_KEY')
     
 
-    
+
     if api_key:
         return {
-            'api_key': api_key,
+            'openai_api_key': api_key,  # Use consistent field name
             'model': 'gpt-3.5-turbo',
             'max_tokens': 1500,
             'temperature': 0.3
@@ -43,4 +43,5 @@ def get_openai_config():
 def get_api_key():
     """Get just the API key"""
     config = get_openai_config()
-    return config['api_key']
+    # Handle both 'openai_api_key' and 'api_key' field names for compatibility
+    return config.get('openai_api_key') or config.get('api_key')

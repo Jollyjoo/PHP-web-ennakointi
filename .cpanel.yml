@@ -54,3 +54,4 @@ deployment:
     - /bin/cp src/Ai/config.php $DEPLOYPATHAI
     - /bin/cp src/Ai/ai_config.py $DEPLOYPATHAI
     - /bin/cp src/Ai/README.md $DEPLOYPATHAI
+    # NOTE: ai_config.json must be uploaded manually for security (not in version control)
