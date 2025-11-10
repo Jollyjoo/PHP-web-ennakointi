@@ -32,6 +32,145 @@ class DatabaseNewsCollector {
     }
     
     /**
+     * Check if article already has analysis in database
+     */
+    private function hasAnalysis($article_id) {
+        $stmt = $this->db->prepare("SELECT id FROM news_analysis WHERE article_id = ?");
+        $stmt->bind_param("i", $article_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->num_rows > 0;
+    }
+    
+    /**
+     * Store analysis results in news_analysis table
+     */
+    private function storeAnalysis($article_id, $analysis_data) {
+        try {
+            // Extract key fields from analysis data
+            $sentiment = $analysis_data['sentiment'] ?? 'neutral';
+            $themes = isset($analysis_data['themes']) ? json_encode($analysis_data['themes']) : '[]';
+            $entities = isset($analysis_data['entities']) ? json_encode($analysis_data['entities']) : '[]';
+            $crisis_probability = $analysis_data['crisis_probability'] ?? 0.0;
+            
+            $stmt = $this->db->prepare("
+                INSERT INTO news_analysis 
+                (article_id, analysis_data, sentiment, themes, entities, crisis_probability) 
+                VALUES (?, ?, ?, ?, ?, ?)
+                ON DUPLICATE KEY UPDATE 
+                analysis_data = VALUES(analysis_data),
+                sentiment = VALUES(sentiment),
+                themes = VALUES(themes),
+                entities = VALUES(entities),
+                crisis_probability = VALUES(crisis_probability),
+                updated_at = CURRENT_TIMESTAMP
+            ");
+            
+            $analysis_json = json_encode($analysis_data);
+            $stmt->bind_param("issssd", 
+                $article_id, 
+                $analysis_json, 
+                $sentiment, 
+                $themes, 
+                $entities, 
+                $crisis_probability
+            );
+            
+            $stmt->execute();
+            
+            // Update analysis status in news_articles
+            $update_stmt = $this->db->prepare("UPDATE news_articles SET analysis_status = 'analyzed' WHERE id = ?");
+            $update_stmt->bind_param("i", $article_id);
+            $update_stmt->execute();
+            
+            return true;
+            
+        } catch (Exception $e) {
+            error_log("Failed to store analysis for article $article_id: " . $e->getMessage());
+            
+            // Mark analysis as failed
+            $fail_stmt = $this->db->prepare("UPDATE news_articles SET analysis_status = 'failed' WHERE id = ?");
+            $fail_stmt->bind_param("i", $article_id);
+            $fail_stmt->execute();
+            
+            return false;
+        }
+    }
+    
+    /**
+     * Run AI analysis on unanalyzed articles
+     */
+    public function analyzeUnanalyzedArticles() {
+        $unanalyzed = $this->getUnanalyzedArticles(20); // Process in batches
+        $results = [
+            'total_unanalyzed' => count($unanalyzed),
+            'analyzed_count' => 0,
+            'failed_count' => 0,
+            'skipped_count' => 0,
+            'analysis_results' => []
+        ];
+        
+        if (empty($unanalyzed)) {
+            $results['message'] = 'No articles need analysis';
+            return $results;
+        }
+        
+        foreach ($unanalyzed as $article) {
+            // Check if analysis already exists (double-check)
+            if ($this->hasAnalysis($article['id'])) {
+                $results['skipped_count']++;
+                continue;
+            }
+            
+            // Run basic analysis 
+            $analysis_result = $this->runBasicAnalysis($article);
+            
+            if ($analysis_result && !isset($analysis_result['error'])) {
+                // Store successful analysis
+                if ($this->storeAnalysis($article['id'], $analysis_result)) {
+                    $results['analyzed_count']++;
+                    $results['analysis_results'][] = [
+                        'article_id' => $article['id'],
+                        'title' => substr($article['title'], 0, 100) . '...',
+                        'sentiment' => $analysis_result['sentiment'] ?? 'unknown',
+                        'crisis_probability' => $analysis_result['crisis_probability'] ?? 0,
+                        'status' => 'success'
+                    ];
+                } else {
+                    $results['failed_count']++;
+                }
+            } else {
+                $results['failed_count']++;
+            }
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Get unanalyzed articles for AI processing
+     */
+    public function getUnanalyzedArticles($limit = 50) {
+        $stmt = $this->db->prepare("
+            SELECT id, title, content, source, published_date, collected_at
+            FROM news_articles 
+            WHERE analysis_status = 'pending' 
+            ORDER BY collected_at DESC 
+            LIMIT ?
+        ");
+        $stmt->bind_param("i", $limit);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $articles = [];
+        while ($row = $result->fetch_assoc()) {
+            $articles[] = $row;
+        }
+        
+        return $articles;
+    }
+    
+    /**
      * Collect and store news articles
      */
     public function collectAndStoreNews() {
@@ -346,6 +485,106 @@ class DatabaseNewsCollector {
         
         return $articles;
     }
+
+    /**
+     * Run basic analysis on an article using OpenAI
+     */
+    private function runBasicAnalysis($article) {
+        try {
+            // Load OpenAI configuration
+            require_once __DIR__ . '/config.php';
+            $openai_key = getOpenAIKey();
+            
+            if (empty($openai_key)) {
+                throw new Exception('OpenAI API key not configured');
+            }
+            
+            // Prepare analysis prompt
+            $prompt = "Analysoi seuraava uutisartikkeli Hämeen alueen näkökulmasta. Anna analyysi JSON-muodossa:
+
+Artikkeli:
+Otsikko: " . $article['title'] . "
+Sisältö: " . substr($article['content'], 0, 1000) . "
+
+Vastaa JSON-muodossa:
+{
+    \"relevance_score\": 1-10,
+    \"region_impact\": \"korkea/keskitaso/matala\",
+    \"economic_impact\": \"positiivinen/neutraali/negatiivinen\",
+    \"sectors\": [\"lista relevanteista sektoreista\"],
+    \"employment_impact\": \"kuvaus työllisyysvaikutuksista\",
+    \"key_insights\": [\"lista tärkeimmistä havainnoista\"],
+    \"summary\": \"lyhyt yhteenveto\"
+}";
+
+            // Make OpenAI API call
+            $data = [
+                'model' => 'gpt-3.5-turbo',
+                'messages' => [
+                    ['role' => 'system', 'content' => 'Olet Hämeen alueen kehitysasiantuntija. Analysoi uutisia alueen talouden ja työllisyyden näkökulmasta.'],
+                    ['role' => 'user', 'content' => $prompt]
+                ],
+                'max_tokens' => 800,
+                'temperature' => 0.7
+            ];
+
+            $ch = curl_init('https://api.openai.com/v1/chat/completions');
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_POST => true,
+                CURLOPT_POSTFIELDS => json_encode($data),
+                CURLOPT_HTTPHEADER => [
+                    'Content-Type: application/json',
+                    'Authorization: Bearer ' . $openai_key
+                ],
+                CURLOPT_TIMEOUT => 30
+            ]);
+
+            $response = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($http_code !== 200) {
+                throw new Exception('OpenAI API error: HTTP ' . $http_code);
+            }
+
+            $result = json_decode($response, true);
+            
+            if (!isset($result['choices'][0]['message']['content'])) {
+                throw new Exception('Invalid OpenAI response format');
+            }
+
+            $analysis_text = $result['choices'][0]['message']['content'];
+            
+            // Try to extract JSON from the response
+            $json_start = strpos($analysis_text, '{');
+            $json_end = strrpos($analysis_text, '}');
+            
+            if ($json_start !== false && $json_end !== false) {
+                $json_content = substr($analysis_text, $json_start, $json_end - $json_start + 1);
+                $analysis_data = json_decode($json_content, true);
+                
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    return $analysis_data;
+                }
+            }
+            
+            // If JSON parsing fails, return raw analysis
+            return [
+                'raw_analysis' => $analysis_text,
+                'relevance_score' => 5,
+                'region_impact' => 'keskitaso',
+                'summary' => 'Automaattinen analyysi epäonnistui, manuaalinen tarkistus suositeltava'
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'error' => 'Analysis failed: ' . $e->getMessage(),
+                'relevance_score' => 1,
+                'region_impact' => 'matala'
+            ];
+        }
+    }
 }
 
 // Handle requests
@@ -379,12 +618,22 @@ try {
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
             break;
             
+        case 'analyze':
+            $collector = new DatabaseNewsCollector();
+            $result = $collector->analyzeUnanalyzedArticles();
+            echo json_encode([
+                'analysis_result' => $result,
+                'timestamp' => date('Y-m-d H:i:s')
+            ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            break;
+            
         default:
             echo json_encode([
                 'available_actions' => [
                     'collect' => 'Collect and store news articles',
                     'recent' => 'Get recent articles from database',
-                    'stats' => 'Get database statistics'
+                    'stats' => 'Get database statistics',
+                    'analyze' => 'Analyze unanalyzed articles with AI'
                 ],
                 'timestamp' => date('Y-m-d H:i:s')
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
