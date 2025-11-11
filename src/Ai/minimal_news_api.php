@@ -34,6 +34,7 @@ try {
             ];
             break;
             
+            
         case 'alerts':
             // Return same format as the working version
             $result = [
