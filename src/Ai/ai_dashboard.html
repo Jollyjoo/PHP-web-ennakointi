@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI News Intelligence Dashboard - Hämeen ELY-keskus</title>
+    <title>AI News Tulevaisuusluotain Dashboard - Hämeen ELY-keskus</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
@@ -156,16 +156,16 @@
 </head>
 <body>
     <div class="header">
-        <h1>🤖 AI News Intelligence Dashboard</h1>
-        <p>Advanced mediaseuranta analysis for Hämeen ELY-keskus</p>
+        <h1>🤖 AI Tulevaisuusluotain Dashboard</h1>
+        <p>Mediaseuranta analyysi / Hämeen ELY-alue</p>
         <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 4px; margin-top: 10px;">
             <small>
-                📊 <strong>Data Sources:</strong> YLE Häme, Hämeen Sanomat, STT, ELY-keskus press releases | 
-                🧠 <strong>AI Analysis:</strong> OpenAI GPT-4 + rule-based fallbacks | 
-                🔄 <strong>Updates:</strong> Real-time collection and analysis
+                📊 <strong>Data Sources:</strong> YLE Häme, Hämeen Sanomat, STT, ELY-keskus  | 
+                🧠 <strong>AI Analyysi:</strong> OpenAI GPT-4 + rule-based fallbacks | 
+                🔄 <strong>Päivitykset:</strong> Reaaliaikainen kerääminen ja analyysi
             </small>
         </div>
-        <span id="status" class="success">System Active</span>
+        <span id="status" class="success">Järjestelmä aktiivinen</span>
     </div>
 
     <div class="controls">
@@ -184,41 +184,41 @@
         <span class="loading" id="loading">⏳ Processing...</span>
         
         <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
-            <strong>ℹ️ Quick Guide:</strong> 
-            <strong>� Collect to Database</strong> = Production use | 
-            <strong>✅ Toimivuustesti</strong> = Test without saving | 
+            <strong>ℹ️ Pikaopas:</strong> 
+            <strong>💾 Kerää Tietokantaan</strong> = Kerää | 
+            <strong>✅ Toimivuustesti</strong> = Testaus ilman tallennusta | 
             Hover buttons for detailed descriptions.
         </div>
     </div>
 
     <div class="dashboard-grid">
-        <!-- Real-time Alerts -->
+        <!-- Reaaliaikaiset Hälytykset -->
         <div class="widget">
-            <h3>🚨 Real-time Alerts</h3>
+            <h3>🚨 Reaaliaikaiset Hälytykset</h3>
             <div id="alerts-container">
                 <p>Klikkaa "Tarkista Hälytykset" etsiäksesi kriisisignaaleja...</p>
             </div>
         </div>
 
-        <!-- News Volume -->
+        <!-- Uutisten volyymi -->
         <div class="widget">
-            <h3>📈 News Volume Analysis</h3>
+            <h3>📈 Uutisten volyymi</h3>
             <div class="chart-container">
                 <canvas id="volumeChart"></canvas>
             </div>
         </div>
 
-        <!-- Sentiment Analysis -->
+        <!-- Sentimentti-analyysi -->
         <div class="widget">
-            <h3>😊 Sentiment Analysis</h3>
+            <h3>😊 Sentimentti-analyysi</h3>
             <div class="chart-container">
                 <canvas id="sentimentChart"></canvas>
             </div>
         </div>
 
-        <!-- Theme Distribution -->
+        <!-- Teemojen esiintyminen -->
         <div class="widget">
-            <h3>🏷️ Theme Distribution</h3>
+            <h3>🏷️ Teemojen esiintyminen</h3>
             <div class="chart-container">
                 <canvas id="themeChart"></canvas>
             </div>
@@ -226,22 +226,22 @@
 
         <!-- Key Metrics -->
         <div class="widget">
-            <h3>📊 Key Metrics (24h)</h3>
+            <h3>📊 Avainluvut (24h)</h3>
             <div id="metrics-container">
                 <div class="metric">
-                    <span>Articles Processed</span>
+                    <span>Artikkeleita prosessoitu</span>
                     <span class="metric-value" id="articles-count">-</span>
                 </div>
                 <div class="metric">
-                    <span>Crisis Signals</span>
+                    <span>Kriisisignaalit</span>
                     <span class="metric-value" id="crisis-count">-</span>
                 </div>
                 <div class="metric">
-                    <span>High Impact Events</span>
+                    <span>Korkean vaikutuksen tapahtumat</span>
                     <span class="metric-value" id="impact-count">-</span>
                 </div>
                 <div class="metric">
-                    <span>Avg Sentiment Score</span>
+                    <span>Keskimääräiset sentimenttipisteet</span>
                     <span class="metric-value" id="sentiment-avg">-</span>
                 </div>
             </div>
@@ -249,9 +249,9 @@
 
         <!-- Competitive Intelligence -->
         <div class="widget">
-            <h3>🏢 Competitive Intelligence</h3>
+            <h3>🏢 Kilpailija-analyysi</h3>
             <div id="competitive-container">
-                <p>Click "Competitive Intelligence" to analyze market activities...</p>
+                <p>Klikkaa "Kilpailija-analyysi" analysoidaksesi markkinatoimintaa...</p>
             </div>
         </div>
     </div>
