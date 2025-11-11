@@ -595,14 +595,32 @@ class NewsIntelligenceSystem {
 
 // API endpoints
 try {
-    // Simple database connection like mediaseuranta_analyzer.php
-    $db_connection = new mysqli('tulevaisuusluotain.fi', 'catbxjbt_Christian', 'Juustonaksu5', 'catbxjbt_ennakointi');
+    // Try database connection - handle gracefully if not available (local development)
+    $db_connection = null;
+    $database_available = false;
     
-    if ($db_connection->connect_error) {
-        throw new Exception('Database connection failed: ' . $db_connection->connect_error);
+    try {
+        // Check if mysqli class is available
+        if (!class_exists('mysqli')) {
+            throw new Exception('mysqli extension not available');
+        }
+        
+        // Simple database connection like mediaseuranta_analyzer.php
+        $db_connection = new mysqli('tulevaisuusluotain.fi', 'catbxjbt_Christian', 'Juustonaksu5', 'catbxjbt_ennakointi');
+        
+        if ($db_connection->connect_error) {
+            throw new Exception('Database connection failed: ' . $db_connection->connect_error);
+        }
+        
+        $db_connection->set_charset('utf8mb4');
+        $database_available = true;
+        
+    } catch (Exception $e) {
+        // Database not available (likely local development)
+        $db_connection = null;
+        $database_available = false;
+        error_log('Database not available (local development): ' . $e->getMessage());
     }
-    
-    $db_connection->set_charset('utf8mb4');
     
     // Get OpenAI key with fallback like mediaseuranta_analyzer.php
     try {
@@ -613,7 +631,11 @@ try {
         error_log('OpenAI configuration warning: ' . $e->getMessage());
     }
     
-    $intelligence_system = new NewsIntelligenceSystem($db_connection, $openai_api_key);
+    // Only create intelligence system if database is available
+    $intelligence_system = null;
+    if ($database_available) {
+        $intelligence_system = new NewsIntelligenceSystem($db_connection, $openai_api_key);
+    }
     
     $action = $_GET['action'] ?? $_POST['action'] ?? 'status';
     
@@ -623,14 +645,22 @@ try {
             $result = [
                 'status' => 'API Working',
                 'timestamp' => date('Y-m-d H:i:s'),
-                'database_connected' => $db_connection->ping(),
+                'database_connected' => $database_available && $db_connection && $db_connection->ping(),
                 'openai_configured' => !empty($openai_api_key),
-                'config_method' => empty($openai_api_key) ? 'none' : 'configured'
+                'config_method' => empty($openai_api_key) ? 'none' : 'configured',
+                'environment' => $database_available ? 'server' : 'local'
             ];
             break;
             
         case 'weekly_report':
-            if (!$openai_api_key) {
+            if (!$database_available) {
+                $result = [
+                    'error' => 'Database not available',
+                    'message' => 'This feature requires server-side database connection.',
+                    'environment' => 'local_development',
+                    'fallback_available' => false
+                ];
+            } elseif (!$openai_api_key) {
                 $result = [
                     'error' => 'OpenAI API key not configured',
                     'message' => 'Weekly report requires OpenAI integration. Please upload ai_config.json to server.',
@@ -644,12 +674,51 @@ try {
             break;
             
         case 'alerts':
-            $result = $intelligence_system->checkForAlerts();
+            if (!$database_available) {
+                // Provide mock data for local development
+                $result = [
+                    'status' => 'local_development',
+                    'message' => 'Demo data - database not available in local environment',
+                    'alerts' => [
+                        [
+                            'id' => 'demo_1',
+                            'type' => 'trend',
+                            'severity' => 'medium',
+                            'title' => 'Demo: Tekoäly kehitys kiihtyy',
+                            'description' => 'Tämä on demo-hälyytys paikallista kehitysympäristöä varten.',
+                            'timestamp' => date('Y-m-d H:i:s'),
+                            'source' => 'local_demo'
+                        ],
+                        [
+                            'id' => 'demo_2', 
+                            'type' => 'economic',
+                            'severity' => 'low',
+                            'title' => 'Demo: Työmarkkinasignaali',
+                            'description' => 'Demo-data: Uusia työpaikkoja teknologia-alalla.',
+                            'timestamp' => date('Y-m-d H:i:s', strtotime('-1 hour')),
+                            'source' => 'local_demo'
+                        ]
+                    ],
+                    'count' => 2,
+                    'environment' => 'local'
+                ];
+            } else {
+                $result = $intelligence_system->checkForAlerts();
+            }
             break;
             
         case 'competitive_intelligence':
-            $days = $_GET['days'] ?? 30;
-            $result = $intelligence_system->getCompetitiveIntelligence($days);
+            if (!$database_available) {
+                $result = [
+                    'error' => 'Database not available',
+                    'message' => 'This feature requires server-side database connection.',
+                    'environment' => 'local_development',
+                    'fallback_available' => false
+                ];
+            } else {
+                $days = $_GET['days'] ?? 30;
+                $result = $intelligence_system->getCompetitiveIntelligence($days);
+            }
             break;
             
         default:
