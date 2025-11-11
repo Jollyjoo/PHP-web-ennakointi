@@ -371,17 +371,53 @@
                     return;
                 }
                 
-                if (!data || data.length === 0) {
+                // Handle both server response format (direct array) and local development format (object with alerts property)
+                let alertsData = data;
+                if (data.alerts) {
+                    // Local development format - use the alerts array inside the response
+                    alertsData = data.alerts;
+                }
+                
+                // Handle local development status message
+                if (data.status === 'local_development') {
+                    container.innerHTML = `
+                        <div class="alert medium">
+                            <strong>🏠 Paikallinen Kehitysympäristö</strong><br>
+                            ${data.message}<br>
+                            <small>Ympäristö: ${data.environment} | Hälytykset: ${data.count} (demo)</small>
+                        </div>
+                    `;
+                }
+                
+                if (!alertsData || alertsData.length === 0) {
                     container.innerHTML = '<p style="color: #28a745;">✅ Kriittisiä hälytyksiä ei havaittu</p>';
                 } else {
-                    data.forEach(alert => {
+                    alertsData.forEach(alert => {
                         const alertDiv = document.createElement('div');
                         alertDiv.className = `alert ${alert.severity || 'medium'}`;
-                        alertDiv.innerHTML = `
-                            <strong>${alert.type.replace('_', ' ').toUpperCase()}</strong><br>
-                            ${alert.title || 'Alert'}<br>
-                            <small>Todennäköisyys: ${(alert.probability * 100).toFixed(1)}%</small>
+                        
+                        // Handle different alert formats (server vs demo)
+                        let alertContent = `
+                            <strong>${(alert.type || '').replace('_', ' ').toUpperCase()}</strong><br>
+                            ${alert.title || alert.message || 'Alert'}<br>
                         `;
+                        
+                        // Add probability if available (server alerts)
+                        if (alert.probability !== undefined) {
+                            alertContent += `<small>Todennäköisyys: ${(alert.probability * 100).toFixed(1)}%</small>`;
+                        }
+                        
+                        // Add description if available (demo alerts)
+                        if (alert.description) {
+                            alertContent += `<small>${alert.description}</small>`;
+                        }
+                        
+                        // Add timestamp
+                        if (alert.timestamp || alert.detected_at) {
+                            alertContent += `<br><small>Aika: ${alert.timestamp || alert.detected_at}</small>`;
+                        }
+                        
+                        alertDiv.innerHTML = alertContent;
                         container.appendChild(alertDiv);
                     });
                 }
