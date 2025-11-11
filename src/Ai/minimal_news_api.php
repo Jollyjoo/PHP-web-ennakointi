@@ -19,7 +19,7 @@ function getRecentNewsForAlerts($db_connection, $hours = 24, $limit = 5) {
         SELECT id, title, content, published_date 
         FROM news_articles 
         WHERE published_date >= DATE_SUB(NOW(), INTERVAL ? HOUR)
-        AND (ai_analysis_status IS NULL OR ai_analysis_status != 'analyzed')
+        AND (analysis_status IS NULL OR analysis_status != 'analyzed')
         ORDER BY published_date DESC
         LIMIT ?
     ");
@@ -101,8 +101,7 @@ function markArticleAsAnalyzed($db_connection, $article_id, $analysis_data) {
         if ($analysis_stored) {
             $update_stmt = $db_connection->prepare("
                 UPDATE news_articles 
-                SET ai_analysis_status = 'analyzed', 
-                    ai_analyzed_at = NOW() 
+                SET analysis_status = 'analyzed'
                 WHERE id = ?
             ");
             if ($update_stmt) {
