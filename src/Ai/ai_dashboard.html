@@ -171,7 +171,7 @@
     <div class="controls">
         <p>Ulkoiset tietolähteet</p><br>
         <button class="btn" onclick="loadAlerts()" title="Tarkista kriittisiä hälytyksiä ja signaaleja uutisvirrasta, (5 artikkelia kerrallaan)">� Tarkista kriittiset signaalit (OpenAi , limit 5)</button>
-        <button class="btn" onclick="loadWeeklyReport()" title="Luo viikkoraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Viikkoraportti (tietokannasta)</button>
+        <button class="btn" onclick="loadWeeklyReport()" title="Luo viikkoraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Kuukausiraportti (tietokannasta)</button>
         <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi kilpailijoiden ja markkinoiden toimintaa">🔍 Kilpailutiedustelu</button>
         <button class="btn" onclick="runAnalysis()" title="Suorita AI-analyysi ja päivitä visualisoinnit">🧠 Suorita AI-analyysi</button>
         <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutiset YLE:stä ja tallenna tietokantaan">💾 Kerää Tietokantaan</button>
@@ -478,7 +478,7 @@
             
             try {
                 const endDate = new Date().toISOString().split('T')[0];
-                const startDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+                const startDate = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
                 
                 // Get analyzed articles from both news_analysis and mediaseuranta tables
                 const [newsResponse, mediaseurantaResponse] = await Promise.all([
@@ -590,7 +590,7 @@
                 `;
                 
                 document.getElementById('report-modal').style.display = 'block';
-                updateStatus('Viikkoraportti luotu tietokannasta', 'success');
+                updateStatus('Kuukausiraportti luotu tietokannasta', 'success');
                 
             } catch (error) {
                 console.error('Error loading report:', error);
@@ -687,7 +687,7 @@
         
         function generateExecutiveSummary(totalArticles, sentimentStats, sectorStats, crisisStats) {
             if (totalArticles === 0) {
-                return `<p>Ei analysoitua dataa valitulta ajanjaksolta. Suorita ensin artikkelien analyysi.</p>`;
+                return `<p>Ei analysoitua dataa valitulta kuukaudelta. Suorita ensin artikkelien analyysi.</p>`;
             }
             
             const dominantSentiment = Object.entries(sentimentStats)
@@ -705,7 +705,7 @@
             const crisisPercentage = ((totalCrisis / totalArticles) * 100).toFixed(1);
             
             return `
-                <p><strong>Viikon aikana analysoitiin yhteensä ${totalArticles} artikkelia.</strong></p>
+                <p><strong>Kuukauden aikana analysoitiin yhteensä ${totalArticles} artikkelia.</strong></p>
                 <p>Yleinen tunnelma oli <strong>${sentimentText}</strong> 
                    (${sentimentStats.positive} positiivista, ${sentimentStats.neutral} neutraalia, ${sentimentStats.negative} negatiivista).</p>
                 <p>Aktiivisimmat toimialat olivat: <strong>${topSectors}</strong>.</p>
