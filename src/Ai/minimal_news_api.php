@@ -35,7 +35,256 @@ function getRecentNewsForAlerts($db_connection, $hours = 24, $limit = 5) {
     return $result->fetch_all(MYSQLI_ASSOC);
 }
 
-// Helper function for simple crisis detection
+// Helper function for comprehensive analysis like mediaseuranta_analyzer
+function runComprehensiveAnalysis($article, $openai_key = null) {
+    if ($openai_key) {
+        return runOpenAIAnalysis($article, $openai_key);
+    } else {
+        return runRuleBasedAnalysis($article);
+    }
+}
+
+// Helper function for OpenAI-powered analysis
+function runOpenAIAnalysis($article, $openai_key) {
+    try {
+        // Prepare analysis prompt like mediaseuranta_analyzer
+        $prompt = "Analysoi tämä uutisartikkeli Hämeen alueen näkökulmasta. Anna analyysi JSON-muodossa:
+
+Otsikko: {$article['title']}
+Päivämäärä: {$article['published_date']}
+Sisältö: " . substr($article['content'], 0, 1500) . "...
+
+Vastaa JSON-muodossa:
+{
+    \"relevance_score\": 1-10,
+    \"economic_impact\": \"positive/neutral/negative\",
+    \"employment_impact\": \"kuvaus työllisyysvaikutuksista\",
+    \"key_sectors\": [\"lista relevanteista sektoreista\"],
+    \"sentiment\": \"positive/neutral/negative\",
+    \"crisis_probability\": 0.0-1.0,
+    \"summary\": \"lyhyt yhteenveto (max 200 merkkiä)\",
+    \"keywords\": [\"lista avainsanoista\"],
+    \"regional_significance\": \"merkitys Hämeen alueelle\",
+    \"long_term_impact\": \"pitkän aikavälin vaikutukset\"
+}";
+
+        // Make OpenAI API call
+        $data = [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                ['role' => 'system', 'content' => 'Olet Hämeen alueen kehitysasiantuntija. Analysoi uutisia alueen talouden ja työllisyyden näkökulmasta.'],
+                ['role' => 'user', 'content' => $prompt]
+            ],
+            'max_tokens' => 700,
+            'temperature' => 0.7
+        ];
+
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => json_encode($data),
+            CURLOPT_HTTPHEADER => [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $openai_key
+            ],
+            CURLOPT_TIMEOUT => 30
+        ]);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code !== 200) {
+            throw new Exception('OpenAI API error: HTTP ' . $http_code);
+        }
+
+        $result = json_decode($response, true);
+        
+        if (!isset($result['choices'][0]['message']['content'])) {
+            throw new Exception('Invalid OpenAI response format');
+        }
+
+        $analysis_text = $result['choices'][0]['message']['content'];
+        
+        // Try to extract JSON from the response
+        $json_start = strpos($analysis_text, '{');
+        $json_end = strrpos($analysis_text, '}');
+        
+        if ($json_start !== false && $json_end !== false) {
+            $json_content = substr($analysis_text, $json_start, $json_end - $json_start + 1);
+            $analysis_data = json_decode($json_content, true);
+            
+            if (json_last_error() === JSON_ERROR_NONE) {
+                return $analysis_data;
+            }
+        }
+        
+        // If JSON parsing fails, return structured fallback
+        return [
+            'raw_analysis' => $analysis_text,
+            'relevance_score' => 5,
+            'economic_impact' => 'neutral',
+            'summary' => 'OpenAI analyysi epäonnistui, käytetään varasuunnitelmaa',
+            'error_note' => 'JSON parsing failed'
+        ];
+        
+    } catch (Exception $e) {
+        return [
+            'error' => 'OpenAI Analysis failed: ' . $e->getMessage(),
+            'relevance_score' => 1,
+            'economic_impact' => 'neutral'
+        ];
+    }
+}
+
+// Helper function for rule-based analysis (fallback when no OpenAI)
+function runRuleBasedAnalysis($article) {
+    $text = strtolower($article['title'] . ' ' . $article['content']);
+    
+    // Economic impact keywords
+    $positive_economic = ['kasvu', 'investointi', 'rahoitus', 'työllistää', 'uusia työpaikkoja', 'menestys', 'voitto', 'kannattava'];
+    $negative_economic = ['irtisanominen', 'lomautus', 'konkurssi', 'sulkeminen', 'kriisi', 'laskusuhdanne', 'työttömyys'];
+    
+    // Sector keywords
+    $sectors = [
+        'teknologia' => ['teknologia', 'IT', 'digitalisaatio', 'tekoäly', 'ohjelmisto', 'data'],
+        'teollisuus' => ['teollisuus', 'tuotanto', 'tehdas', 'valmistus', 'metalliteollisuus'],
+        'palvelut' => ['palvelut', 'kauppa', 'matkailu', 'ravintola', 'hotelli'],
+        'koulutus' => ['koulutus', 'opiskelu', 'yliopisto', 'ammattikoulu', 'tutkimus'],
+        'terveydenhuolto' => ['terveydenhuolto', 'sairaala', 'lääkäri', 'hoitaja'],
+        'liikenne' => ['liikenne', 'kuljetus', 'logistiikka', 'rautatie', 'lentokenttä']
+    ];
+    
+    // Crisis keywords
+    $crisis_keywords = [
+        'high' => ['kriisi', 'katastrofi', 'romahdus', 'konkurssi', 'sulkeminen', 'irtisanominen'],
+        'medium' => ['ongelma', 'vaikeudet', 'laskusuhdanne', 'supistus', 'työttömyys'],
+        'low' => ['haaste', 'muutos', 'epävarmuus', 'lasku']
+    ];
+    
+    // Calculate scores
+    $economic_score = 0;
+    foreach ($positive_economic as $word) {
+        if (strpos($text, $word) !== false) $economic_score++;
+    }
+    foreach ($negative_economic as $word) {
+        if (strpos($text, $word) !== false) $economic_score--;
+    }
+    
+    // Determine economic impact
+    $economic_impact = $economic_score > 0 ? 'positive' : ($economic_score < 0 ? 'negative' : 'neutral');
+    $sentiment = $economic_impact; // Simple mapping
+    
+    // Find relevant sectors
+    $relevant_sectors = [];
+    foreach ($sectors as $sector => $keywords) {
+        foreach ($keywords as $keyword) {
+            if (strpos($text, $keyword) !== false) {
+                $relevant_sectors[] = $sector;
+                break;
+            }
+        }
+    }
+    
+    // Calculate crisis probability
+    $crisis_probability = 0.0;
+    foreach ($crisis_keywords as $level => $keywords) {
+        foreach ($keywords as $keyword) {
+            if (strpos($text, $keyword) !== false) {
+                $crisis_probability = match($level) {
+                    'high' => 0.8,
+                    'medium' => 0.6,
+                    'low' => 0.3,
+                    default => 0.0
+                };
+                break 2;
+            }
+        }
+    }
+    
+    // Extract keywords (simple approach)
+    $keywords = [];
+    $title_words = explode(' ', strtolower($article['title']));
+    foreach ($title_words as $word) {
+        $word = trim($word, '.,!?;:()[]');
+        if (strlen($word) > 4) { // Only longer words
+            $keywords[] = $word;
+        }
+    }
+    $keywords = array_slice(array_unique($keywords), 0, 5); // Max 5 keywords
+    
+    // Generate employment impact description
+    $employment_impact = '';
+    if ($economic_score > 0) {
+        $employment_impact = 'Positiivinen vaikutus työllisyyteen odotettavissa';
+    } elseif ($economic_score < 0) {
+        $employment_impact = 'Mahdollisia negatiivisia vaikutuksia työllisyyteen';
+    } else {
+        $employment_impact = 'Ei merkittäviä suoria vaikutuksia työllisyyteen';
+    }
+    
+    return [
+        'relevance_score' => min(10, max(1, 5 + $economic_score)),
+        'economic_impact' => $economic_impact,
+        'employment_impact' => $employment_impact,
+        'key_sectors' => $relevant_sectors,
+        'sentiment' => $sentiment,
+        'crisis_probability' => $crisis_probability,
+        'summary' => substr($article['title'], 0, 150) . (strlen($article['title']) > 150 ? '...' : ''),
+        'keywords' => $keywords,
+        'regional_significance' => empty($relevant_sectors) ? 'Alueellinen merkitys arvioitavana' : 'Merkitystä sektoreille: ' . implode(', ', $relevant_sectors),
+        'long_term_impact' => $crisis_probability > 0.5 ? 'Seurantaa vaativa tilanne' : 'Normaali kehitys',
+        'analysis_method' => 'rule_based'
+    ];
+}
+
+// Helper function to store comprehensive analysis like mediaseuranta_analyzer
+function storeComprehensiveAnalysis($db_connection, $article_id, $analysis_data) {
+    if (!$db_connection) {
+        return false;
+    }
+    
+    try {
+        // Store full analysis in news_analysis table (JSON format)
+        $stmt = $db_connection->prepare("
+            INSERT INTO news_analysis (article_id, analysis_data, created_at) 
+            VALUES (?, ?, NOW())
+            ON DUPLICATE KEY UPDATE 
+            analysis_data = VALUES(analysis_data), 
+            updated_at = NOW()
+        ");
+        
+        if ($stmt) {
+            $full_analysis_json = json_encode($analysis_data);
+            $stmt->bind_param("is", $article_id, $full_analysis_json);
+            $analysis_stored = $stmt->execute();
+            
+            // Mark article as analyzed to prevent duplicate processing
+            if ($analysis_stored) {
+                $update_stmt = $db_connection->prepare("
+                    UPDATE news_articles 
+                    SET ai_analysis_status = 'analyzed', 
+                        ai_analyzed_at = NOW() 
+                    WHERE id = ?
+                ");
+                if ($update_stmt) {
+                    $update_stmt->bind_param("i", $article_id);
+                    $update_stmt->execute();
+                }
+            }
+            
+            return $analysis_stored;
+        }
+    } catch (Exception $e) {
+        error_log('Failed to store comprehensive analysis: ' . $e->getMessage());
+        return false;
+    }
+    
+    return false;
+}
+
+// Helper function for simple crisis detection (kept for backward compatibility)
 function detectCrisisSignals($text) {
     $crisis_keywords = [
         'high' => ['kriisi', 'katastrofi', 'romahdus', 'konkurssi', 'sulkeminen'],
@@ -191,45 +440,58 @@ try {
                     foreach ($recent_news as $article) {
                         $processed_count++;
                         
-                        // Analyze for crisis signals
-                        $crisis_signals = detectCrisisSignals($article['content']);
+                        // Run comprehensive analysis like mediaseuranta_analyzer
+                        $comprehensive_analysis = runComprehensiveAnalysis($article, $openai_api_key);
                         
-                        // Store analysis results and mark as analyzed
-                        $analysis_data = [
-                            'article_id' => $article['id'],
-                            'crisis_analysis' => $crisis_signals,
-                            'analyzed_for' => 'alerts',
-                            'processed_at' => date('Y-m-d H:i:s'),
-                            'api_version' => 'working_minimal'
-                        ];
+                        // Store comprehensive analysis results
+                        storeComprehensiveAnalysis($db_connection, $article['id'], $comprehensive_analysis);
                         
-                        markArticleAsAnalyzed($db_connection, $article['id'], $analysis_data);
+                        // Generate alert based on comprehensive analysis
+                        $crisis_probability = $comprehensive_analysis['crisis_probability'] ?? 0.0;
+                        $relevance_score = $comprehensive_analysis['relevance_score'] ?? 5;
                         
-                        // Generate alert if crisis probability is high enough
-                        if ($crisis_signals['crisis_probability'] > 0.4) { // Lower threshold for demo
+                        // Generate alert if crisis probability is high enough OR high relevance
+                        if ($crisis_probability > 0.4 || $relevance_score >= 8) {
+                            $alert_type = $crisis_probability > 0.6 ? 'crisis_detected' : 'high_relevance';
+                            
                             $high_priority_alerts[] = [
-                                'type' => 'crisis_detected',
+                                'type' => $alert_type,
                                 'article_id' => $article['id'],
                                 'title' => $article['title'],
-                                'probability' => $crisis_signals['crisis_probability'],
-                                'crisis_type' => $crisis_signals['crisis_type'],
-                                'severity' => $crisis_signals['severity'],
-                                'keywords_found' => $crisis_signals['keywords_found'],
-                                'recommended_actions' => $crisis_signals['mitigation_strategies'],
+                                'probability' => $crisis_probability,
+                                'relevance_score' => $relevance_score,
+                                'economic_impact' => $comprehensive_analysis['economic_impact'] ?? 'neutral',
+                                'employment_impact' => $comprehensive_analysis['employment_impact'] ?? '',
+                                'key_sectors' => $comprehensive_analysis['key_sectors'] ?? [],
+                                'sentiment' => $comprehensive_analysis['sentiment'] ?? 'neutral',
+                                'summary' => $comprehensive_analysis['summary'] ?? '',
+                                'keywords' => $comprehensive_analysis['keywords'] ?? [],
+                                'severity' => $crisis_probability > 0.6 ? 'high' : ($crisis_probability > 0.3 ? 'medium' : 'low'),
                                 'detected_at' => date('Y-m-d H:i:s'),
-                                'source' => 'ai_analysis'
+                                'source' => 'comprehensive_ai_analysis',
+                                'analysis_method' => $comprehensive_analysis['analysis_method'] ?? 'unknown'
                             ];
                         }
                     }
                     
                     $result = [
                         'status' => 'analysis_complete',
-                        'message' => "Analyzed $processed_count recent articles",
+                        'message' => "Comprehensive analysis completed for $processed_count recent articles",
                         'alerts' => $high_priority_alerts,
                         'count' => count($high_priority_alerts),
                         'processed_articles' => $processed_count,
                         'environment' => 'server',
-                        'analysis_method' => 'rule_based_crisis_detection'
+                        'analysis_method' => $openai_api_key ? 'openai_comprehensive' : 'rule_based_comprehensive',
+                        'features' => [
+                            'relevance_scoring',
+                            'economic_impact_analysis',
+                            'employment_impact_assessment',
+                            'sector_identification',
+                            'sentiment_analysis',
+                            'crisis_probability_assessment',
+                            'keyword_extraction',
+                            'comprehensive_storage'
+                        ]
                     ];
                     
                 } catch (Exception $e) {
