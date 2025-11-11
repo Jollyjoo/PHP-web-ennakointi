@@ -176,8 +176,8 @@
         <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutiset YLE:stä ja tallenna tietokantaan">💾 Kerää Tietokantaan</button>
         <button class="btn" onclick="viewStoredNews()" style="background: #6f42c1;" title="Näytä tietokantaan tallennetut uutiset">📰 Näytä Tallennetut</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Toimivuustesti</button>
-        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennetut uutiset AI:lla erissä (5 artikkelia kerrallaan)">🤖 Analysoi Artikkeleita</button>
-        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältö AI:lla">📰 Analysoi Mediaseuranta</button>
+        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennetut uutiset AI:lla erissä (5 artikkelia kerrallaan)">🤖 Analysoi Artikkeleita (OpenAi)</button>
+        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältö AI:lla">📰 Analysoi Mediaseuranta (OpenAi)</button>
         <button class="btn" onclick="viewMediaseurantaInsights()" style="background: #34495e;" title="Näytä Mediaseurannan AI-analyysien tulokset">📊 Mediaseurannan Tulokset</button>
         <button class="btn" onclick="debugMediaseuranta()" style="background: #e74c3c;" title="Testaa Mediaseuranta-taulun yhteyttä ja rakennetta">🔧 Debuggaa Mediaseuranta</button>
         <button class="btn" onclick="testMediaseuranta()" style="background: #f39c12;" title="Testaa datan hakemista Mediaseuranta-taulusta">🧪 Testaa Dataa</button>
@@ -489,6 +489,143 @@
             document.getElementById('crisis-count').textContent = Math.floor(Math.random() * 5);
             document.getElementById('impact-count').textContent = Math.floor(Math.random() * 10);
             document.getElementById('sentiment-avg').textContent = (Math.random() * 0.4 + 0.3).toFixed(2);
+        }
+
+        // Update charts with Mediaseuranta AI analysis data
+        function updateChartsWithMediaseurantaData(insights) {
+            // Update Volume Chart with entry frequency over time
+            updateVolumeChartWithMediaseuranta(insights);
+            
+            // Update Sentiment Chart with AI sentiment analysis
+            updateSentimentChartWithMediaseuranta(insights);
+            
+            // Update Theme Chart with AI key sectors
+            updateThemeChartWithMediaseuranta(insights);
+        }
+
+        function updateVolumeChartWithMediaseuranta(insights) {
+            // Group entries by date and count frequency
+            const dateCount = {};
+            insights.forEach(entry => {
+                const date = entry.uutisen_pvm ? entry.uutisen_pvm.split(' ')[0] : 'Unknown';
+                dateCount[date] = (dateCount[date] || 0) + 1;
+            });
+            
+            // Get dates from last 3 months instead of just 7 days (for Mediaseuranta data)
+            const allDates = Object.keys(dateCount).sort();
+            const threeMonthsAgo = new Date();
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            
+            // Filter dates to last 3 months and take up to 20 most recent dates
+            const recentDates = allDates.filter(date => {
+                try {
+                    const entryDate = new Date(date);
+                    return entryDate >= threeMonthsAgo;
+                } catch (e) {
+                    return false; // Skip invalid dates
+                }
+            }).slice(-20); // Show max 20 data points for readability
+            
+            const volumes = recentDates.map(date => dateCount[date] || 0);
+            
+            // Format dates for display (shorter format for 3 months of data)
+            const displayDates = recentDates.map(date => {
+                try {
+                    const d = new Date(date);
+                    return d.toLocaleDateString('fi', { 
+                        month: 'short', 
+                        day: 'numeric'
+                    });
+                } catch (e) {
+                    return date;
+                }
+            });
+            
+            volumeChart.data.labels = displayDates.length > 0 ? displayDates : ['No Data'];
+            volumeChart.data.datasets[0].data = volumes.length > 0 ? volumes : [0];
+            volumeChart.data.datasets[0].label = 'Mediaseuranta Entries (3 months)';
+            volumeChart.update();
+        }
+
+        function updateSentimentChartWithMediaseuranta(insights) {
+            // Count sentiment distribution from AI analysis
+            let positive = 0, neutral = 0, negative = 0;
+            
+            insights.forEach(entry => {
+                const sentiment = (entry.ai_sentiment || '').toLowerCase();
+                if (sentiment.includes('positive') || sentiment.includes('myönteinen')) {
+                    positive++;
+                } else if (sentiment.includes('negative') || sentiment.includes('kielteinen')) {
+                    negative++;
+                } else {
+                    neutral++;
+                }
+            });
+            
+            // If no data, show equal distribution
+            if (positive + neutral + negative === 0) {
+                positive = neutral = negative = 1;
+            }
+            
+            sentimentChart.data.labels = ['Positive', 'Neutral', 'Negative'];
+            sentimentChart.data.datasets[0].data = [positive, neutral, negative];
+            sentimentChart.update();
+        }
+
+        function updateThemeChartWithMediaseuranta(insights) {
+            // Count key sectors frequency from AI analysis
+            const sectorCount = {};
+            
+            insights.forEach(entry => {
+                if (entry.ai_key_sectors_parsed && Array.isArray(entry.ai_key_sectors_parsed)) {
+                    entry.ai_key_sectors_parsed.forEach(sector => {
+                        const cleanSector = sector.trim();
+                        if (cleanSector) {
+                            sectorCount[cleanSector] = (sectorCount[cleanSector] || 0) + 1;
+                        }
+                    });
+                }
+            });
+            
+            // Get top 5 sectors
+            const sortedSectors = Object.entries(sectorCount)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5);
+            
+            if (sortedSectors.length > 0) {
+                themeChart.data.labels = sortedSectors.map(([sector]) => sector);
+                themeChart.data.datasets[0].data = sortedSectors.map(([,count]) => count);
+                themeChart.data.datasets[0].label = 'Sector Frequency';
+            } else {
+                // Fallback data
+                themeChart.data.labels = ['No Sector Data'];
+                themeChart.data.datasets[0].data = [0];
+                themeChart.data.datasets[0].label = 'Sector Frequency';
+            }
+            
+            themeChart.update();
+        }
+
+        function updateMetricsWithMediaseurantaData(insights) {
+            // Update metrics with real Mediaseuranta data
+            document.getElementById('articles-count').textContent = insights.length;
+            
+            // Count high-impact entries (relevance >= 8)
+            const highImpact = insights.filter(entry => entry.ai_relevance_score >= 8).length;
+            document.getElementById('impact-count').textContent = highImpact;
+            
+            // Count crisis-related entries (high relevance + negative sentiment)
+            const crisisSignals = insights.filter(entry => 
+                entry.ai_relevance_score >= 7 && 
+                (entry.ai_sentiment || '').toLowerCase().includes('negative')
+            ).length;
+            document.getElementById('crisis-count').textContent = crisisSignals;
+            
+            // Calculate average relevance score
+            const avgRelevance = insights.length > 0 
+                ? (insights.reduce((sum, entry) => sum + (entry.ai_relevance_score || 0), 0) / insights.length / 10).toFixed(2)
+                : '0.00';
+            document.getElementById('sentiment-avg').textContent = avgRelevance;
         }
 
         // Utility functions
@@ -995,6 +1132,10 @@
                     const insights = data.mediaseuranta_insights;
                     updateStatus(`✅ Loaded ${insights.length} analyzed Mediaseuranta entries`, 'success');
                     
+                    // Update charts with Mediaseuranta data
+                    updateChartsWithMediaseurantaData(insights);
+                    updateMetricsWithMediaseurantaData(insights);
+                    
                     const alertsContainer = document.getElementById('alerts-container');
                     alertsContainer.innerHTML = `
                         <h4>📊 Mediaseuranta AI Insights</h4>
@@ -1009,6 +1150,14 @@
                             </div>
                         `;
                     } else {
+                        alertsContainer.innerHTML += `
+                            <div class="alert medium" style="background: #e7f3ff; border-color: #0066cc;">
+                                <strong>📈 Charts Updated!</strong><br>
+                                Charts now display Mediaseuranta analysis data: sentiment distribution, sector frequency, and regional trends.<br>
+                                <small>Data from ${insights.length} analyzed entries with relevance ≥5</small>
+                            </div>
+                        `;
+                        
                         insights.slice(0, 10).forEach(entry => {
                             const sectors = entry.ai_key_sectors_parsed ? entry.ai_key_sectors_parsed.slice(0, 3).join(', ') : 'N/A';
                             const keywords = entry.ai_keywords_parsed ? entry.ai_keywords_parsed.slice(0, 5).join(', ') : 'N/A';
