@@ -5,46 +5,8 @@ ini_set('display_errors', 0); // Don't display errors as HTML
 
 header('Content-Type: application/json; charset=utf-8');
 
-// Try to load config with error handling
-try {
-    if (file_exists('config.php')) {
-        require_once 'config.php';
-    } else {
-        // Fallback configuration if config.php not found
-        function getOpenAIKey() {
-            // Try environment variable first
-            $api_key = getenv('OPENAI_API_KEY');
-            if ($api_key) {
-                return $api_key;
-            }
-            
-            // Try JSON config file
-            $config_file = __DIR__ . '/ai_config.json';
-            if (file_exists($config_file)) {
-                $config = json_decode(file_get_contents($config_file), true);
-                if (isset($config['openai_api_key'])) {
-                    return $config['openai_api_key'];
-                }
-            }
-            
-            return null; // Return null instead of throwing error
-        }
-        
-        function getDatabaseConfig() {
-            return [
-                'host' => 'tulevaisuusluotain.fi',
-                'username' => 'catbxjbt_Christian',
-                'password' => 'Juustonaksu5',
-                'database' => 'catbxjbt_ennakointi',
-                'charset' => 'utf8mb4'
-            ];
-        }
-    }
-} catch (Exception $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'Configuration error: ' . $e->getMessage()]);
-    exit;
-}
+// Use same simple config approach as mediaseuranta_analyzer.php
+require_once 'config.php';
 
 /**
  * Advanced AI-Powered News Monitoring System
@@ -633,24 +595,18 @@ class NewsIntelligenceSystem {
 
 // API endpoints
 try {
-    // Get secure configuration with error handling
-    try {
-        $db_config = getDatabaseConfig();
-        $db_connection = new mysqli($db_config['host'], $db_config['username'], $db_config['password'], $db_config['database']);
-        $db_connection->set_charset($db_config['charset']);
-        
-        if ($db_connection->connect_error) {
-            throw new Exception('Database connection failed: ' . $db_connection->connect_error);
-        }
-    } catch (Exception $e) {
-        throw new Exception('Database configuration error: ' . $e->getMessage());
+    // Simple database connection like mediaseuranta_analyzer.php
+    $db_connection = new mysqli('tulevaisuusluotain.fi', 'catbxjbt_Christian', 'Juustonaksu5', 'catbxjbt_ennakointi');
+    
+    if ($db_connection->connect_error) {
+        throw new Exception('Database connection failed: ' . $db_connection->connect_error);
     }
     
+    $db_connection->set_charset('utf8mb4');
+    
+    // Get OpenAI key with fallback like mediaseuranta_analyzer.php
     try {
         $openai_api_key = getOpenAIKey();
-        if (!$openai_api_key) {
-            throw new Exception('OpenAI API key not configured. Please set up ai_config.json or environment variable.');
-        }
     } catch (Exception $e) {
         // Continue without OpenAI - system will use fallback methods
         $openai_api_key = null;
