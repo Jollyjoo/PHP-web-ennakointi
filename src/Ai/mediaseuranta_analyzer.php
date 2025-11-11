@@ -400,6 +400,131 @@ Vastaa JSON-muodossa:
             throw new Exception('Failed to fetch analyzed entries: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Get weekly insights for analyzed Mediaseuranta entries within date range
+     */
+    public function getWeeklyInsights($start_date, $end_date, $min_relevance = 3) {
+        try {
+            $start_datetime = $start_date . ' 00:00:00';
+            $end_datetime = $end_date . ' 23:59:59';
+            
+            $stmt = $this->db->prepare("
+                SELECT *, 
+                    CASE WHEN Maakunta_ID = 1 THEN 'Päijät-Häme' ELSE 'Kanta-Häme' END as Maakunta_Nimi
+                FROM Mediaseuranta 
+                WHERE ai_analysis_status = 'completed' 
+                AND ai_relevance_score >= ?
+                AND uutisen_pvm >= ? AND uutisen_pvm <= ?
+                ORDER BY ai_relevance_score DESC, uutisen_pvm DESC
+            ");
+            
+            $stmt->bind_param("iss", $min_relevance, $start_datetime, $end_datetime);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $insights = [];
+            while ($row = $result->fetch_assoc()) {
+                // Parse JSON fields for dashboard compatibility
+                if ($row['ai_key_sectors']) {
+                    $row['ai_key_sectors_parsed'] = json_decode($row['ai_key_sectors'], true);
+                }
+                if ($row['ai_keywords']) {
+                    $row['ai_keywords_parsed'] = json_decode($row['ai_keywords'], true);
+                }
+                
+                // Add compatible field mappings for dashboard
+                $row['sentiment'] = $row['ai_sentiment'];
+                $row['themes'] = $row['ai_key_sectors'];
+                $row['entities'] = $row['ai_keywords'];
+                $row['crisis_probability'] = $row['ai_crisis_probability'];
+                
+                $insights[] = $row;
+            }
+            
+            // Calculate summary statistics
+            $stats = [
+                'total' => count($insights),
+                'date_range' => [
+                    'start' => $start_date,
+                    'end' => $end_date
+                ],
+                'sentiment_distribution' => [
+                    'positive' => 0,
+                    'neutral' => 0,
+                    'negative' => 0
+                ],
+                'avg_relevance_score' => 0,
+                'crisis_levels' => [
+                    'high' => 0,
+                    'medium' => 0,
+                    'low' => 0
+                ],
+                'top_themes' => []
+            ];
+            
+            // Calculate statistics
+            if (!empty($insights)) {
+                $relevance_sum = 0;
+                $theme_count = [];
+                
+                foreach ($insights as $insight) {
+                    // Count sentiment
+                    $sentiment = strtolower($insight['ai_sentiment'] ?? 'neutral');
+                    if (strpos($sentiment, 'positive') !== false || strpos($sentiment, 'myönteinen') !== false) {
+                        $stats['sentiment_distribution']['positive']++;
+                    } elseif (strpos($sentiment, 'negative') !== false || strpos($sentiment, 'kielteinen') !== false) {
+                        $stats['sentiment_distribution']['negative']++;
+                    } else {
+                        $stats['sentiment_distribution']['neutral']++;
+                    }
+                    
+                    // Sum relevance scores
+                    $relevance_sum += $insight['ai_relevance_score'] ?? 0;
+                    
+                    // Count crisis levels
+                    $crisis_prob = $insight['ai_crisis_probability'] ?? 0;
+                    if ($crisis_prob > 0.7) {
+                        $stats['crisis_levels']['high']++;
+                    } elseif ($crisis_prob > 0.3) {
+                        $stats['crisis_levels']['medium']++;
+                    } else {
+                        $stats['crisis_levels']['low']++;
+                    }
+                    
+                    // Count themes
+                    if ($insight['ai_key_sectors_parsed'] && is_array($insight['ai_key_sectors_parsed'])) {
+                        foreach ($insight['ai_key_sectors_parsed'] as $theme) {
+                            $theme = trim($theme);
+                            if ($theme) {
+                                $theme_count[$theme] = ($theme_count[$theme] ?? 0) + 1;
+                            }
+                        }
+                    }
+                }
+                
+                $stats['avg_relevance_score'] = round($relevance_sum / count($insights), 2);
+                
+                // Get top 5 themes
+                arsort($theme_count);
+                $stats['top_themes'] = array_slice($theme_count, 0, 5, true);
+            }
+            
+            return [
+                'insights' => $insights,
+                'stats' => $stats,
+                'success' => true
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'error' => 'Failed to get weekly insights: ' . $e->getMessage(),
+                'insights' => [],
+                'stats' => ['total' => 0],
+                'success' => false
+            ];
+        }
+    }
 }
 
 // Handle API requests
@@ -516,6 +641,15 @@ try {
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
             break;
             
+        case 'weekly_insights':
+            $analyzer = new MediaseurantaAnalyzer();
+            $start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-7 days'));
+            $end_date = $_GET['end_date'] ?? date('Y-m-d');
+            $min_relevance = $_GET['min_relevance'] ?? 3;
+            $result = $analyzer->getWeeklyInsights($start_date, $end_date, $min_relevance);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            break;
+            
         default:
             echo json_encode([
                 'available_actions' => [
@@ -523,7 +657,8 @@ try {
                     'test' => 'Test basic data retrieval from Mediaseuranta',
                     'analyze' => 'Analyze unanalyzed Mediaseuranta entries with AI',
                     'stats' => 'Get analysis statistics',
-                    'insights' => 'Get analyzed entries with insights'
+                    'insights' => 'Get analyzed entries with insights',
+                    'weekly_insights' => 'Get weekly insights for analyzed entries within date range (supports start_date, end_date, min_relevance parameters)'
                 ],
                 'timestamp' => date('Y-m-d H:i:s')
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);

@@ -504,6 +504,140 @@ class DatabaseNewsCollector {
     }
 
     /**
+     * Get weekly statistics and analyzed articles for reporting
+     */
+    public function getWeeklyStats($start_date, $end_date) {
+        try {
+            // Get analyzed articles within the date range
+            $stmt = $this->db->prepare("
+                SELECT 
+                    na.id,
+                    na.title,
+                    na.content,
+                    na.source,
+                    na.published_date,
+                    na.collected_at,
+                    nana.analysis_data,
+                    nana.sentiment,
+                    nana.themes,
+                    nana.entities,
+                    nana.crisis_probability,
+                    nana.created_at as analysis_date,
+                    na.region_relevance
+                FROM news_articles na
+                LEFT JOIN news_analysis nana ON na.id = nana.article_id
+                WHERE na.collected_at >= ? AND na.collected_at <= ?
+                AND na.analysis_status = 'analyzed'
+                ORDER BY na.collected_at DESC
+            ");
+            
+            $start_datetime = $start_date . ' 00:00:00';
+            $end_datetime = $end_date . ' 23:59:59';
+            $stmt->bind_param("ss", $start_datetime, $end_datetime);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            $analyzed_articles = [];
+            while ($row = $result->fetch_assoc()) {
+                // Parse JSON fields
+                $analysis_data = $row['analysis_data'] ? json_decode($row['analysis_data'], true) : null;
+                $themes = $row['themes'] ? json_decode($row['themes'], true) : [];
+                $entities = $row['entities'] ? json_decode($row['entities'], true) : [];
+                
+                // Format for dashboard consumption
+                $article = [
+                    'id' => $row['id'],
+                    'title' => $row['title'],
+                    'content' => substr($row['content'], 0, 300) . '...',
+                    'source' => $row['source'],
+                    'published_date' => $row['published_date'],
+                    'collected_at' => $row['collected_at'],
+                    'analysis_date' => $row['analysis_date'],
+                    // Sentiment data
+                    'sentiment' => $row['sentiment'],
+                    'ai_sentiment' => $row['sentiment'],
+                    // Sectors/themes data 
+                    'themes' => $row['themes'],
+                    'ai_key_sectors_parsed' => $themes,
+                    // Entities/keywords
+                    'entities' => $row['entities'],
+                    'ai_keywords_parsed' => $entities,
+                    // Crisis probability
+                    'crisis_probability' => $row['crisis_probability'],
+                    'ai_crisis_probability' => $row['crisis_probability'],
+                    // Region relevance
+                    'region_relevance' => $row['region_relevance'],
+                    // Full analysis data
+                    'analysis_data' => $analysis_data
+                ];
+                
+                $analyzed_articles[] = $article;
+            }
+            
+            // Calculate summary statistics
+            $stats = [
+                'total' => count($analyzed_articles),
+                'date_range' => [
+                    'start' => $start_date,
+                    'end' => $end_date
+                ],
+                'sources' => [],
+                'sentiment_distribution' => [
+                    'positive' => 0,
+                    'neutral' => 0,
+                    'negative' => 0
+                ],
+                'crisis_levels' => [
+                    'high' => 0,
+                    'medium' => 0,
+                    'low' => 0
+                ]
+            ];
+            
+            // Calculate statistics
+            foreach ($analyzed_articles as $article) {
+                // Count by source
+                $source = $article['source'];
+                $stats['sources'][$source] = ($stats['sources'][$source] ?? 0) + 1;
+                
+                // Count sentiment
+                $sentiment = strtolower($article['sentiment'] ?? 'neutral');
+                if (strpos($sentiment, 'positive') !== false || strpos($sentiment, 'myönteinen') !== false) {
+                    $stats['sentiment_distribution']['positive']++;
+                } elseif (strpos($sentiment, 'negative') !== false || strpos($sentiment, 'kielteinen') !== false) {
+                    $stats['sentiment_distribution']['negative']++;
+                } else {
+                    $stats['sentiment_distribution']['neutral']++;
+                }
+                
+                // Count crisis levels
+                $crisis_prob = $article['crisis_probability'] ?? 0;
+                if ($crisis_prob > 0.7) {
+                    $stats['crisis_levels']['high']++;
+                } elseif ($crisis_prob > 0.3) {
+                    $stats['crisis_levels']['medium']++;
+                } else {
+                    $stats['crisis_levels']['low']++;
+                }
+            }
+            
+            return [
+                'analyzed_articles' => $analyzed_articles,
+                'stats' => $stats,
+                'success' => true
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'error' => 'Failed to get weekly stats: ' . $e->getMessage(),
+                'analyzed_articles' => [],
+                'stats' => ['total' => 0],
+                'success' => false
+            ];
+        }
+    }
+
+    /**
      * Run basic analysis on an article using OpenAI
      */
     private function runBasicAnalysis($article) {
@@ -644,13 +778,22 @@ try {
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
             break;
             
+        case 'weekly_stats':
+            $collector = new DatabaseNewsCollector();
+            $start_date = $_GET['start_date'] ?? date('Y-m-d', strtotime('-7 days'));
+            $end_date = $_GET['end_date'] ?? date('Y-m-d');
+            $result = $collector->getWeeklyStats($start_date, $end_date);
+            echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+            break;
+            
         default:
             echo json_encode([
                 'available_actions' => [
                     'collect' => 'Collect and store news articles',
                     'recent' => 'Get recent articles from database',
                     'stats' => 'Get database statistics',
-                    'analyze' => 'Analyze unanalyzed articles with AI'
+                    'analyze' => 'Analyze unanalyzed articles with AI',
+                    'weekly_stats' => 'Get weekly statistics and analyzed articles (supports start_date and end_date parameters)'
                 ],
                 'timestamp' => date('Y-m-d H:i:s')
             ], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
