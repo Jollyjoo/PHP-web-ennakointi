@@ -193,75 +193,81 @@
         </div>
     </div>
 
-    <div class="dashboard-grid">
-        <!-- Reaaliaikaiset Hälytykset -->
-        <div class="widget">
-            <h3>🚨 Reaaliaikaiset Hälytykset</h3>
-            <div id="alerts-container">
-                <p>Klikkaa "Tarkista Hälytykset" etsiäksesi kriisisignaaleja...</p>
-            </div>
-        </div>
-
-        <!-- Uutisten volyymi -->
-        <div class="widget">
-            <h3>📈 Uutisten volyymi</h3>
-            <div class="chart-container">
-                <canvas id="volumeChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Sentimentti-analyysi -->
-        <div class="widget">
-            <h3>😊 Sentimentti-analyysi</h3>
-            <div class="chart-container">
-                <canvas id="sentimentChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Teemojen esiintyminen -->
-        <div class="widget">
-            <h3>🏷️ Teemojen esiintyminen</h3>
-            <div class="chart-container">
-                <canvas id="themeChart"></canvas>
-            </div>
-        </div>
-
-        <!-- Key Metrics -->
-        <div class="widget">
-            <h3>📊 Avainluvut (24h)</h3>
-            <div id="metrics-container">
-                <div class="metric">
-                    <span>Artikkeleita prosessoitu</span>
-                    <span class="metric-value" id="articles-count">-</span>
+    <div class="dashboard-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start;">
+        <!-- Left Column: Alerts -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Reaaliaikaiset Hälytykset -->
+            <div class="widget">
+                <h3>🚨 Reaaliaikaiset Hälytykset</h3>
+                <div id="alerts-container">
+                    <p>Klikkaa "Tarkista Hälytykset" etsiäksesi kriisisignaaleja...</p>
                 </div>
-                <div class="metric">
-                    <span>Kriisisignaalit</span>
-                    <span class="metric-value" id="crisis-count">-</span>
-                </div>
-                <div class="metric">
-                    <span>Korkean vaikutuksen tapahtumat</span>
-                    <span class="metric-value" id="impact-count">-</span>
-                </div>
-                <div class="metric">
-                    <span>Keskimääräiset sentimenttipisteet</span>
-                    <span class="metric-value" id="sentiment-avg">-</span>
+            </div>
+
+            <!-- Competitive Intelligence -->
+            <div class="widget">
+                <h3>🏢 Kilpailija-analyysi</h3>
+                <div id="competitive-container">
+                    <p>Klikkaa "Kilpailija-analyysi" analysoidaksesi markkinatoimintaa...</p>
                 </div>
             </div>
         </div>
 
-        <!-- Competitive Intelligence -->
-        <div class="widget">
-            <h3>🏢 Kilpailija-analyysi</h3>
-            <div id="competitive-container">
-                <p>Klikkaa "Kilpailija-analyysi" analysoidaksesi markkinatoimintaa...</p>
+        <!-- Right Column: Charts and Metrics -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <!-- Uutisten volyymi -->
+            <div class="widget">
+                <h3>📈 Uutisten volyymi</h3>
+                <div class="chart-container">
+                    <canvas id="volumeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Sentimentti-analyysi -->
+            <div class="widget">
+                <h3>😊 Sentimentti-analyysi</h3>
+                <div class="chart-container">
+                    <canvas id="sentimentChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Teemojen esiintyminen -->
+            <div class="widget">
+                <h3>🏷️ Teemojen esiintyminen</h3>
+                <div class="chart-container">
+                    <canvas id="themeChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Key Metrics -->
+            <div class="widget">
+                <h3>📊 Avainluvut (24h)</h3>
+                <div id="metrics-container">
+                    <div class="metric">
+                        <span>Artikkeleita prosessoitu</span>
+                        <span class="metric-value" id="articles-count">-</span>
+                    </div>
+                    <div class="metric">
+                        <span>Kriisisignaalit</span>
+                        <span class="metric-value" id="crisis-count">-</span>
+                    </div>
+                    <div class="metric">
+                        <span>Korkean vaikutuksen tapahtumat</span>
+                        <span class="metric-value" id="impact-count">-</span>
+                    </div>
+                    <div class="metric">
+                        <span>Keskimääräiset sentimenttipisteet</span>
+                        <span class="metric-value" id="sentiment-avg">-</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Weekly Report Modal -->
+    <!-- Monthly Report Modal -->
     <div id="report-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000;">
         <div style="background: white; margin: 50px auto; padding: 20px; width: 80%; max-width: 800px; border-radius: 8px; max-height: 80%; overflow-y: auto;">
-            <h2>📋 Weekly Intelligence Report</h2>
+            <h2>📋 Kuukausiraportti - Intelligence Report</h2>
             <div id="report-content"></div>
             <button class="btn" onclick="closeReport()">Close</button>
         </div>
