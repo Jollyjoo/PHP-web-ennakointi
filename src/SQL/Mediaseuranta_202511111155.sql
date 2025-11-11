@@ -1,0 +1,14 @@
+INSERT INTO catbxjbt_ennakointi.Mediaseuranta (Maakunta_ID,Teema,uutisen_pvm,Uutinen,Url,Hankkeen_luokitus) VALUES
+	 (1,N'Investoinnit, kansainvälistyminen, toiminnan laajennus ja uudet työpaikat','2025-10-29',N'Nyt se on varmaa: Heinolaan rakennetaan Prisma',N'https://yle.fi/a/74-20191016',N''),
+	 (1,N'Julkinen talous','2025-10-28',N'Hallinto- ja talousjohtaja saa mennä – Kärkölä hakee säästöjä lakkauttamalla virkoja',N'https://yle.fi/a/74-20190783',N'Aluekehitys'),
+	 (1,N'Investoinnit, kansainvälistyminen, toiminnan laajennus ja uudet työpaikat','2025-11-10',N'Päijäthämäläinen kirjakauppa laajentaa jälleen – hurjan kasvuvauhdin takana teknologian käyttö',N'https://www.ess.fi/paikalliset/8984983',N''),
+	 (1,N'Julkinen talous','2025-10-30',N'Terveysaseman myynti pelastaa Orimattilan talouden – mutta vain ensi vuonna',N'https://yle.fi/a/74-20191055',N''),
+	 (1,N'Muutosneuvottelut, irtisanomiset, konkurssit, investointien perumiset ja tulosten heikentymiset','2025-10-30',N'Raute varautuu lomautuksiin – tilauksia on tullut alkuvuonna heikosti',N'https://yle.fi/a/74-20191213',N''),
+	 (1,N'Investoinnit, kansainvälistyminen, toiminnan laajennus ja uudet työpaikat','2025-10-30',N'Lahden Holmaan nousee iso liikekeskus – Rusta, Jysk ja Puuilo saman katon alle',N'https://yle.fi/a/74-20191319',N''),
+	 (1,N'Investoinnit, kansainvälistyminen, toiminnan laajennus ja uudet työpaikat','2025-10-30',N'Vellamo-?vettä myydään maailmalle tarina kerrallaan – päijäthämäläinen erikoisuus on vuosituhansia vanhaa mineraalivettä',N'https://www.ess.fi/paikalliset/8959392',N''),
+	 (1,N'Julkinen talous','2025-10-30',N'Lahden päättäjät saavat odotetun suuruisen esityksen veronkorotuksista',N'https://www.ess.fi/paikalliset/8961958',N''),
+	 (1,N'Muutosneuvottelut, irtisanomiset, konkurssit, investointien perumiset ja tulosten heikentymiset','2025-10-29',N'Lahtelainen Kempower paransi reilusti tilauskertymää ja liikevaihtoa, mutta varoittaa liikevaihdon jäävän ennakoidusta',N'https://www.ess.fi/paikalliset/8957213',N''),
+	 (1,N'Julkinen talous','2025-10-28',N'Padasjoen budjettiesitys painui pitkästä aikaa miinukselle – "Akuuttia hätää ei onneksi ole"',N'https://www.ess.fi/paikalliset/8955609',N'');
+INSERT INTO catbxjbt_ennakointi.Mediaseuranta (Maakunta_ID,Teema,uutisen_pvm,Uutinen,Url,Hankkeen_luokitus) VALUES
+	 (1,N'Muutosneuvottelut, irtisanomiset, konkurssit, investointien perumiset ja tulosten heikentymiset','2025-10-28',N'Orimattilalaisen Ferroplanin tytäryhtiö hakee itseään konkurssiin – emoyhtiö hakeutui konkurssiin kuun alussa',N'https://www.ess.fi/paikalliset/8956283',N''),
+	 (1,N'Muutosneuvottelut, irtisanomiset, konkurssit, investointien perumiset ja tulosten heikentymiset','2025-10-28',N'Päijäthämäläislähtöiseltä pörssiyhtiöltä tulosvaroitus',N'https://www.ess.fi/paikalliset/8956427',N'');

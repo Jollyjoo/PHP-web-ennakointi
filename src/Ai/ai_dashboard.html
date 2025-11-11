@@ -1125,7 +1125,7 @@
             updateStatus('Loading Mediaseuranta AI insights...', 'info');
             
             try {
-                const response = await fetch('mediaseuranta_analyzer.php?action=insights&limit=15&min_relevance=5');
+                const response = await fetch('mediaseuranta_analyzer.php?action=insights&limit=100&min_relevance=3');
                 const data = await response.json();
                 
                 if (data.mediaseuranta_insights) {
