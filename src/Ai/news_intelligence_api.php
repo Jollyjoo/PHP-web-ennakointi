@@ -140,6 +140,17 @@ class NewsIntelligenceSystem {
         foreach ($recent_news as $article) {
             $crisis_signals = $this->detectCrisisSignals($article['content']);
             
+            // Store full analysis results for each article
+            $analysis_data = [
+                'article_id' => $article['id'],
+                'crisis_analysis' => $crisis_signals,
+                'analyzed_for' => 'alerts',
+                'processed_at' => date('Y-m-d H:i:s')
+            ];
+            
+            // Store analysis to prevent duplicate processing and mark as analyzed
+            $this->storeAnalysis($article['id'], $analysis_data);
+            
             if ($crisis_signals['crisis_probability'] > 0.7) {
                 $high_priority_alerts[] = [
                     'type' => 'crisis_detected',
