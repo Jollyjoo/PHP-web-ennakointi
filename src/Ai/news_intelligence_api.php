@@ -132,7 +132,7 @@ class NewsIntelligenceSystem {
      * Real-time alert system
      */
     public function checkForAlerts() {
-        // Get recent news (last 24 hours)
+        // Get recent news (last 24 hours) - LIMITED TO 5 ARTICLES for cost control
         $recent_news = $this->getRecentNews(24);
         
         $high_priority_alerts = [];
@@ -462,9 +462,10 @@ class NewsIntelligenceSystem {
     }
     
     /**
-     * Store analysis results in database
+     * Store analysis results in database and mark as analyzed
      */
     private function storeAnalysis($article_id, $analysis_data) {
+        // Store analysis results
         $stmt = $this->db->prepare("
             INSERT INTO news_analysis (article_id, analysis_data, created_at) 
             VALUES (?, ?, NOW())
@@ -475,7 +476,21 @@ class NewsIntelligenceSystem {
         
         $json_data = json_encode($analysis_data);
         $stmt->bind_param("is", $article_id, $json_data);
-        return $stmt->execute();
+        $analysis_stored = $stmt->execute();
+        
+        // Mark article as analyzed to prevent duplicate processing
+        if ($analysis_stored) {
+            $update_stmt = $this->db->prepare("
+                UPDATE news_articles 
+                SET ai_analysis_status = 'analyzed', 
+                    ai_analyzed_at = NOW() 
+                WHERE id = ?
+            ");
+            $update_stmt->bind_param("i", $article_id);
+            $update_stmt->execute();
+        }
+        
+        return $analysis_stored;
     }
     
     /**
@@ -497,14 +512,17 @@ class NewsIntelligenceSystem {
     }
     
     /**
-     * Get recent news (last X hours)
+     * Get recent news (last X hours) - LIMITED TO 5 ARTICLES for cost control
+     * Only returns unanalyzed articles to avoid duplicate OpenAI API calls
      */
     private function getRecentNews($hours) {
         $stmt = $this->db->prepare("
             SELECT id, title, content, published_date 
             FROM news_articles 
             WHERE published_date >= DATE_SUB(NOW(), INTERVAL ? HOUR)
+            AND (ai_analysis_status IS NULL OR ai_analysis_status != 'analyzed')
             ORDER BY published_date DESC
+            LIMIT 5
         ");
         
         $stmt->bind_param("i", $hours);
@@ -515,13 +533,14 @@ class NewsIntelligenceSystem {
     }
     
     /**
-     * Get news from last X days
+     * Get news from last X days - only unanalyzed articles to avoid duplicate processing
      */
     private function getNewsFromDays($days) {
         $stmt = $this->db->prepare("
             SELECT id, title, content, published_date 
             FROM news_articles 
             WHERE published_date >= DATE_SUB(NOW(), INTERVAL ? DAY)
+            AND (ai_analysis_status IS NULL OR ai_analysis_status != 'analyzed')
             ORDER BY published_date DESC
         ");
         
