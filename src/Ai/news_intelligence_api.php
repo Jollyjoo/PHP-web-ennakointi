@@ -605,7 +605,7 @@ try {
             throw new Exception('mysqli extension not available');
         }
         
-        // Simple database connection like mediaseuranta_analyzer.php
+        // Use hardcoded connection like mediaseuranta_analyzer.php
         $db_connection = new mysqli('tulevaisuusluotain.fi', 'catbxjbt_Christian', 'Juustonaksu5', 'catbxjbt_ennakointi');
         
         if ($db_connection->connect_error) {

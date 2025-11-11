@@ -336,7 +336,7 @@
         async function loadAlerts() {
             showLoading(true);
             try {
-                const response = await fetch('news_intelligence_api.php?action=alerts');
+                const response = await fetch('minimal_news_api.php?action=alerts');
                 
                 // Check if response is ok
                 if (!response.ok) {
