@@ -176,16 +176,16 @@
         <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutisia lähteistä ja tallenna tietokantaan (ei OpenAI-kutsuja)">💾 Kerää uutisia (tietokantaan)</button>        
         <button class="btn" onclick="loadWeeklyReport()" title="Luo Kuukausiraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Kuukausiraportti (tietokannasta)</button>
         <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi uutisesta kilpailijoiden ja markkinoiden toimintaa (OpenAI, limit 5)">🔍 Kilpailuanalyysi (OpenAI, limit 5)</button>
-        <button class="btn" onclick="runAnalysis()" title="Suorita AI-analyysi ja päivitä visualisoinnit">🧠 Suorita AI-analyysi</button>
+
         <button class="btn" onclick="viewStoredNews()" style="background: #6f42c1;" title="Näytä tietokantaan tallennetut uutiset">📰 Näytä Tallennetut</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Testaus ilman tallennusta</button>
         <br><p>Ely-mediaseuranta</p><br>
-        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältö AI:lla (OpenAI, limit 5)">📰 Analysoi Mediaseuranta (OpenAi, limit 5)</button>
+        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältöä (OpenAI, limit 5)">📰 Analysoi Mediaseuranta (OpenAi, limit 5)</button>
         <button class="btn" onclick="loadMediaseurantaIntelligence()" title="Analysoi Mediaseuranta-dataa ja luo yhteenvetoja (OpenAI, limit 5)" style="background: #8e44ad;">📊 Mediaseuranta Insights (OpenAI, limit 5)</button>
-        <button class="btn" onclick="loadMediaseurantaCompetitive()" title="Kilpailutiedustelu Mediaseuranta-datasta (OpenAI, limit 5)" style="background: #2c3e50;">🏢 Mediaseuranta Kilpailuanalyysi (OpenAI, limit 5)</button>        
-        <button class="btn" onclick="viewMediaseurantaInsights()" style="background: #34495e;" title="Näytä Mediaseurannan AI-analyysien tulokset">📊 Mediaseurannan Tulokset</button>
-        <button class="btn" onclick="debugMediaseuranta()" style="background: #e74c3c;" title="Testaa Mediaseuranta-taulun yhteyttä ja rakennetta">🔧 Debuggaa Mediaseuranta</button>
-        <button class="btn" onclick="testMediaseuranta()" style="background: #f39c12;" title="Testaa datan hakemista Mediaseuranta-taulusta">🧪 Testaa yhteys kantaan</button>
+        <button class="btn" onclick="loadMediaseurantaCompetitive()" style="background: #e74c3c;" title="Kilpailutiedustelu Mediaseuranta-datasta (OpenAI, limit 5)" style="background: #2c3e50;">🏢 Mediaseuranta Kilpailuanalyysi (OpenAI, limit 5)</button>        
+        <button class="btn" onclick="viewMediaseurantaInsights()" style="background: #f39c12;" title="Näytä Mediaseurannan AI-analyysien tulokset">📊 Mediaseurannan Tulokset</button>
+        <!-- <button class="btn" onclick="debugMediaseuranta()" style="background: #e74c3c;" title="Testaa Mediaseuranta-taulun yhteyttä ja rakennetta">🔧 Debuggaa Mediaseuranta</button> -->
+        <!-- <button class="btn" onclick="testMediaseuranta()" style="background: #f39c12;" title="Testaa datan hakemista Mediaseuranta-taulusta">🧪 Testaa yhteys kantaan</button> -->
         <span class="loading" id="loading">⏳ Processing...</span>
         
         <div style="margin-top: 15px; font-size: 0.9em; color: #666;">
@@ -1084,31 +1084,6 @@
                 updateStatus('Failed to load mediaseuranta competitive intelligence', 'error');
             }
             showLoading(false);
-        }
-
-        // Run AI analysis
-        async function runAnalysis() {
-            showLoading(true);
-            updateStatus('Running AI analysis...', 'warning');
-            
-            try {
-                // Simulate analysis with sample data
-                setTimeout(() => {
-                    // Update charts with sample data
-                    updateVolumeChart();
-                    updateSentimentChart();
-                    updateThemeChart();
-                    updateMetrics();
-                    
-                    updateStatus('AI analysis completed', 'success');
-                    showLoading(false);
-                }, 2000);
-                
-            } catch (error) {
-                console.error('Error running analysis:', error);
-                updateStatus('Analysis failed', 'error');
-                showLoading(false);
-            }
         }
 
         // Update chart functions
