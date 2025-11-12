@@ -365,6 +365,219 @@ function markArticleAsAnalyzed($db_connection, $article_id, $analysis_data) {
     return false;
 }
 
+// Helper function to get analyzed articles for competitive intelligence
+function getAnalyzedArticlesForCompetitive($db_connection, $days = 30, $limit = 5) {
+    if (!$db_connection) {
+        return [];
+    }
+    
+    $stmt = $db_connection->prepare("
+        SELECT id, title, content, published_date 
+        FROM news_articles 
+        WHERE published_date >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND analysis_status = 'analyzed'
+        AND (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
+        ORDER BY published_date DESC
+        LIMIT ?
+    ");
+    
+    if (!$stmt) {
+        return [];
+    }
+    
+    $stmt->bind_param("ii", $days, $limit);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Helper function for competitive analysis
+function runCompetitiveAnalysis($article, $openai_key = null) {
+    if ($openai_key) {
+        return runCompetitiveOpenAIAnalysis($article, $openai_key);
+    } else {
+        return runCompetitiveFallbackAnalysis($article);
+    }
+}
+
+// OpenAI competitive analysis
+function runCompetitiveOpenAIAnalysis($article, $openai_key) {
+    try {
+        $prompt = "Analysoi tämä uutisartikkeli kilpailutiedustelun näkökulmasta. Anna vastaus JSON-muodossa:
+{
+    \"competitors_mentioned\": [\"yritys1\", \"yritys2\"],
+    \"competitive_moves\": [\"siirto1\", \"siirto2\"],
+    \"market_opportunities\": [\"mahdollisuus1\", \"mahdollisuus2\"],
+    \"funding_intelligence\": {
+        \"sources\": [\"rahoituslähde1\"],
+        \"amounts\": [\"summa1\"],
+        \"purposes\": [\"tarkoitus1\"]
+    },
+    \"partnership_opportunities\": [\"kumppanuus1\", \"kumppanuus2\"],
+    \"strategic_insights\": \"strategiset oivallukset\",
+    \"action_recommendations\": [\"suositus1\", \"suositus2\"]
+}
+
+Otsikko: {$article['title']}
+Sisältö: " . substr($article['content'], 0, 2000);
+
+        $data = [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Olet kokenut kilpailutiedustelu-analyytikko Hämeen ELY-keskukselle.'
+                ],
+                [
+                    'role' => 'user', 
+                    'content' => $prompt
+                ]
+            ],
+            'max_tokens' => 1000,
+            'temperature' => 0.3
+        ];
+
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $openai_key
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code === 200 && $response) {
+            $result = json_decode($response, true);
+            if (isset($result['choices'][0]['message']['content'])) {
+                $content = $result['choices'][0]['message']['content'];
+                
+                // Extract JSON from response
+                if (preg_match('/\{.*\}/s', $content, $matches)) {
+                    $analysis = json_decode($matches[0], true);
+                    if ($analysis) {
+                        return $analysis;
+                    }
+                }
+            }
+        }
+        
+        return runCompetitiveFallbackAnalysis($article);
+        
+    } catch (Exception $e) {
+        return runCompetitiveFallbackAnalysis($article);
+    }
+}
+
+// Fallback competitive analysis
+function runCompetitiveFallbackAnalysis($article) {
+    $text = strtolower($article['title'] . ' ' . $article['content']);
+    
+    // Simple keyword-based competitive analysis
+    $competitors = [];
+    $funding = ['sources' => [], 'amounts' => [], 'purposes' => []];
+    $opportunities = [];
+    
+    // Look for company mentions
+    if (preg_match_all('/(\w+\s+oy|\w+\s+oyj|\w+\s+ltd|\w+\s+ab)/i', $article['content'], $matches)) {
+        $competitors = array_unique($matches[0]);
+    }
+    
+    // Look for funding mentions
+    if (preg_match_all('/(\d+(?:\.\d+)?\s*(?:miljoonaa|million|M€|€))/i', $article['content'], $matches)) {
+        $funding['amounts'] = $matches[0];
+    }
+    
+    // Look for opportunities
+    $opportunity_keywords = ['investointi', 'mahdollisuus', 'kasvu', 'kehitys', 'hanke'];
+    foreach ($opportunity_keywords as $keyword) {
+        if (strpos($text, $keyword) !== false) {
+            $opportunities[] = ucfirst($keyword) . ' havaittu';
+        }
+    }
+    
+    return [
+        'competitors_mentioned' => array_slice($competitors, 0, 5),
+        'competitive_moves' => [],
+        'market_opportunities' => $opportunities,
+        'funding_intelligence' => $funding,
+        'partnership_opportunities' => [],
+        'strategic_insights' => 'Automaattinen analyysi suoritettu',
+        'action_recommendations' => []
+    ];
+}
+
+// Helper function to store competitive results
+function storeCompetitiveResults($db_connection, $article_id, $competitive_data) {
+    try {
+        // Try to update news_analysis table with competitive data
+        $competitive_json = json_encode($competitive_data);
+        $competitors_json = json_encode($competitive_data['competitors_mentioned'] ?? []);
+        $funding_json = json_encode($competitive_data['funding_intelligence'] ?? []);
+        $opportunities_json = json_encode($competitive_data['market_opportunities'] ?? []);
+        
+        // Calculate simple competitive score
+        $score = 0.0;
+        if (!empty($competitive_data['competitors_mentioned'])) $score += 0.3;
+        if (!empty($competitive_data['funding_intelligence']['amounts'])) $score += 0.4;
+        if (!empty($competitive_data['market_opportunities'])) $score += 0.3;
+        
+        $business_relevance = $score >= 0.7 ? 'high' : ($score >= 0.4 ? 'medium' : ($score > 0 ? 'low' : 'none'));
+        
+        // Update or insert competitive analysis
+        $stmt = $db_connection->prepare("
+            INSERT INTO news_analysis (
+                article_id, competitive_analysis, competitors_mentioned, 
+                funding_intelligence, market_opportunities, competitive_score, 
+                business_relevance, competitive_analyzed_at, created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE 
+                competitive_analysis = VALUES(competitive_analysis),
+                competitors_mentioned = VALUES(competitors_mentioned),
+                funding_intelligence = VALUES(funding_intelligence),
+                market_opportunities = VALUES(market_opportunities),
+                competitive_score = VALUES(competitive_score),
+                business_relevance = VALUES(business_relevance),
+                competitive_analyzed_at = NOW(),
+                updated_at = NOW()
+        ");
+        
+        if ($stmt) {
+            $stmt->bind_param("issssds", $article_id, $competitive_json, $competitors_json, 
+                            $funding_json, $opportunities_json, $score, $business_relevance);
+            $result = $stmt->execute();
+            
+            // Mark article as competitively analyzed
+            if ($result) {
+                $update_stmt = $db_connection->prepare("
+                    UPDATE news_articles 
+                    SET competitive_analysis_status = 'analyzed', 
+                        competitive_analyzed_at = NOW() 
+                    WHERE id = ?
+                ");
+                if ($update_stmt) {
+                    $update_stmt->bind_param("i", $article_id);
+                    $update_stmt->execute();
+                }
+            }
+            
+            return $result;
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        // If database storage fails, still return true to continue processing
+        error_log("Competitive analysis storage failed: " . $e->getMessage());
+        return false;
+    }
+}
+
 // Main processing
 try {
     require_once 'config.php';
@@ -500,6 +713,84 @@ try {
                         'error' => $e->getMessage(),
                         'alerts' => [],
                         'count' => 0,
+                        'environment' => 'server'
+                    ];
+                }
+            }
+            break;
+            
+        case 'competitive_intelligence':
+            if (!$database_available) {
+                $result = [
+                    'error' => 'Database not available',
+                    'message' => 'Competitive intelligence requires server-side database connection.',
+                    'environment' => 'local_development',
+                    'fallback_available' => false
+                ];
+            } else {
+                try {
+                    // Get analyzed articles for competitive intelligence (limit 5 for cost protection)
+                    $days = $_GET['days'] ?? 30;
+                    $recent_articles = getAnalyzedArticlesForCompetitive($db_connection, $days, 5);
+                    
+                    $companies_mentioned = [];
+                    $funding_activities = [];
+                    $market_opportunities = [];
+                    $processed_count = 0;
+                    $stored_count = 0;
+                    
+                    foreach ($recent_articles as $article) {
+                        $competitive_intel = runCompetitiveAnalysis($article, $openai_api_key);
+                        $processed_count++;
+                        
+                        // Store competitive intelligence in database
+                        if (storeCompetitiveResults($db_connection, $article['id'], $competitive_intel)) {
+                            $stored_count++;
+                        }
+                        
+                        // Aggregate data for dashboard
+                        if (!empty($competitive_intel['competitors_mentioned'])) {
+                            foreach ($competitive_intel['competitors_mentioned'] as $company) {
+                                $companies_mentioned[$company] = ($companies_mentioned[$company] ?? 0) + 1;
+                            }
+                        }
+                        
+                        if (!empty($competitive_intel['funding_intelligence']['amounts'])) {
+                            $funding_activities[] = [
+                                'article_id' => $article['id'],
+                                'article_title' => $article['title'],
+                                'sources' => $competitive_intel['funding_intelligence']['sources'] ?? [],
+                                'amounts' => $competitive_intel['funding_intelligence']['amounts'] ?? [],
+                                'purposes' => $competitive_intel['funding_intelligence']['purposes'] ?? []
+                            ];
+                        }
+                        
+                        if (!empty($competitive_intel['market_opportunities'])) {
+                            $market_opportunities = array_merge($market_opportunities, $competitive_intel['market_opportunities']);
+                        }
+                    }
+                    
+                    $result = [
+                        'period_days' => $days,
+                        'articles_analyzed' => $processed_count,
+                        'analyses_stored' => $stored_count,
+                        'cost_protection' => 'Limited to 5 articles maximum',
+                        'companies_activity' => $companies_mentioned,
+                        'funding_activities' => $funding_activities,
+                        'market_opportunities' => array_unique($market_opportunities),
+                        'generated_at' => date('Y-m-d H:i:s'),
+                        'environment' => 'server'
+                    ];
+                    
+                } catch (Exception $e) {
+                    $result = [
+                        'error' => 'Competitive analysis failed: ' . $e->getMessage(),
+                        'articles_analyzed' => 0,
+                        'analyses_stored' => 0,
+                        'cost_protection' => 'Error occurred',
+                        'companies_activity' => [],
+                        'funding_activities' => [],
+                        'market_opportunities' => [],
                         'environment' => 'server'
                     ];
                 }
