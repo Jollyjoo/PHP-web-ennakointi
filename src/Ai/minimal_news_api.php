@@ -839,7 +839,6 @@ function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 5) 
         SELECT ID, Teema, Uutinen, uutisen_pvm, Url, Hankkeen_luokitus 
         FROM Mediaseuranta 
         WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        AND ai_analysis_status = 'completed'
         AND (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
         ORDER BY uutisen_pvm DESC
         LIMIT ?
