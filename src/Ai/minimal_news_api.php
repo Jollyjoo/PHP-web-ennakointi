@@ -835,11 +835,12 @@ function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 5) 
         return [];
     }
     
+    // Get latest entries that haven't been competitively analyzed yet
+    // Remove date restriction to find any unanalyzed entries
     $stmt = $db_connection->prepare("
         SELECT ID, Teema, Uutinen, uutisen_pvm, Url, Hankkeen_luokitus 
         FROM Mediaseuranta 
-        WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        AND (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
+        WHERE (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
         ORDER BY uutisen_pvm DESC
         LIMIT ?
     ");
@@ -848,9 +849,11 @@ function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 5) 
         return [];
     }
     
-    $stmt->bind_param("ii", $days, $limit);
+    $stmt->bind_param("i", $limit);
     $stmt->execute();
     $result = $stmt->get_result();
+    
+    return $result->fetch_all(MYSQLI_ASSOC);
     
     return $result->fetch_all(MYSQLI_ASSOC);
 }
@@ -1082,6 +1085,7 @@ function getMediaseurantaCompetitiveInsights($db_connection, $days = 30) {
         return [];
     }
     
+    // Get all competitively analyzed entries, not restricted by date
     $stmt = $db_connection->prepare("
         SELECT 
             ID, Teema, Uutinen, uutisen_pvm,
@@ -1089,16 +1093,15 @@ function getMediaseurantaCompetitiveInsights($db_connection, $days = 30) {
             competitors_mentioned, funding_intelligence, market_opportunities,
             competitive_threats, market_intelligence, action_recommendations
         FROM Mediaseuranta 
-        WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
-        AND competitive_analysis_status = 'analyzed'
+        WHERE competitive_analysis_status = 'analyzed'
         ORDER BY competitive_score DESC, strategic_importance DESC
+        LIMIT 50
     ");
     
     if (!$stmt) {
         return [];
     }
     
-    $stmt->bind_param("i", $days);
     $stmt->execute();
     $result = $stmt->get_result();
     
