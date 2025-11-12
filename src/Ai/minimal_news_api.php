@@ -1338,10 +1338,8 @@ try {
                 ];
             } else {
                 try {
-                    $days = $_GET['days'] ?? 30;
-                    
                     // First, analyze unanalyzed entries (limit 5 for cost protection)
-                    $unanalyzed_entries = getMediaseurantaEntries($db_connection, $days, 5);
+                    $unanalyzed_entries = getMediaseurantaEntries($db_connection, 9999, 5);
                     $analyzed_count = 0;
                     $stored_count = 0;
                     
@@ -1356,7 +1354,7 @@ try {
                     }
                     
                     // Get insights from already analyzed data
-                    $analyzed_data = getAnalyzedMediaseurantaData($db_connection, $days);
+                    $analyzed_data = getAnalyzedMediaseurantaData($db_connection, 9999);
                     
                     // Generate insights
                     $theme_breakdown = [];
@@ -1404,7 +1402,7 @@ try {
                     
                     $result = [
                         'analysis_summary' => [
-                            'period_days' => $days,
+                            'period_days' => 'All available data',
                             'new_analyzed' => $analyzed_count,
                             'stored_analyses' => $stored_count,
                             'total_entries' => count($analyzed_data),
@@ -1423,7 +1421,7 @@ try {
                     $result = [
                         'error' => 'Mediaseuranta analysis failed: ' . $e->getMessage(),
                         'analysis_summary' => [
-                            'period_days' => $days ?? 30,
+                            'period_days' => 'All available data',
                             'new_analyzed' => 0,
                             'stored_analyses' => 0,
                             'total_entries' => 0,
@@ -1450,10 +1448,8 @@ try {
                 ];
             } else {
                 try {
-                    $days = $_GET['days'] ?? 30;
-                    
                     // Get mediaseuranta entries ready for competitive analysis (limit 5)
-                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, $days, 5);
+                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, 9999, 5);
                     $analyzed_count = 0;
                     $stored_count = 0;
                     
@@ -1465,7 +1461,7 @@ try {
                         
                         $result = [
                             'analysis_summary' => [
-                                'period_days' => $days,
+                                'period_days' => 'All available data',
                                 'new_analyzed' => 0,
                                 'stored_analyses' => 0,
                                 'total_competitive_insights' => 0,
@@ -1483,7 +1479,7 @@ try {
                         ];
                         
                         // Still try to get existing insights
-                        $competitive_insights = getMediaseurantaCompetitiveInsights($db_connection, $days);
+                        $competitive_insights = getMediaseurantaCompetitiveInsights($db_connection, 9999);
                         $result['analysis_summary']['total_competitive_insights'] = count($competitive_insights);
                         
                         echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
@@ -1501,7 +1497,7 @@ try {
                     }
                     
                     // Get insights from already analyzed competitive data
-                    $competitive_insights = getMediaseurantaCompetitiveInsights($db_connection, $days);
+                    $competitive_insights = getMediaseurantaCompetitiveInsights($db_connection, 9999);
                     
                     // Aggregate competitive intelligence
                     $companies_activity = [];
@@ -1557,7 +1553,7 @@ try {
                     
                     $result = [
                         'analysis_summary' => [
-                            'period_days' => $days,
+                            'period_days' => 'All available data',
                             'new_analyzed' => $analyzed_count,
                             'stored_analyses' => $stored_count,
                             'total_competitive_insights' => count($competitive_insights),
@@ -1577,7 +1573,7 @@ try {
                     $result = [
                         'error' => 'Mediaseuranta competitive analysis failed: ' . $e->getMessage(),
                         'analysis_summary' => [
-                            'period_days' => $days ?? 30,
+                            'period_days' => 'All available data',
                             'new_analyzed' => 0,
                             'stored_analyses' => 0,
                             'total_competitive_insights' => 0,
