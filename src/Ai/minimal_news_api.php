@@ -579,7 +579,7 @@ function storeCompetitiveResults($db_connection, $article_id, $competitive_data)
 }
 
 // Helper function to get mediaseuranta entries for analysis
-function getMediaseurantaEntries($db_connection, $days = 30, $limit = 5) {
+function getMediaseurantaEntries($db_connection, $days = 330, $limit = 5) {
     if (!$db_connection) {
         return [];
     }
@@ -779,7 +779,7 @@ function runMediaseurantaFallbackAnalysis($entry) {
 }
 
 // Helper function to store mediaseuranta analysis results
-function storeMediaseurantaResults($db_connection, $entry_id, $analysis_data) {
+function storeMediaseurantaResults($db_connection, $entry_url, $analysis_data) {
     try {
         $stmt = $db_connection->prepare("
             UPDATE Mediaseuranta SET
@@ -794,7 +794,7 @@ function storeMediaseurantaResults($db_connection, $entry_id, $analysis_data) {
                 ai_summary = ?,
                 ai_keywords = ?,
                 ai_full_analysis = ?
-            WHERE ID = ?
+            WHERE Url = ?
         ");
         
         if ($stmt) {
@@ -803,7 +803,7 @@ function storeMediaseurantaResults($db_connection, $entry_id, $analysis_data) {
             $full_analysis_json = json_encode($analysis_data);
             
             $stmt->bind_param(
-                "issssdsssi", 
+                "issssdssss", 
                 $analysis_data['relevance_score'],
                 $analysis_data['economic_impact'],
                 $analysis_data['employment_impact'],
@@ -813,7 +813,7 @@ function storeMediaseurantaResults($db_connection, $entry_id, $analysis_data) {
                 $analysis_data['summary'],
                 $keywords_json,
                 $full_analysis_json,
-                $entry_id
+                $entry_url
             );
             
             return $stmt->execute();
@@ -1348,7 +1348,7 @@ try {
                         $analysis = runMediaseurantaAnalysis($entry, $openai_api_key);
                         $analyzed_count++;
                         
-                        if (storeMediaseurantaResults($db_connection, $entry['ID'], $analysis)) {
+                        if (storeMediaseurantaResults($db_connection, $entry['Url'], $analysis)) {
                             $stored_count++;
                         }
                     }
