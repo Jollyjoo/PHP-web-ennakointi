@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS `news_articles` (
   `published_date` datetime DEFAULT NULL,
   `collected_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `analysis_status` enum('pending','analyzed','failed') DEFAULT 'pending',
+  `competitive_analysis_status` enum('pending','analyzed','failed','not_applicable') DEFAULT 'pending',
+  `competitive_analyzed_at` datetime DEFAULT NULL,
   `sentiment_score` decimal(3,2) DEFAULT NULL,
   `impact_level` enum('low','medium','high') DEFAULT NULL,
   `region_relevance` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -18,6 +20,7 @@ CREATE TABLE IF NOT EXISTS `news_articles` (
   KEY `idx_collected_at` (`collected_at`),
   KEY `idx_source` (`source`),
   KEY `idx_analysis_status` (`analysis_status`),
+  KEY `idx_competitive_analysis_status` (`competitive_analysis_status`),
   FULLTEXT KEY `idx_title_content` (`title`,`content`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -30,12 +33,26 @@ CREATE TABLE IF NOT EXISTS `news_analysis` (
   `themes` json,
   `entities` json,
   `crisis_probability` decimal(3,2) DEFAULT 0.00,
+  -- Competitive Intelligence fields
+  `competitive_analysis` json,
+  `competitors_mentioned` json,
+  `funding_intelligence` json,
+  `market_opportunities` json,
+  `partnership_opportunities` json,
+  `competitive_score` decimal(3,2) DEFAULT 0.00,
+  `business_relevance` enum('high','medium','low','none') DEFAULT 'none',
+  `strategic_importance` enum('critical','important','moderate','low') DEFAULT 'low',
+  -- Timestamps
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `competitive_analyzed_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `idx_article_id` (`article_id`),
   KEY `idx_sentiment` (`sentiment`),
   KEY `idx_crisis_probability` (`crisis_probability`),
+  KEY `idx_competitive_score` (`competitive_score`),
+  KEY `idx_business_relevance` (`business_relevance`),
+  KEY `idx_strategic_importance` (`strategic_importance`),
   FOREIGN KEY (`article_id`) REFERENCES `news_articles`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

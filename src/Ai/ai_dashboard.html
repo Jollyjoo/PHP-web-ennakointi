@@ -736,37 +736,88 @@
                     <div class="alert medium" style="background: #e8f5e8; border-color: #28a745;">
                         <strong>💰 Cost Protected Analysis</strong><br>
                         Articles Analyzed: ${data.articles_analyzed || 0} (max 5)<br>
+                        Stored to Database: ${data.analyses_stored || 0}<br>
                         Period: ${data.period_days || 30} days | ${data.cost_protection || 'Cost protection active'}
                     </div>
-                    <h4>Companies Activity (${data.period_days || 30} days)</h4>
+                    <h4>🏢 Companies Activity (${data.period_days || 30} days)</h4>
                     <div id="companies-list"></div>
-                    <h4>Funding Activities</h4>
+                    <h4>💰 Funding Activities</h4>
                     <div id="funding-list"></div>
+                    <h4>🚀 Market Opportunities</h4>
+                    <div id="opportunities-list"></div>
                 `;
                 
+                // Display companies activity
                 const companiesList = document.getElementById('companies-list');
                 const companiesData = data.companies_activity || {};
                 if (Object.keys(companiesData).length === 0) {
-                    companiesList.innerHTML = '<p>No company activities detected</p>';
+                    companiesList.innerHTML = '<p style="color: #666;">No company activities detected in analyzed articles</p>';
                 } else {
                     Object.entries(companiesData).forEach(([company, count]) => {
-                        companiesList.innerHTML += `<div class="metric"><span>${company}</span><span>${count} mentions</span></div>`;
+                        companiesList.innerHTML += `
+                            <div class="metric">
+                                <span><strong>${company}</strong></span>
+                                <span class="metric-value">${count} mentions</span>
+                            </div>
+                        `;
                     });
                 }
                 
+                // Display funding activities
                 const fundingList = document.getElementById('funding-list');
                 const fundingData = data.funding_activities || [];
                 if (fundingData.length === 0) {
-                    fundingList.innerHTML = '<p>No funding activities detected</p>';
+                    fundingList.innerHTML = '<p style="color: #666;">No funding activities detected</p>';
                 } else {
                     fundingData.forEach(funding => {
-                        fundingList.innerHTML += `<div class="metric"><span>Article ${funding.article_id}</span><span>${funding.amounts.length} funding events</span></div>`;
+                        fundingList.innerHTML += `
+                            <div class="alert medium" style="margin-bottom: 10px;">
+                                <strong>${funding.article_title || `Article ${funding.article_id}`}</strong><br>
+                                <small><strong>Amounts:</strong> ${funding.amounts.join(', ') || 'N/A'}</small><br>
+                                <small><strong>Sources:</strong> ${funding.sources.join(', ') || 'N/A'}</small><br>
+                                <small><strong>Purposes:</strong> ${funding.purposes.join(', ') || 'N/A'}</small>
+                            </div>
+                        `;
                     });
                 }
                 
-                updateStatus('Competitive intelligence updated (cost protected)', 'success');
+                // Display market opportunities
+                const opportunitiesList = document.getElementById('opportunities-list');
+                const opportunitiesData = data.market_opportunities || [];
+                if (opportunitiesData.length === 0) {
+                    opportunitiesList.innerHTML = '<p style="color: #666;">No market opportunities identified</p>';
+                } else {
+                    opportunitiesData.forEach((opportunity, index) => {
+                        opportunitiesList.innerHTML += `
+                            <div class="metric">
+                                <span>📈 ${opportunity}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                updateStatus(`Competitive intelligence updated (${data.articles_analyzed} articles, cost protected)`, 'success');
             } catch (error) {
                 console.error('Error loading competitive intelligence:', error);
+                
+                // Show error with helpful information
+                const container = document.getElementById('competitive-container');
+                container.innerHTML = `
+                    <div class="alert high">
+                        <strong>❌ Competitive Intelligence Error</strong><br>
+                        Error: ${error.message}<br>
+                        <small>Possible causes:</small>
+                        <ul style="margin-top: 10px; margin-bottom: 10px;">
+                            <li>No articles analyzed yet (run basic analysis first)</li>
+                            <li>Database schema needs updating for competitive intelligence</li>
+                            <li>OpenAI API configuration issues</li>
+                        </ul>
+                        <button class="btn" onclick="analyzeStoredArticles()" style="margin-top: 10px;">
+                            🤖 Analyze Articles First
+                        </button>
+                    </div>
+                `;
+                
                 updateStatus('Failed to load competitive intelligence', 'error');
             }
             showLoading(false);

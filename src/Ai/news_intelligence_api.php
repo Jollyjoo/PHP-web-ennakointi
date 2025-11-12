@@ -133,6 +133,7 @@ class NewsIntelligenceSystem {
     /**
      * Competitive intelligence dashboard
      * COST PROTECTION: Limited to 5 articles to prevent excessive OpenAI API costs
+     * Stores results in database for future reference and reporting
      */
     public function getCompetitiveIntelligence($time_period = 30) {
         // COST PROTECTION: Limit to 5 articles maximum
@@ -141,11 +142,19 @@ class NewsIntelligenceSystem {
         $companies_mentioned = [];
         $funding_activities = [];
         $market_moves = [];
+        $processed_articles = 0;
+        $stored_analyses = 0;
         
         foreach ($news_data as $article) {
             $intel = $this->generateCompetitiveIntelligence($article['content']);
+            $processed_articles++;
             
-            // Aggregate competitive data
+            // Store competitive intelligence in database
+            if ($this->storeCompetitiveIntelligence($article['id'], $intel)) {
+                $stored_analyses++;
+            }
+            
+            // Aggregate competitive data for dashboard display
             if (!empty($intel['competitors_mentioned'])) {
                 foreach ($intel['competitors_mentioned'] as $company) {
                     $companies_mentioned[$company] = ($companies_mentioned[$company] ?? 0) + 1;
@@ -155,19 +164,26 @@ class NewsIntelligenceSystem {
             if (!empty($intel['funding_intelligence']['amounts'])) {
                 $funding_activities[] = [
                     'article_id' => $article['id'],
+                    'article_title' => $article['title'],
                     'sources' => $intel['funding_intelligence']['sources'],
                     'amounts' => $intel['funding_intelligence']['amounts'],
                     'purposes' => $intel['funding_intelligence']['purposes']
                 ];
             }
+            
+            if (!empty($intel['market_opportunities'])) {
+                $market_moves = array_merge($market_moves, $intel['market_opportunities']);
+            }
         }
         
         return [
             'period_days' => $time_period,
-            'articles_analyzed' => count($news_data),
+            'articles_analyzed' => $processed_articles,
+            'analyses_stored' => $stored_analyses,
             'cost_protection' => 'Limited to 5 articles maximum',
             'companies_activity' => $companies_mentioned,
             'funding_activities' => $funding_activities,
+            'market_opportunities' => array_unique($market_moves),
             'market_intelligence' => $this->summarizeMarketIntelligence($news_data),
             'generated_at' => date('Y-m-d H:i:s')
         ];
@@ -471,6 +487,142 @@ class NewsIntelligenceSystem {
     }
     
     /**
+     * Store competitive intelligence results in database
+     * Updates news_analysis table with competitive data and marks article as competitively analyzed
+     */
+    private function storeCompetitiveIntelligence($article_id, $competitive_data) {
+        // Update or insert competitive intelligence data
+        $stmt = $this->db->prepare("
+            INSERT INTO news_analysis (
+                article_id, 
+                competitive_analysis, 
+                competitors_mentioned,
+                funding_intelligence,
+                market_opportunities,
+                partnership_opportunities,
+                competitive_score,
+                business_relevance,
+                strategic_importance,
+                competitive_analyzed_at,
+                created_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+            ON DUPLICATE KEY UPDATE 
+                competitive_analysis = VALUES(competitive_analysis),
+                competitors_mentioned = VALUES(competitors_mentioned),
+                funding_intelligence = VALUES(funding_intelligence),
+                market_opportunities = VALUES(market_opportunities),
+                partnership_opportunities = VALUES(partnership_opportunities),
+                competitive_score = VALUES(competitive_score),
+                business_relevance = VALUES(business_relevance),
+                strategic_importance = VALUES(strategic_importance),
+                competitive_analyzed_at = NOW(),
+                updated_at = NOW()
+        ");
+        
+        // Prepare data for storage
+        $competitive_json = json_encode($competitive_data);
+        $competitors_json = json_encode($competitive_data['competitors_mentioned'] ?? []);
+        $funding_json = json_encode($competitive_data['funding_intelligence'] ?? []);
+        $opportunities_json = json_encode($competitive_data['market_opportunities'] ?? []);
+        $partnerships_json = json_encode($competitive_data['partnership_opportunities'] ?? []);
+        
+        // Calculate competitive score (0-1) based on data richness
+        $competitive_score = $this->calculateCompetitiveScore($competitive_data);
+        
+        // Determine business relevance and strategic importance
+        $business_relevance = $this->assessBusinessRelevance($competitive_data, $competitive_score);
+        $strategic_importance = $this->assessStrategicImportance($competitive_data, $competitive_score);
+        
+        $stmt->bind_param("isssssdss", 
+            $article_id, 
+            $competitive_json, 
+            $competitors_json, 
+            $funding_json, 
+            $opportunities_json,
+            $partnerships_json,
+            $competitive_score,
+            $business_relevance,
+            $strategic_importance
+        );
+        
+        $analysis_stored = $stmt->execute();
+        
+        // Mark article as competitively analyzed to prevent duplicate processing
+        if ($analysis_stored) {
+            $update_stmt = $this->db->prepare("
+                UPDATE news_articles 
+                SET competitive_analysis_status = 'analyzed', 
+                    competitive_analyzed_at = NOW() 
+                WHERE id = ?
+            ");
+            $update_stmt->bind_param("i", $article_id);
+            $update_stmt->execute();
+        }
+        
+        return $analysis_stored;
+    }
+    
+    /**
+     * Calculate competitive score based on data richness
+     */
+    private function calculateCompetitiveScore($competitive_data) {
+        $score = 0.0;
+        
+        // Companies mentioned (+0.3)
+        if (!empty($competitive_data['competitors_mentioned'])) {
+            $score += 0.3;
+        }
+        
+        // Funding intelligence (+0.3)
+        if (!empty($competitive_data['funding_intelligence']['amounts'])) {
+            $score += 0.3;
+        }
+        
+        // Market opportunities (+0.2)
+        if (!empty($competitive_data['market_opportunities'])) {
+            $score += 0.2;
+        }
+        
+        // Partnership opportunities (+0.2)
+        if (!empty($competitive_data['partnership_opportunities'])) {
+            $score += 0.2;
+        }
+        
+        return round(min($score, 1.0), 2);
+    }
+    
+    /**
+     * Assess business relevance based on competitive data
+     */
+    private function assessBusinessRelevance($competitive_data, $competitive_score) {
+        if ($competitive_score >= 0.8) return 'high';
+        if ($competitive_score >= 0.5) return 'medium'; 
+        if ($competitive_score >= 0.2) return 'low';
+        return 'none';
+    }
+    
+    /**
+     * Assess strategic importance based on competitive data
+     */
+    private function assessStrategicImportance($competitive_data, $competitive_score) {
+        // Check for high-value indicators
+        $funding_amounts = $competitive_data['funding_intelligence']['amounts'] ?? [];
+        $has_large_funding = false;
+        
+        foreach ($funding_amounts as $amount) {
+            if (preg_match('/(\d+(?:\.\d+)?)\s*(?:miljoonaa|million|M€|M\$)/i', $amount)) {
+                $has_large_funding = true;
+                break;
+            }
+        }
+        
+        if ($has_large_funding || $competitive_score >= 0.9) return 'critical';
+        if ($competitive_score >= 0.7) return 'important';
+        if ($competitive_score >= 0.4) return 'moderate';
+        return 'low';
+    }
+    
+    /**
      * Get news from specific period
      */
     private function getNewsFromPeriod($start_date, $end_date) {
@@ -512,13 +664,16 @@ class NewsIntelligenceSystem {
     /**
      * Get news from last X days - only unanalyzed articles to avoid duplicate processing
      * COST PROTECTION: Limited to 5 articles for competitive intelligence
+     * Uses analysis_status to check if article has been generally analyzed
+     * Uses competitive_analysis_status to avoid duplicate competitive analysis
      */
     private function getNewsFromDays($days, $limit = null) {
         $sql = "
             SELECT id, title, content, published_date 
             FROM news_articles 
             WHERE published_date >= DATE_SUB(NOW(), INTERVAL ? DAY)
-            AND (ai_analysis_status IS NULL OR ai_analysis_status != 'analyzed')
+            AND analysis_status = 'analyzed'
+            AND (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
             ORDER BY published_date DESC
         ";
         
