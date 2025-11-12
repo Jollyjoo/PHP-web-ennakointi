@@ -176,6 +176,8 @@
         <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutisia lähteistä ja tallenna tietokantaan (ei OpenAI-kutsuja)">💾 Kerää uutisia (tietokantaan)</button>        
         <button class="btn" onclick="loadWeeklyReport()" title="Luo Kuukausiraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Kuukausiraportti (tietokannasta)</button>
         <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi uutisesta kilpailijoiden ja markkinoiden toimintaa (OpenAI, limit 5)">🔍 Kilpailuanalyysi (OpenAI, limit 5)</button>
+        <button class="btn" onclick="loadMediaseurantaIntelligence()" title="Analysoi Mediaseuranta-dataa ja luo yhteenvetoja (OpenAI, limit 5)" style="background: #8e44ad;">📊 Mediaseuranta Insights (OpenAI, limit 5)</button>
+        <button class="btn" onclick="loadMediaseurantaCompetitive()" title="Kilpailutiedustelu Mediaseuranta-datasta (OpenAI, limit 5)" style="background: #2c3e50;">🏢 Mediaseuranta Kilpailuanalyysi (OpenAI, limit 5)</button>
         <button class="btn" onclick="runAnalysis()" title="Suorita AI-analyysi ja päivitä visualisoinnit">🧠 Suorita AI-analyysi</button>
         <button class="btn" onclick="viewStoredNews()" style="background: #6f42c1;" title="Näytä tietokantaan tallennetut uutiset">📰 Näytä Tallennetut</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Testaus ilman tallennusta</button>
@@ -210,6 +212,22 @@
                 <h3>🏢 Kilpailija-analyysi</h3>
                 <div id="competitive-container">
                     <p>Klikkaa "Kilpailija-analyysi" analysoidaksesi markkinatoimintaa...</p>
+                </div>
+            </div>
+
+            <!-- Mediaseuranta Intelligence -->
+            <div class="widget">
+                <h3>📰 Mediaseuranta Insights</h3>
+                <div id="mediaseuranta-container">
+                    <p>Klikkaa "Mediaseuranta Insights" analysoidaksesi mediaseurantatietoja...</p>
+                </div>
+            </div>
+
+            <!-- Mediaseuranta Competitive Intelligence -->
+            <div class="widget">
+                <h3>🏢 Mediaseuranta Kilpailuanalyysi</h3>
+                <div id="mediaseuranta-competitive-container">
+                    <p>Klikkaa "Mediaseuranta Kilpailuanalyysi" kilpailutiedustelua varten...</p>
                 </div>
             </div>
         </div>
@@ -819,6 +837,251 @@
                 `;
                 
                 updateStatus('Failed to load competitive intelligence', 'error');
+            }
+            showLoading(false);
+        }
+
+        // Load mediaseuranta intelligence
+        async function loadMediaseurantaIntelligence() {
+            showLoading(true);
+            try {
+                const response = await fetch('minimal_news_api.php?action=mediaseuranta_analysis&days=30');
+                const data = await response.json();
+                
+                const container = document.getElementById('mediaseuranta-container');
+                
+                // Show analysis summary and cost protection
+                container.innerHTML = `
+                    <div class="alert medium" style="background: #e8f4fd; border-color: #17a2b8;">
+                        <strong>📊 Mediaseuranta Analysis Summary</strong><br>
+                        New Analyzed: ${data.analysis_summary?.new_analyzed || 0} (max 5)<br>
+                        Total Entries: ${data.analysis_summary?.total_entries || 0}<br>
+                        Period: ${data.analysis_summary?.period_days || 30} days | ${data.analysis_summary?.cost_protection || 'Cost protection active'}
+                    </div>
+                    <h4>📊 Teema-analyysi</h4>
+                    <div id="theme-breakdown"></div>
+                    <h4>😊 Sentimentti-yhteenveto</h4>
+                    <div id="sentiment-breakdown"></div>
+                    <h4>🚨 Kriisihälytykset</h4>
+                    <div id="crisis-alerts"></div>
+                    <h4>⭐ Korkean vaikutuksen uutiset</h4>
+                    <div id="high-impact-news"></div>
+                `;
+                
+                // Display theme breakdown
+                const themeBreakdown = document.getElementById('theme-breakdown');
+                const themes = data.theme_breakdown || {};
+                if (Object.keys(themes).length === 0) {
+                    themeBreakdown.innerHTML = '<p style="color: #666;">No themes analyzed yet</p>';
+                } else {
+                    Object.entries(themes).forEach(([theme, count]) => {
+                        themeBreakdown.innerHTML += `
+                            <div class="metric">
+                                <span><strong>${theme}</strong></span>
+                                <span class="metric-value">${count} uutista</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Display sentiment breakdown
+                const sentimentBreakdown = document.getElementById('sentiment-breakdown');
+                const sentiments = data.sentiment_summary || {positive: 0, neutral: 0, negative: 0};
+                sentimentBreakdown.innerHTML = `
+                    <div class="metric">
+                        <span>😊 Positiivinen</span>
+                        <span class="metric-value" style="color: #28a745;">${sentiments.positive || 0}</span>
+                    </div>
+                    <div class="metric">
+                        <span>😐 Neutraali</span>
+                        <span class="metric-value" style="color: #6c757d;">${sentiments.neutral || 0}</span>
+                    </div>
+                    <div class="metric">
+                        <span>😟 Negatiivinen</span>
+                        <span class="metric-value" style="color: #dc3545;">${sentiments.negative || 0}</span>
+                    </div>
+                `;
+                
+                // Display crisis alerts
+                const crisisAlerts = document.getElementById('crisis-alerts');
+                const crises = data.crisis_alerts || [];
+                if (crises.length === 0) {
+                    crisisAlerts.innerHTML = '<p style="color: #666;">No crisis signals detected</p>';
+                } else {
+                    crises.forEach(crisis => {
+                        const probability = Math.round((crisis.probability || 0) * 100);
+                        crisisAlerts.innerHTML += `
+                            <div class="alert high" style="margin-bottom: 10px;">
+                                <strong>⚠️ ${crisis.title}</strong><br>
+                                <small><strong>Probability:</strong> ${probability}% | <strong>Date:</strong> ${crisis.date}</small><br>
+                                <small><strong>Theme:</strong> ${crisis.theme}</small>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Display high impact news
+                const highImpactNews = document.getElementById('high-impact-news');
+                const highImpact = data.high_impact_news || [];
+                if (highImpact.length === 0) {
+                    highImpactNews.innerHTML = '<p style="color: #666;">No high-impact news identified</p>';
+                } else {
+                    highImpact.forEach(news => {
+                        const impactColor = news.impact === 'positive' ? '#28a745' : 
+                                          news.impact === 'negative' ? '#dc3545' : '#6c757d';
+                        highImpactNews.innerHTML += `
+                            <div class="alert medium" style="margin-bottom: 10px; border-left: 4px solid ${impactColor};">
+                                <strong>${news.title}</strong><br>
+                                <small><strong>Score:</strong> ${news.score}/10 | <strong>Impact:</strong> ${news.impact} | <strong>Date:</strong> ${news.date}</small><br>
+                                <small>${news.summary || 'No summary available'}</small>
+                            </div>
+                        `;
+                    });
+                }
+                
+                updateStatus(`Mediaseuranta insights updated (${data.analysis_summary?.new_analyzed || 0} new analyses, cost protected)`, 'success');
+            } catch (error) {
+                console.error('Error loading mediaseuranta intelligence:', error);
+                
+                // Show error with helpful information
+                const container = document.getElementById('mediaseuranta-container');
+                container.innerHTML = `
+                    <div class="alert high">
+                        <strong>❌ Mediaseuranta Intelligence Error</strong><br>
+                        Error: ${error.message}<br>
+                        <small>Possible causes:</small>
+                        <ul style="margin-top: 10px; margin-bottom: 10px;">
+                            <li>Mediaseuranta table not available or empty</li>
+                            <li>AI analysis columns not added to database</li>
+                            <li>OpenAI API configuration issues</li>
+                        </ul>
+                        <button class="btn" onclick="analyzeMediaseuranta()" style="margin-top: 10px;">
+                            📰 Try Existing Mediaseuranta Analysis
+                        </button>
+                    </div>
+                `;
+                
+                updateStatus('Failed to load mediaseuranta intelligence', 'error');
+            }
+            showLoading(false);
+        }
+
+        // Load mediaseuranta competitive intelligence
+        async function loadMediaseurantaCompetitive() {
+            showLoading(true);
+            try {
+                const response = await fetch('minimal_news_api.php?action=mediaseuranta_competitive&days=30');
+                const data = await response.json();
+                
+                const container = document.getElementById('mediaseuranta-competitive-container');
+                
+                // Show analysis summary and cost protection
+                container.innerHTML = `
+                    <div class="alert medium" style="background: #e8f0fe; border-color: #2c3e50;">
+                        <strong>🏢 Mediaseuranta Competitive Analysis</strong><br>
+                        New Analyzed: ${data.analysis_summary?.new_analyzed || 0} (max 5)<br>
+                        Total Insights: ${data.analysis_summary?.total_competitive_insights || 0}<br>
+                        Period: ${data.analysis_summary?.period_days || 30} days | ${data.analysis_summary?.cost_protection || 'Cost protection active'}
+                    </div>
+                    <h4>🏢 Companies Activity</h4>
+                    <div id="mediaseuranta-companies-list"></div>
+                    <h4>💰 Funding Intelligence</h4>
+                    <div id="mediaseuranta-funding-list"></div>
+                    <h4>⭐ Strategic High Priority</h4>
+                    <div id="mediaseuranta-strategic-list"></div>
+                    <h4>⚠️ Competitive Threats</h4>
+                    <div id="mediaseuranta-threats-list"></div>
+                `;
+                
+                // Display companies activity
+                const companiesList = document.getElementById('mediaseuranta-companies-list');
+                const companiesData = data.companies_activity || {};
+                if (Object.keys(companiesData).length === 0) {
+                    companiesList.innerHTML = '<p style="color: #666;">No company activities detected</p>';
+                } else {
+                    Object.entries(companiesData).forEach(([company, count]) => {
+                        companiesList.innerHTML += `
+                            <div class="metric">
+                                <span><strong>${company}</strong></span>
+                                <span class="metric-value">${count} mentions</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Display funding intelligence
+                const fundingList = document.getElementById('mediaseuranta-funding-list');
+                const fundingData = data.funding_activities || [];
+                if (fundingData.length === 0) {
+                    fundingList.innerHTML = '<p style="color: #666;">No funding activities detected</p>';
+                } else {
+                    fundingData.forEach(funding => {
+                        fundingList.innerHTML += `
+                            <div class="alert medium" style="margin-bottom: 10px;">
+                                <strong>${funding.title}</strong><br>
+                                <small><strong>Date:</strong> ${funding.date} | <strong>Amounts:</strong> ${funding.amounts.join(', ') || 'N/A'}</small><br>
+                                <small><strong>Sources:</strong> ${funding.sources.join(', ') || 'N/A'}</small>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Display strategic high priority items
+                const strategicList = document.getElementById('mediaseuranta-strategic-list');
+                const strategicData = data.strategic_high_priority || [];
+                if (strategicData.length === 0) {
+                    strategicList.innerHTML = '<p style="color: #666;">No high-priority strategic items</p>';
+                } else {
+                    strategicData.forEach(item => {
+                        const relevanceColor = item.relevance === 'high' ? '#dc3545' : 
+                                             item.relevance === 'medium' ? '#ffc107' : '#28a745';
+                        strategicList.innerHTML += `
+                            <div class="alert high" style="margin-bottom: 10px; border-left: 4px solid ${relevanceColor};">
+                                <strong>🔥 ${item.title}</strong><br>
+                                <small><strong>Importance:</strong> ${item.importance}/5 | <strong>Score:</strong> ${Math.round((item.score || 0) * 100)}% | <strong>Date:</strong> ${item.date}</small>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Display competitive threats
+                const threatsList = document.getElementById('mediaseuranta-threats-list');
+                const threatsData = data.competitive_threats || [];
+                if (threatsData.length === 0) {
+                    threatsList.innerHTML = '<p style="color: #666;">No competitive threats identified</p>';
+                } else {
+                    threatsData.forEach(threat => {
+                        threatsList.innerHTML += `
+                            <div class="alert high" style="margin-bottom: 8px;">
+                                <span>⚠️ ${threat}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                updateStatus(`Mediaseuranta competitive intelligence updated (${data.analysis_summary?.new_analyzed || 0} new analyses, cost protected)`, 'success');
+            } catch (error) {
+                console.error('Error loading mediaseuranta competitive intelligence:', error);
+                
+                // Show error with helpful information
+                const container = document.getElementById('mediaseuranta-competitive-container');
+                container.innerHTML = `
+                    <div class="alert high">
+                        <strong>❌ Mediaseuranta Competitive Intelligence Error</strong><br>
+                        Error: ${error.message}<br>
+                        <small>Possible causes:</small>
+                        <ul style="margin-top: 10px; margin-bottom: 10px;">
+                            <li>Competitive intelligence columns not added to Mediaseuranta table</li>
+                            <li>No mediaseuranta entries with general AI analysis completed</li>
+                            <li>OpenAI API configuration issues</li>
+                        </ul>
+                        <button class="btn" onclick="loadMediaseurantaIntelligence()" style="margin-top: 10px;">
+                            📊 Try General Mediaseuranta Analysis First
+                        </button>
+                    </div>
+                `;
+                
+                updateStatus('Failed to load mediaseuranta competitive intelligence', 'error');
             }
             showLoading(false);
         }

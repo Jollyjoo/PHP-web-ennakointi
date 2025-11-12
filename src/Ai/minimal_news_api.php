@@ -578,6 +578,534 @@ function storeCompetitiveResults($db_connection, $article_id, $competitive_data)
     }
 }
 
+// Helper function to get mediaseuranta entries for analysis
+function getMediaseurantaEntries($db_connection, $days = 30, $limit = 5) {
+    if (!$db_connection) {
+        return [];
+    }
+    
+    $stmt = $db_connection->prepare("
+        SELECT * FROM Mediaseuranta 
+        WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND (ai_analysis_status IS NULL OR ai_analysis_status = 'pending')
+        ORDER BY uutisen_pvm DESC
+        LIMIT ?
+    ");
+    
+    if (!$stmt) {
+        return [];
+    }
+    
+    $stmt->bind_param("ii", $days, $limit);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Helper function to get analyzed mediaseuranta data for insights
+function getAnalyzedMediaseurantaData($db_connection, $days = 30) {
+    if (!$db_connection) {
+        return [];
+    }
+    
+    $stmt = $db_connection->prepare("
+        SELECT 
+            Teema,
+            uutisen_pvm,
+            Uutinen,
+            ai_relevance_score,
+            ai_economic_impact,
+            ai_sentiment,
+            ai_crisis_probability,
+            ai_key_sectors,
+            ai_summary
+        FROM Mediaseuranta 
+        WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND ai_analysis_status = 'completed'
+        ORDER BY uutisen_pvm DESC
+    ");
+    
+    if (!$stmt) {
+        return [];
+    }
+    
+    $stmt->bind_param("i", $days);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Helper function for mediaseuranta analysis
+function runMediaseurantaAnalysis($entry, $openai_key = null) {
+    if ($openai_key) {
+        return runMediaseurantaOpenAIAnalysis($entry, $openai_key);
+    } else {
+        return runMediaseurantaFallbackAnalysis($entry);
+    }
+}
+
+// OpenAI mediaseuranta analysis
+function runMediaseurantaOpenAIAnalysis($entry, $openai_key) {
+    try {
+        $prompt = "Analysoi tämä mediaseurantauutinen Hämeen alueen näkökulmasta. Anna vastaus JSON-muodossa:
+{
+    \"relevance_score\": 1-10,
+    \"economic_impact\": \"positive/neutral/negative\",
+    \"employment_impact\": \"kuvaus työllisyysvaikutuksista\",
+    \"key_sectors\": [\"lista relevanteista sektoreista\"],
+    \"sentiment\": \"positive/neutral/negative\",
+    \"crisis_probability\": 0.0-1.0,
+    \"summary\": \"lyhyt yhteenveto (max 200 merkkiä)\",
+    \"keywords\": [\"lista avainsanoista\"],
+    \"regional_significance\": \"merkitys Hämeen alueelle\",
+    \"long_term_impact\": \"pitkän aikavälin vaikutukset\"
+}
+
+Teema: {$entry['Teema']}
+Uutinen: {$entry['Uutinen']}
+Päivämäärä: {$entry['uutisen_pvm']}
+Hankkeen luokitus: {$entry['Hankkeen_luokitus']}";
+
+        $data = [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Olet Hämeen alueen kehitysasiantuntija. Analysoi mediaseurantauutisia alueen talouden ja työllisyyden näkökulmasta.'
+                ],
+                [
+                    'role' => 'user', 
+                    'content' => $prompt
+                ]
+            ],
+            'max_tokens' => 800,
+            'temperature' => 0.3
+        ];
+
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $openai_key
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code === 200 && $response) {
+            $result = json_decode($response, true);
+            if (isset($result['choices'][0]['message']['content'])) {
+                $content = $result['choices'][0]['message']['content'];
+                
+                // Extract JSON from response
+                if (preg_match('/\{.*\}/s', $content, $matches)) {
+                    $analysis = json_decode($matches[0], true);
+                    if ($analysis) {
+                        return $analysis;
+                    }
+                }
+            }
+        }
+        
+        return runMediaseurantaFallbackAnalysis($entry);
+        
+    } catch (Exception $e) {
+        return runMediaseurantaFallbackAnalysis($entry);
+    }
+}
+
+// Fallback mediaseuranta analysis
+function runMediaseurantaFallbackAnalysis($entry) {
+    $text = strtolower($entry['Teema'] . ' ' . $entry['Uutinen']);
+    
+    // Determine economic impact based on theme and content
+    $positive_keywords = ['investointi', 'kasvu', 'uudet työpaikat', 'laajennus', 'kehitys'];
+    $negative_keywords = ['irtisanominen', 'konkurssi', 'supistus', 'kriisi', 'sulkeminen', 'lomautus'];
+    
+    $positive_score = 0;
+    $negative_score = 0;
+    
+    foreach ($positive_keywords as $keyword) {
+        if (strpos($text, $keyword) !== false) $positive_score++;
+    }
+    
+    foreach ($negative_keywords as $keyword) {
+        if (strpos($text, $keyword) !== false) $negative_score++;
+    }
+    
+    $economic_impact = 'neutral';
+    $sentiment = 'neutral';
+    $crisis_probability = 0.0;
+    $relevance_score = 5;
+    
+    if ($positive_score > $negative_score) {
+        $economic_impact = 'positive';
+        $sentiment = 'positive';
+        $relevance_score = min(10, 6 + $positive_score);
+    } elseif ($negative_score > $positive_score) {
+        $economic_impact = 'negative';
+        $sentiment = 'negative';
+        $crisis_probability = min(1.0, 0.3 + ($negative_score * 0.2));
+        $relevance_score = min(10, 7 + $negative_score);
+    }
+    
+    // Extract sectors from theme
+    $sectors = [];
+    $theme = $entry['Teema'] ?? '';
+    if (strpos($theme, 'Investoinnit') !== false) $sectors[] = 'Investoinnit';
+    if (strpos($theme, 'Julkinen talous') !== false) $sectors[] = 'Julkinen sektori';
+    if (strpos($theme, 'Muutosneuvottelut') !== false) $sectors[] = 'Yritystoiminta';
+    
+    return [
+        'relevance_score' => $relevance_score,
+        'economic_impact' => $economic_impact,
+        'employment_impact' => $economic_impact === 'positive' ? 'Positiivinen vaikutus työllisyyteen' : 
+                              ($economic_impact === 'negative' ? 'Negatiivinen vaikutus työllisyyteen' : 'Neutraali vaikutus'),
+        'key_sectors' => $sectors,
+        'sentiment' => $sentiment,
+        'crisis_probability' => $crisis_probability,
+        'summary' => substr($entry['Uutinen'], 0, 150) . '...',
+        'keywords' => explode(' ', substr(str_replace([',', '.', '!', '?'], '', $text), 0, 100)),
+        'regional_significance' => 'Merkitys Hämeen alueelle arvioitu',
+        'long_term_impact' => $crisis_probability > 0.5 ? 'Seurantaa vaativa tilanne' : 'Normaali kehitys',
+        'analysis_method' => 'rule_based'
+    ];
+}
+
+// Helper function to store mediaseuranta analysis results
+function storeMediaseurantaResults($db_connection, $entry_id, $analysis_data) {
+    try {
+        $stmt = $db_connection->prepare("
+            UPDATE Mediaseuranta SET
+                ai_analysis_status = 'completed',
+                ai_analyzed_at = NOW(),
+                ai_relevance_score = ?,
+                ai_economic_impact = ?,
+                ai_employment_impact = ?,
+                ai_key_sectors = ?,
+                ai_sentiment = ?,
+                ai_crisis_probability = ?,
+                ai_summary = ?,
+                ai_keywords = ?,
+                ai_full_analysis = ?
+            WHERE ID = ?
+        ");
+        
+        if ($stmt) {
+            $sectors_json = json_encode($analysis_data['key_sectors'] ?? []);
+            $keywords_json = json_encode(array_slice($analysis_data['keywords'] ?? [], 0, 10));
+            $full_analysis_json = json_encode($analysis_data);
+            
+            $stmt->bind_param(
+                "issssdsssi", 
+                $analysis_data['relevance_score'],
+                $analysis_data['economic_impact'],
+                $analysis_data['employment_impact'],
+                $sectors_json,
+                $analysis_data['sentiment'],
+                $analysis_data['crisis_probability'],
+                $analysis_data['summary'],
+                $keywords_json,
+                $full_analysis_json,
+                $entry_id
+            );
+            
+            return $stmt->execute();
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        error_log("Mediaseuranta analysis storage failed: " . $e->getMessage());
+        return false;
+    }
+}
+
+// ================= MEDIASEURANTA COMPETITIVE INTELLIGENCE FUNCTIONS =================
+
+// Helper function to get mediaseuranta entries for competitive analysis
+function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 5) {
+    if (!$db_connection) {
+        return [];
+    }
+    
+    $stmt = $db_connection->prepare("
+        SELECT ID, Teema, Uutinen, uutisen_pvm, Url, Hankkeen_luokitus 
+        FROM Mediaseuranta 
+        WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND ai_analysis_status = 'completed'
+        AND (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
+        ORDER BY uutisen_pvm DESC
+        LIMIT ?
+    ");
+    
+    if (!$stmt) {
+        return [];
+    }
+    
+    $stmt->bind_param("ii", $days, $limit);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Helper function for mediaseuranta competitive analysis
+function runMediaseurantaCompetitiveAnalysis($entry, $openai_key = null) {
+    if ($openai_key) {
+        return runMediaseurantaCompetitiveOpenAIAnalysis($entry, $openai_key);
+    } else {
+        return runMediaseurantaCompetitiveFallbackAnalysis($entry);
+    }
+}
+
+// OpenAI competitive analysis for mediaseuranta
+function runMediaseurantaCompetitiveOpenAIAnalysis($entry, $openai_key) {
+    try {
+        $prompt = "Analysoi tämä mediaseurantauutinen kilpailutiedustelun näkökulmasta Hämeen alueelle. Anna vastaus JSON-muodossa:
+{
+    \"competitors_mentioned\": [\"yritys1\", \"yritys2\"],
+    \"competitive_moves\": [\"strateginen siirto1\", \"siirto2\"],
+    \"market_opportunities\": [\"markkinamahdollisuus1\", \"mahdollisuus2\"],
+    \"funding_intelligence\": {
+        \"sources\": [\"rahoituslähde1\"],
+        \"amounts\": [\"summa1\"],
+        \"purposes\": [\"tarkoitus1\"]
+    },
+    \"partnership_opportunities\": [\"kumppanuusmahdollisuus1\"],
+    \"competitive_threats\": [\"kilpailuuhka1\", \"uhka2\"],
+    \"strategic_importance\": 1-5,
+    \"market_intelligence\": {
+        \"trends\": [\"trendi1\"],
+        \"disruptions\": [\"häiriö1\"],
+        \"growth_areas\": [\"kasvualue1\"]
+    },
+    \"action_recommendations\": [\"suositus1\", \"suositus2\"]
+}
+
+Teema: {$entry['Teema']}
+Uutinen: {$entry['Uutinen']}
+Päivämäärä: {$entry['uutisen_pvm']}
+Hankkeen luokitus: {$entry['Hankkeen_luokitus']}";
+
+        $data = [
+            'model' => 'gpt-3.5-turbo',
+            'messages' => [
+                [
+                    'role' => 'system',
+                    'content' => 'Olet kokenut kilpailutiedustelu-analyytikko Hämeen ELY-keskukselle. Analysoi mediaseurantauutisia kilpailutiedustelun ja liiketoimintamahdollisuuksien näkökulmasta.'
+                ],
+                [
+                    'role' => 'user', 
+                    'content' => $prompt
+                ]
+            ],
+            'max_tokens' => 1200,
+            'temperature' => 0.3
+        ];
+
+        $ch = curl_init('https://api.openai.com/v1/chat/completions');
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $openai_key
+        ]);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($http_code === 200 && $response) {
+            $result = json_decode($response, true);
+            if (isset($result['choices'][0]['message']['content'])) {
+                $content = $result['choices'][0]['message']['content'];
+                
+                // Extract JSON from response
+                if (preg_match('/\{.*\}/s', $content, $matches)) {
+                    $analysis = json_decode($matches[0], true);
+                    if ($analysis) {
+                        return $analysis;
+                    }
+                }
+            }
+        }
+        
+        return runMediaseurantaCompetitiveFallbackAnalysis($entry);
+        
+    } catch (Exception $e) {
+        return runMediaseurantaCompetitiveFallbackAnalysis($entry);
+    }
+}
+
+// Fallback competitive analysis for mediaseuranta
+function runMediaseurantaCompetitiveFallbackAnalysis($entry) {
+    $text = strtolower($entry['Teema'] . ' ' . $entry['Uutinen']);
+    
+    // Extract competitive information
+    $competitors = [];
+    $funding = ['sources' => [], 'amounts' => [], 'purposes' => []];
+    $opportunities = [];
+    $threats = [];
+    
+    // Look for company mentions
+    if (preg_match_all('/(\w+\s+oy|\w+\s+oyj|\w+\s+ltd|\w+\s+ab|\w+\s+group)/i', $entry['Uutinen'], $matches)) {
+        $competitors = array_unique($matches[0]);
+    }
+    
+    // Look for funding mentions
+    if (preg_match_all('/(\d+(?:\.\d+)?\s*(?:miljoonaa|million|M€|€|miljardia))/i', $entry['Uutinen'], $matches)) {
+        $funding['amounts'] = $matches[0];
+    }
+    
+    // Opportunities based on theme and content
+    $opportunity_keywords = ['investointi', 'laajennus', 'uudet työpaikat', 'kasvu', 'kehitys', 'hanke', 'yhteistyö'];
+    foreach ($opportunity_keywords as $keyword) {
+        if (strpos($text, $keyword) !== false) {
+            $opportunities[] = ucfirst($keyword) . ' havaittu mediaseurannassa';
+        }
+    }
+    
+    // Threats based on negative indicators
+    $threat_keywords = ['konkurssi', 'irtisanominen', 'sulkeminen', 'supistus', 'lomautus', 'kriisi'];
+    foreach ($threat_keywords as $keyword) {
+        if (strpos($text, $keyword) !== false) {
+            $threats[] = ucfirst($keyword) . ' havaittu mediaseurannassa';
+        }
+    }
+    
+    // Strategic importance based on theme
+    $strategic_importance = 3; // Default medium
+    if (strpos($text, 'investointi') !== false || strpos($text, 'kansainvälistyminen') !== false) {
+        $strategic_importance = 4;
+    }
+    if (!empty($threats)) {
+        $strategic_importance = 5;
+    }
+    
+    return [
+        'competitors_mentioned' => array_slice($competitors, 0, 5),
+        'competitive_moves' => [],
+        'market_opportunities' => $opportunities,
+        'funding_intelligence' => $funding,
+        'partnership_opportunities' => [],
+        'competitive_threats' => $threats,
+        'strategic_importance' => $strategic_importance,
+        'market_intelligence' => [
+            'trends' => [],
+            'disruptions' => $threats,
+            'growth_areas' => $opportunities
+        ],
+        'action_recommendations' => []
+    ];
+}
+
+// Helper function to store mediaseuranta competitive results
+function storeMediaseurantaCompetitiveResults($db_connection, $entry_id, $competitive_data) {
+    try {
+        $competitive_json = json_encode($competitive_data);
+        $competitors_json = json_encode($competitive_data['competitors_mentioned'] ?? []);
+        $funding_json = json_encode($competitive_data['funding_intelligence'] ?? []);
+        $opportunities_json = json_encode($competitive_data['market_opportunities'] ?? []);
+        $threats_json = json_encode($competitive_data['competitive_threats'] ?? []);
+        $market_intel_json = json_encode($competitive_data['market_intelligence'] ?? []);
+        $recommendations_json = json_encode($competitive_data['action_recommendations'] ?? []);
+        
+        // Calculate competitive score
+        $score = 0.0;
+        if (!empty($competitive_data['competitors_mentioned'])) $score += 0.25;
+        if (!empty($competitive_data['funding_intelligence']['amounts'])) $score += 0.35;
+        if (!empty($competitive_data['market_opportunities'])) $score += 0.25;
+        if (!empty($competitive_data['competitive_threats'])) $score += 0.15;
+        
+        $business_relevance = $score >= 0.7 ? 'high' : ($score >= 0.4 ? 'medium' : ($score > 0 ? 'low' : 'none'));
+        $strategic_importance = $competitive_data['strategic_importance'] ?? 3;
+        
+        $stmt = $db_connection->prepare("
+            UPDATE Mediaseuranta SET
+                competitive_analysis_status = 'analyzed',
+                competitive_analyzed_at = NOW(),
+                competitive_analysis = ?,
+                competitors_mentioned = ?,
+                funding_intelligence = ?,
+                market_opportunities = ?,
+                partnership_opportunities = ?,
+                competitive_score = ?,
+                business_relevance = ?,
+                strategic_importance = ?,
+                competitive_threats = ?,
+                market_intelligence = ?,
+                action_recommendations = ?
+            WHERE ID = ?
+        ");
+        
+        if ($stmt) {
+            $partnerships_json = json_encode($competitive_data['partnership_opportunities'] ?? []);
+            
+            $stmt->bind_param(
+                "sssssssisssi", 
+                $competitive_json,
+                $competitors_json,
+                $funding_json,
+                $opportunities_json,
+                $partnerships_json,
+                $score,
+                $business_relevance,
+                $strategic_importance,
+                $threats_json,
+                $market_intel_json,
+                $recommendations_json,
+                $entry_id
+            );
+            
+            return $stmt->execute();
+        }
+        
+        return false;
+        
+    } catch (Exception $e) {
+        error_log("Mediaseuranta competitive analysis storage failed: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Helper function to get competitive intelligence insights from mediaseuranta
+function getMediaseurantaCompetitiveInsights($db_connection, $days = 30) {
+    if (!$db_connection) {
+        return [];
+    }
+    
+    $stmt = $db_connection->prepare("
+        SELECT 
+            ID, Teema, Uutinen, uutisen_pvm,
+            competitive_score, business_relevance, strategic_importance,
+            competitors_mentioned, funding_intelligence, market_opportunities,
+            competitive_threats, market_intelligence, action_recommendations
+        FROM Mediaseuranta 
+        WHERE uutisen_pvm >= DATE_SUB(NOW(), INTERVAL ? DAY)
+        AND competitive_analysis_status = 'analyzed'
+        ORDER BY competitive_score DESC, strategic_importance DESC
+    ");
+    
+    if (!$stmt) {
+        return [];
+    }
+    
+    $stmt->bind_param("i", $days);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_all(MYSQLI_ASSOC);
+}
+
 // Main processing
 try {
     require_once 'config.php';
@@ -797,11 +1325,245 @@ try {
             }
             break;
             
+        case 'mediaseuranta_analysis':
+            if (!$database_available) {
+                $result = [
+                    'error' => 'Database not available',
+                    'message' => 'Mediaseuranta analysis requires server-side database connection.',
+                    'environment' => 'local_development',
+                    'fallback_available' => false
+                ];
+            } else {
+                try {
+                    $days = $_GET['days'] ?? 30;
+                    
+                    // First, analyze unanalyzed entries (limit 5 for cost protection)
+                    $unanalyzed_entries = getMediaseurantaEntries($db_connection, $days, 5);
+                    $analyzed_count = 0;
+                    $stored_count = 0;
+                    
+                    // Process unanalyzed entries
+                    foreach ($unanalyzed_entries as $entry) {
+                        $analysis = runMediaseurantaAnalysis($entry, $openai_api_key);
+                        $analyzed_count++;
+                        
+                        if (storeMediaseurantaResults($db_connection, $entry['ID'], $analysis)) {
+                            $stored_count++;
+                        }
+                    }
+                    
+                    // Get insights from already analyzed data
+                    $analyzed_data = getAnalyzedMediaseurantaData($db_connection, $days);
+                    
+                    // Generate insights
+                    $theme_breakdown = [];
+                    $sentiment_summary = ['positive' => 0, 'neutral' => 0, 'negative' => 0];
+                    $high_impact_news = [];
+                    $crisis_alerts = [];
+                    $sector_activity = [];
+                    
+                    foreach ($analyzed_data as $item) {
+                        // Theme breakdown
+                        $theme = $item['Teema'] ?? 'Muut';
+                        $theme_breakdown[$theme] = ($theme_breakdown[$theme] ?? 0) + 1;
+                        
+                        // Sentiment summary
+                        $sentiment = $item['ai_sentiment'] ?? 'neutral';
+                        $sentiment_summary[$sentiment]++;
+                        
+                        // High impact news (relevance score >= 8)
+                        if (($item['ai_relevance_score'] ?? 0) >= 8) {
+                            $high_impact_news[] = [
+                                'title' => $item['Uutinen'],
+                                'date' => $item['uutisen_pvm'],
+                                'score' => $item['ai_relevance_score'],
+                                'impact' => $item['ai_economic_impact'],
+                                'summary' => $item['ai_summary']
+                            ];
+                        }
+                        
+                        // Crisis alerts (crisis probability >= 0.6)
+                        if (($item['ai_crisis_probability'] ?? 0) >= 0.6) {
+                            $crisis_alerts[] = [
+                                'title' => $item['Uutinen'],
+                                'date' => $item['uutisen_pvm'],
+                                'probability' => $item['ai_crisis_probability'],
+                                'theme' => $item['Teema']
+                            ];
+                        }
+                        
+                        // Sector activity
+                        $sectors = json_decode($item['ai_key_sectors'] ?? '[]', true) ?: [];
+                        foreach ($sectors as $sector) {
+                            $sector_activity[$sector] = ($sector_activity[$sector] ?? 0) + 1;
+                        }
+                    }
+                    
+                    $result = [
+                        'analysis_summary' => [
+                            'period_days' => $days,
+                            'new_analyzed' => $analyzed_count,
+                            'stored_analyses' => $stored_count,
+                            'total_entries' => count($analyzed_data),
+                            'cost_protection' => 'Limited to 5 new analyses maximum'
+                        ],
+                        'theme_breakdown' => $theme_breakdown,
+                        'sentiment_summary' => $sentiment_summary,
+                        'high_impact_news' => array_slice($high_impact_news, 0, 10), // Top 10
+                        'crisis_alerts' => $crisis_alerts,
+                        'sector_activity' => $sector_activity,
+                        'generated_at' => date('Y-m-d H:i:s'),
+                        'environment' => 'server'
+                    ];
+                    
+                } catch (Exception $e) {
+                    $result = [
+                        'error' => 'Mediaseuranta analysis failed: ' . $e->getMessage(),
+                        'analysis_summary' => [
+                            'period_days' => $days ?? 30,
+                            'new_analyzed' => 0,
+                            'stored_analyses' => 0,
+                            'total_entries' => 0,
+                            'cost_protection' => 'Error occurred'
+                        ],
+                        'theme_breakdown' => [],
+                        'sentiment_summary' => ['positive' => 0, 'neutral' => 0, 'negative' => 0],
+                        'high_impact_news' => [],
+                        'crisis_alerts' => [],
+                        'sector_activity' => [],
+                        'environment' => 'server'
+                    ];
+                }
+            }
+            break;
+            
+        case 'mediaseuranta_competitive':
+            if (!$database_available) {
+                $result = [
+                    'error' => 'Database not available',
+                    'message' => 'Mediaseuranta competitive intelligence requires server-side database connection.',
+                    'environment' => 'local_development',
+                    'fallback_available' => false
+                ];
+            } else {
+                try {
+                    $days = $_GET['days'] ?? 30;
+                    
+                    // Get mediaseuranta entries ready for competitive analysis (limit 5)
+                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, $days, 5);
+                    $analyzed_count = 0;
+                    $stored_count = 0;
+                    
+                    // Analyze entries for competitive intelligence
+                    foreach ($entries_for_analysis as $entry) {
+                        $competitive_intel = runMediaseurantaCompetitiveAnalysis($entry, $openai_api_key);
+                        $analyzed_count++;
+                        
+                        if (storeMediaseurantaCompetitiveResults($db_connection, $entry['ID'], $competitive_intel)) {
+                            $stored_count++;
+                        }
+                    }
+                    
+                    // Get insights from already analyzed competitive data
+                    $competitive_insights = getMediaseurantaCompetitiveInsights($db_connection, $days);
+                    
+                    // Aggregate competitive intelligence
+                    $companies_activity = [];
+                    $funding_activities = [];
+                    $market_opportunities = [];
+                    $competitive_threats = [];
+                    $strategic_high_priority = [];
+                    $recommendations_summary = [];
+                    
+                    foreach ($competitive_insights as $insight) {
+                        // Companies activity
+                        $competitors = json_decode($insight['competitors_mentioned'] ?? '[]', true) ?: [];
+                        foreach ($competitors as $company) {
+                            $companies_activity[$company] = ($companies_activity[$company] ?? 0) + 1;
+                        }
+                        
+                        // Funding activities
+                        $funding = json_decode($insight['funding_intelligence'] ?? '[]', true) ?: [];
+                        if (!empty($funding['amounts'])) {
+                            $funding_activities[] = [
+                                'entry_id' => $insight['ID'],
+                                'title' => substr($insight['Uutinen'], 0, 100) . '...',
+                                'date' => $insight['uutisen_pvm'],
+                                'amounts' => $funding['amounts'] ?? [],
+                                'sources' => $funding['sources'] ?? [],
+                                'purposes' => $funding['purposes'] ?? []
+                            ];
+                        }
+                        
+                        // Market opportunities
+                        $opportunities = json_decode($insight['market_opportunities'] ?? '[]', true) ?: [];
+                        $market_opportunities = array_merge($market_opportunities, $opportunities);
+                        
+                        // Competitive threats
+                        $threats = json_decode($insight['competitive_threats'] ?? '[]', true) ?: [];
+                        $competitive_threats = array_merge($competitive_threats, $threats);
+                        
+                        // Strategic high priority (importance >= 4)
+                        if (($insight['strategic_importance'] ?? 0) >= 4) {
+                            $strategic_high_priority[] = [
+                                'title' => $insight['Uutinen'],
+                                'date' => $insight['uutisen_pvm'],
+                                'importance' => $insight['strategic_importance'],
+                                'score' => $insight['competitive_score'],
+                                'relevance' => $insight['business_relevance']
+                            ];
+                        }
+                        
+                        // Action recommendations
+                        $recommendations = json_decode($insight['action_recommendations'] ?? '[]', true) ?: [];
+                        $recommendations_summary = array_merge($recommendations_summary, $recommendations);
+                    }
+                    
+                    $result = [
+                        'analysis_summary' => [
+                            'period_days' => $days,
+                            'new_analyzed' => $analyzed_count,
+                            'stored_analyses' => $stored_count,
+                            'total_competitive_insights' => count($competitive_insights),
+                            'cost_protection' => 'Limited to 5 new analyses maximum'
+                        ],
+                        'companies_activity' => $companies_activity,
+                        'funding_activities' => array_slice($funding_activities, 0, 10), // Top 10
+                        'market_opportunities' => array_unique(array_slice($market_opportunities, 0, 15)),
+                        'competitive_threats' => array_unique(array_slice($competitive_threats, 0, 10)),
+                        'strategic_high_priority' => array_slice($strategic_high_priority, 0, 8),
+                        'action_recommendations' => array_unique(array_slice($recommendations_summary, 0, 12)),
+                        'generated_at' => date('Y-m-d H:i:s'),
+                        'environment' => 'server'
+                    ];
+                    
+                } catch (Exception $e) {
+                    $result = [
+                        'error' => 'Mediaseuranta competitive analysis failed: ' . $e->getMessage(),
+                        'analysis_summary' => [
+                            'period_days' => $days ?? 30,
+                            'new_analyzed' => 0,
+                            'stored_analyses' => 0,
+                            'total_competitive_insights' => 0,
+                            'cost_protection' => 'Error occurred'
+                        ],
+                        'companies_activity' => [],
+                        'funding_activities' => [],
+                        'market_opportunities' => [],
+                        'competitive_threats' => [],
+                        'strategic_high_priority' => [],
+                        'action_recommendations' => [],
+                        'environment' => 'server'
+                    ];
+                }
+            }
+            break;
+            
         default:
             $result = [
                 'status' => 'Working AI News Intelligence System Active', 
                 'timestamp' => date('Y-m-d H:i:s'),
-                'available_actions' => ['test', 'alerts'],
+                'available_actions' => ['test', 'alerts', 'competitive_intelligence', 'mediaseuranta_analysis', 'mediaseuranta_competitive'],
                 'database_available' => $database_available,
                 'openai_available' => !empty($openai_api_key)
             ];
