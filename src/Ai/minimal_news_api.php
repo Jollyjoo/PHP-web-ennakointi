@@ -836,11 +836,12 @@ function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 5) 
     }
     
     // Get latest entries that haven't been competitively analyzed yet
-    // Remove date restriction to find any unanalyzed entries
+    // Since table has no ID column, we'll use URL as identifier (should be unique)
     $stmt = $db_connection->prepare("
-        SELECT ID, Teema, Uutinen, uutisen_pvm, Url, Hankkeen_luokitus 
+        SELECT Maakunta_ID, Teema, Uutinen, uutisen_pvm, Url, Hankkeen_luokitus 
         FROM Mediaseuranta 
         WHERE (competitive_analysis_status IS NULL OR competitive_analysis_status = 'pending')
+        AND Url IS NOT NULL AND Url != ''
         ORDER BY uutisen_pvm DESC
         LIMIT ?
     ");
@@ -1011,7 +1012,7 @@ function runMediaseurantaCompetitiveFallbackAnalysis($entry) {
 }
 
 // Helper function to store mediaseuranta competitive results
-function storeMediaseurantaCompetitiveResults($db_connection, $entry_id, $competitive_data) {
+function storeMediaseurantaCompetitiveResults($db_connection, $entry_url, $competitive_data) {
     try {
         $competitive_json = json_encode($competitive_data);
         $competitors_json = json_encode($competitive_data['competitors_mentioned'] ?? []);
@@ -1046,14 +1047,14 @@ function storeMediaseurantaCompetitiveResults($db_connection, $entry_id, $compet
                 competitive_threats = ?,
                 market_intelligence = ?,
                 action_recommendations = ?
-            WHERE ID = ?
+            WHERE Url = ?
         ");
         
         if ($stmt) {
             $partnerships_json = json_encode($competitive_data['partnership_opportunities'] ?? []);
             
             $stmt->bind_param(
-                "sssssssisssi", 
+                "sssssssissss", 
                 $competitive_json,
                 $competitors_json,
                 $funding_json,
@@ -1065,7 +1066,7 @@ function storeMediaseurantaCompetitiveResults($db_connection, $entry_id, $compet
                 $threats_json,
                 $market_intel_json,
                 $recommendations_json,
-                $entry_id
+                $entry_url
             );
             
             return $stmt->execute();
@@ -1088,7 +1089,7 @@ function getMediaseurantaCompetitiveInsights($db_connection, $days = 30) {
     // Get all competitively analyzed entries, not restricted by date
     $stmt = $db_connection->prepare("
         SELECT 
-            ID, Teema, Uutinen, uutisen_pvm,
+            Url, Teema, Uutinen, uutisen_pvm,
             competitive_score, business_relevance, strategic_importance,
             competitors_mentioned, funding_intelligence, market_opportunities,
             competitive_threats, market_intelligence, action_recommendations
@@ -1456,12 +1457,45 @@ try {
                     $analyzed_count = 0;
                     $stored_count = 0;
                     
+                    // Debug: Check if we found any entries
+                    if (empty($entries_for_analysis)) {
+                        // Try to get some basic info about the table
+                        $check_query = $db_connection->query("SELECT COUNT(*) as total FROM Mediaseuranta");
+                        $total_entries = $check_query ? $check_query->fetch_assoc()['total'] : 'unknown';
+                        
+                        $result = [
+                            'analysis_summary' => [
+                                'period_days' => $days,
+                                'new_analyzed' => 0,
+                                'stored_analyses' => 0,
+                                'total_competitive_insights' => 0,
+                                'cost_protection' => 'No entries found to analyze',
+                                'debug_info' => "Total entries in table: $total_entries"
+                            ],
+                            'companies_activity' => [],
+                            'funding_activities' => [],
+                            'market_opportunities' => [],
+                            'competitive_threats' => [],
+                            'strategic_high_priority' => [],
+                            'action_recommendations' => [],
+                            'generated_at' => date('Y-m-d H:i:s'),
+                            'environment' => 'server'
+                        ];
+                        
+                        // Still try to get existing insights
+                        $competitive_insights = getMediaseurantaCompetitiveInsights($db_connection, $days);
+                        $result['analysis_summary']['total_competitive_insights'] = count($competitive_insights);
+                        
+                        echo json_encode($result, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+                        return;
+                    }
+                    
                     // Analyze entries for competitive intelligence
                     foreach ($entries_for_analysis as $entry) {
                         $competitive_intel = runMediaseurantaCompetitiveAnalysis($entry, $openai_api_key);
                         $analyzed_count++;
                         
-                        if (storeMediaseurantaCompetitiveResults($db_connection, $entry['ID'], $competitive_intel)) {
+                        if (storeMediaseurantaCompetitiveResults($db_connection, $entry['Url'], $competitive_intel)) {
                             $stored_count++;
                         }
                     }
@@ -1488,7 +1522,7 @@ try {
                         $funding = json_decode($insight['funding_intelligence'] ?? '[]', true) ?: [];
                         if (!empty($funding['amounts'])) {
                             $funding_activities[] = [
-                                'entry_id' => $insight['ID'],
+                                'entry_url' => $insight['Url'],
                                 'title' => substr($insight['Uutinen'], 0, 100) . '...',
                                 'date' => $insight['uutisen_pvm'],
                                 'amounts' => $funding['amounts'] ?? [],
