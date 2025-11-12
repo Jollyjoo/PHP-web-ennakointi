@@ -132,9 +132,11 @@ class NewsIntelligenceSystem {
     
     /**
      * Competitive intelligence dashboard
+     * COST PROTECTION: Limited to 5 articles to prevent excessive OpenAI API costs
      */
     public function getCompetitiveIntelligence($time_period = 30) {
-        $news_data = $this->getNewsFromDays($time_period);
+        // COST PROTECTION: Limit to 5 articles maximum
+        $news_data = $this->getNewsFromDays($time_period, 5);
         
         $companies_mentioned = [];
         $funding_activities = [];
@@ -162,6 +164,8 @@ class NewsIntelligenceSystem {
         
         return [
             'period_days' => $time_period,
+            'articles_analyzed' => count($news_data),
+            'cost_protection' => 'Limited to 5 articles maximum',
             'companies_activity' => $companies_mentioned,
             'funding_activities' => $funding_activities,
             'market_intelligence' => $this->summarizeMarketIntelligence($news_data),
@@ -507,17 +511,30 @@ class NewsIntelligenceSystem {
     
     /**
      * Get news from last X days - only unanalyzed articles to avoid duplicate processing
+     * COST PROTECTION: Limited to 5 articles for competitive intelligence
      */
-    private function getNewsFromDays($days) {
-        $stmt = $this->db->prepare("
+    private function getNewsFromDays($days, $limit = null) {
+        $sql = "
             SELECT id, title, content, published_date 
             FROM news_articles 
             WHERE published_date >= DATE_SUB(NOW(), INTERVAL ? DAY)
             AND (ai_analysis_status IS NULL OR ai_analysis_status != 'analyzed')
             ORDER BY published_date DESC
-        ");
+        ";
         
-        $stmt->bind_param("i", $days);
+        // Add limit for cost protection
+        if ($limit !== null) {
+            $sql .= " LIMIT ?";
+        }
+        
+        $stmt = $this->db->prepare($sql);
+        
+        if ($limit !== null) {
+            $stmt->bind_param("ii", $days, $limit);
+        } else {
+            $stmt->bind_param("i", $days);
+        }
+        
         $stmt->execute();
         $result = $stmt->get_result();
         

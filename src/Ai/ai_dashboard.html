@@ -170,14 +170,15 @@
 
     <div class="controls">
         <p>Ulkoiset tietolähteet</p><br>
-        <button class="btn" onclick="loadAlerts()" title="Tarkista kriittisiä hälytyksiä ja signaaleja uutisvirrasta, (5 artikkelia kerrallaan)">� Tarkista kriittiset signaalit (OpenAi , limit 5)</button>
-        <button class="btn" onclick="loadWeeklyReport()" title="Luo viikkoraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Kuukausiraportti (tietokannasta)</button>
-        <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi kilpailijoiden ja markkinoiden toimintaa">🔍 Kilpailutiedustelu</button>
+
+        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennettuja uutisia OpenAi:lla (5 artikkelia kerrallaan)">🤖 Analysoi Artikkeleita (OpenAi, limit 5)</button>         
+        <button class="btn" onclick="loadAlerts()" title="Analysoi tallennettuja uutisia OpenAi:lla + kriittiset signaalit (5 artikkelia kerrallaan)">🔍 Analysoi artikkeleita + kriittiset signaalit (OpenAi, limit 5)</button>       
+        <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutisia lähteistä ja tallenna tietokantaan (ei OpenAI-kutsuja)">💾 Kerää uutisia (tietokantaan)</button>        
+        <button class="btn" onclick="loadWeeklyReport()" title="Luo Kuukausiraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Kuukausiraportti (tietokannasta)</button>
+        <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi uutisesta kilpailijoiden ja markkinoiden toimintaa (OpenAI, limit 5)">🔍 Kilpailuanalyysi (OpenAI, limit 5)</button>
         <button class="btn" onclick="runAnalysis()" title="Suorita AI-analyysi ja päivitä visualisoinnit">🧠 Suorita AI-analyysi</button>
-        <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutiset YLE:stä ja tallenna tietokantaan">💾 Kerää Tietokantaan</button>
         <button class="btn" onclick="viewStoredNews()" style="background: #6f42c1;" title="Näytä tietokantaan tallennetut uutiset">📰 Näytä Tallennetut</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Testaus ilman tallennusta</button>
-        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennetut uutiset AI:lla erissä (5 artikkelia kerrallaan)">🤖 Analysoi Artikkeleita (OpenAi, limit 5)</button>
         <br><p>Ely-mediaseuranta</p><br>
         <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältö AI:lla (5 artikkelia kerrallaan)">📰 Analysoi Mediaseuranta (OpenAi, limit 5)</button>
         <button class="btn" onclick="viewMediaseurantaInsights()" style="background: #34495e;" title="Näytä Mediaseurannan AI-analyysien tulokset">📊 Mediaseurannan Tulokset</button>
@@ -729,8 +730,15 @@
                 const data = await response.json();
                 
                 const container = document.getElementById('competitive-container');
+                
+                // Show cost protection info and analysis count
                 container.innerHTML = `
-                    <h4>Companies Activity (30 days)</h4>
+                    <div class="alert medium" style="background: #e8f5e8; border-color: #28a745;">
+                        <strong>💰 Cost Protected Analysis</strong><br>
+                        Articles Analyzed: ${data.articles_analyzed || 0} (max 5)<br>
+                        Period: ${data.period_days || 30} days | ${data.cost_protection || 'Cost protection active'}
+                    </div>
+                    <h4>Companies Activity (${data.period_days || 30} days)</h4>
                     <div id="companies-list"></div>
                     <h4>Funding Activities</h4>
                     <div id="funding-list"></div>
@@ -746,7 +754,17 @@
                     });
                 }
                 
-                updateStatus('Competitive intelligence updated', 'success');
+                const fundingList = document.getElementById('funding-list');
+                const fundingData = data.funding_activities || [];
+                if (fundingData.length === 0) {
+                    fundingList.innerHTML = '<p>No funding activities detected</p>';
+                } else {
+                    fundingData.forEach(funding => {
+                        fundingList.innerHTML += `<div class="metric"><span>Article ${funding.article_id}</span><span>${funding.amounts.length} funding events</span></div>`;
+                    });
+                }
+                
+                updateStatus('Competitive intelligence updated (cost protected)', 'success');
             } catch (error) {
                 console.error('Error loading competitive intelligence:', error);
                 updateStatus('Failed to load competitive intelligence', 'error');
