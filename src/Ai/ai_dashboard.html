@@ -171,18 +171,18 @@
     <div class="controls">
         <p>Ulkoiset tietolähteet</p><br>
 
-        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennettuja uutisia OpenAi:lla (5 artikkelia kerrallaan)">🤖 Analysoi Artikkeleita (OpenAi, limit 5)</button>         
-        <button class="btn" onclick="loadAlerts()" title="Analysoi tallennettuja uutisia OpenAi:lla + kriittiset signaalit (5 artikkelia kerrallaan)">🔍 Analysoi artikkeleita + kriittiset signaalit (OpenAi, limit 5)</button>       
+        <button class="btn" onclick="analyzeStoredArticles()" style="background: #e67e22;" title="Analysoi tallennettuja uutisia OpenAi:lla (1 artikkeli kerrallaan)">🤖 Analysoi Artikkeleita (OpenAi, limit 1)</button>         
+        <button class="btn" onclick="loadAlerts()" title="Analysoi tallennettuja uutisia OpenAi:lla + kriittiset signaalit (1 artikkeli kerrallaan)">🔍 Analysoi artikkeleita + kriittiset signaalit (OpenAi, limit 1)</button>       
         <button class="btn" onclick="collectToDatabase()" style="background: #007bff;" title="Kerää uutisia lähteistä ja tallenna tietokantaan (ei OpenAI-kutsuja)">💾 Kerää uutisia (tietokantaan)</button>        
         <button class="btn" onclick="loadWeeklyReport()" title="Luo Kuukausiraportti jo analysoidusta datasta (ei OpenAI-kutsuja)">📊 Kuukausiraportti (tietokannasta)</button>
-        <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi uutisesta kilpailijoiden ja markkinoiden toimintaa (OpenAI, limit 5)">🔍 Kilpailuanalyysi (OpenAI, limit 5)</button>
+        <button class="btn" onclick="loadCompetitiveIntel()" title="Analysoi uutisesta kilpailijoiden ja markkinoiden toimintaa (OpenAI, limit 1)">🔍 Kilpailuanalyysi (OpenAI, limit 1)</button>
 
         <button class="btn" onclick="viewStoredNews()" style="background: #6f42c1;" title="Näytä tietokantaan tallennetut uutiset">📰 Näytä Tallennetut</button>
         <button class="btn" onclick="workingTest()" style="background: #28a745;" title="Testaa uutisten keräystä ilman tietokantaan tallennusta">✅ Testaus ilman tallennusta</button>
         <br><p>Ely-mediaseuranta</p><br>
-        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältöä (OpenAI, limit 5)">📰 Analysoi Mediaseuranta (OpenAi, limit 5)</button>
-        <button class="btn" onclick="loadMediaseurantaIntelligence()" title="Analysoi Mediaseuranta-dataa ja luo yhteenvetoja (OpenAI, limit 5)" style="background: #8e44ad;">📊 Mediaseuranta Insights (OpenAI, limit 5)</button>
-        <button class="btn" onclick="loadMediaseurantaCompetitive()" style="background: #e74c3c;" title="Kilpailutiedustelu Mediaseuranta-datasta (OpenAI, limit 5)" style="background: #2c3e50;">🏢 Mediaseuranta Kilpailuanalyysi (OpenAI, limit 5)</button>        
+        <button class="btn" onclick="analyzeMediaseuranta()" style="background: #9b59b6;" title="Analysoi Mediaseuranta-taulun sisältöä (OpenAI, limit 1)">📰 Analysoi Mediaseuranta (OpenAi, limit 1)</button>
+        <button class="btn" onclick="loadMediaseurantaIntelligence()" title="Analysoi Mediaseuranta-dataa ja luo yhteenvetoja (OpenAI, limit 1)" style="background: #8e44ad;">📊 Mediaseuranta Insights (OpenAI, limit 1)</button>
+        <button class="btn" onclick="loadMediaseurantaCompetitive()" style="background: #e74c3c;" title="Kilpailutiedustelu Mediaseuranta-datasta (OpenAI, limit 1)" style="background: #2c3e50;">🏢 Mediaseuranta Kilpailuanalyysi (OpenAI, limit 1)</button>        
         <button class="btn" onclick="viewMediaseurantaInsights()" style="background: #f39c12;" title="Näytä Mediaseurannan AI-analyysien tulokset">📊 Mediaseurannan Tulokset</button>
         <!-- <button class="btn" onclick="debugMediaseuranta()" style="background: #e74c3c;" title="Testaa Mediaseuranta-taulun yhteyttä ja rakennetta">🔧 Debuggaa Mediaseuranta</button> -->
         <!-- <button class="btn" onclick="testMediaseuranta()" style="background: #f39c12;" title="Testaa datan hakemista Mediaseuranta-taulusta">🧪 Testaa yhteys kantaan</button> -->
@@ -1559,7 +1559,7 @@
                 }
                 
                 // Start analysis with small batch size for reliability
-                const response = await fetch('database_news_collector.php?action=analyze&batch_size=5', {
+                const response = await fetch('database_news_collector.php?action=analyze&batch_size=1', {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1688,7 +1688,7 @@
                 }
                 
                 // Start analysis
-                const response = await fetch('mediaseuranta_analyzer.php?action=analyze&batch_size=5');
+                const response = await fetch('mediaseuranta_analyzer.php?action=analyze&batch_size=1');
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);

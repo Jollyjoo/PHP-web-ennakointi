@@ -104,7 +104,7 @@ class DatabaseNewsCollector {
         set_time_limit(300); // 5 minutes max
         
         // Get batch size from request parameter, default to 5 for stability
-        $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 5;
+        $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 1;
         $unanalyzed = $this->getUnanalyzedArticles($batch_size);
         
         $results = [

@@ -10,7 +10,7 @@ header('Content-Type: application/json; charset=utf-8');
  */
 
 // Helper function to get recent news from database
-function getRecentNewsForAlerts($db_connection, $hours = 24, $limit = 5) {
+function getRecentNewsForAlerts($db_connection, $hours = 24, $limit = 1) {
     if (!$db_connection) {
         return [];
     }
@@ -366,7 +366,7 @@ function markArticleAsAnalyzed($db_connection, $article_id, $analysis_data) {
 }
 
 // Helper function to get analyzed articles for competitive intelligence
-function getAnalyzedArticlesForCompetitive($db_connection, $days = 30, $limit = 5) {
+function getAnalyzedArticlesForCompetitive($db_connection, $days = 30, $limit = 1) {
     if (!$db_connection) {
         return [];
     }
@@ -579,7 +579,7 @@ function storeCompetitiveResults($db_connection, $article_id, $competitive_data)
 }
 
 // Helper function to get mediaseuranta entries for analysis
-function getMediaseurantaEntries($db_connection, $days = 330, $limit = 5) {
+function getMediaseurantaEntries($db_connection, $days = 330, $limit = 1) {
     if (!$db_connection) {
         return [];
     }
@@ -830,7 +830,7 @@ function storeMediaseurantaResults($db_connection, $entry_url, $analysis_data) {
 // ================= MEDIASEURANTA COMPETITIVE INTELLIGENCE FUNCTIONS =================
 
 // Helper function to get mediaseuranta entries for competitive analysis
-function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 5) {
+function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 1) {
     if (!$db_connection) {
         return [];
     }
@@ -1178,7 +1178,7 @@ try {
                 $processed_count = 0;
                 
                 try {
-                    // Get recent unanalyzed news (limit to 5 for cost control)
+                    // Get recent unanalyzed news (limit to 1 for cost control)
                     $recent_news = getRecentNewsForAlerts($db_connection, 24, 5);
                     
                     foreach ($recent_news as $article) {
@@ -1260,7 +1260,7 @@ try {
                 ];
             } else {
                 try {
-                    // Get analyzed articles for competitive intelligence (limit 5 for cost protection)
+                    // Get analyzed articles for competitive intelligence (limit 1 for cost protection)
                     $days = $_GET['days'] ?? 30;
                     $recent_articles = getAnalyzedArticlesForCompetitive($db_connection, $days, 5);
                     
@@ -1305,7 +1305,7 @@ try {
                         'period_days' => $days,
                         'articles_analyzed' => $processed_count,
                         'analyses_stored' => $stored_count,
-                        'cost_protection' => 'Limited to 5 articles maximum',
+                        'cost_protection' => 'Limited to 1 article maximum',
                         'companies_activity' => $companies_mentioned,
                         'funding_activities' => $funding_activities,
                         'market_opportunities' => array_unique($market_opportunities),
@@ -1338,7 +1338,7 @@ try {
                 ];
             } else {
                 try {
-                    // First, analyze unanalyzed entries (limit 5 for cost protection)
+                    // First, analyze unanalyzed entries (limit 1 for cost protection)
                     $unanalyzed_entries = getMediaseurantaEntries($db_connection, 9999, 5);
                     $analyzed_count = 0;
                     $stored_count = 0;
@@ -1406,7 +1406,7 @@ try {
                             'new_analyzed' => $analyzed_count,
                             'stored_analyses' => $stored_count,
                             'total_entries' => count($analyzed_data),
-                            'cost_protection' => 'Limited to 5 new analyses maximum'
+                            'cost_protection' => 'Limited to 1 new analysis maximum'
                         ],
                         'theme_breakdown' => $theme_breakdown,
                         'sentiment_summary' => $sentiment_summary,
@@ -1448,7 +1448,7 @@ try {
                 ];
             } else {
                 try {
-                    // Get mediaseuranta entries ready for competitive analysis (limit 5)
+                    // Get mediaseuranta entries ready for competitive analysis (limit 1)
                     $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, 9999, 5);
                     $analyzed_count = 0;
                     $stored_count = 0;
@@ -1557,7 +1557,7 @@ try {
                             'new_analyzed' => $analyzed_count,
                             'stored_analyses' => $stored_count,
                             'total_competitive_insights' => count($competitive_insights),
-                            'cost_protection' => 'Limited to 5 new analyses maximum'
+                            'cost_protection' => 'Limited to 1 new analysis maximum'
                         ],
                         'companies_activity' => $companies_activity,
                         'funding_activities' => array_slice($funding_activities, 0, 10), // Top 10

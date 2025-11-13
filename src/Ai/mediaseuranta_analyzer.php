@@ -70,7 +70,7 @@ class MediaseurantaAnalyzer {
     /**
      * Analyze Mediaseuranta entries with AI
      */
-    public function analyzeEntries($batch_size = 5) {
+    public function analyzeEntries($batch_size = 1) {
         set_time_limit(300); // 5 minutes max
         
         $unanalyzed = $this->getUnanalyzedEntries($batch_size);
@@ -612,7 +612,7 @@ try {
             
         case 'analyze':
             $analyzer = new MediaseurantaAnalyzer();
-            $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 5;
+            $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 1;
             $result = $analyzer->analyzeEntries($batch_size);
             echo json_encode([
                 'mediaseuranta_analysis' => $result,
