@@ -1,6 +1,9 @@
 <?php
+// Include the centralized OpenAI limits configuration  
+require_once 'openai_limits_config.php';
+
 /**
- * Mediaseuranta AI Analyzer
+ * Mediaseuranta Analyzer
  * Analyzes existing media monitoring data with AI
  * Integrates with the Mediaseuranta table to provide intelligent insights
  */
@@ -70,7 +73,7 @@ class MediaseurantaAnalyzer {
     /**
      * Analyze Mediaseuranta entries with AI
      */
-    public function analyzeEntries($batch_size = 1) {
+    public function analyzeEntries($batch_size = MEDIASEURANTA_ANALYSIS_LIMIT) {
         set_time_limit(300); // 5 minutes max
         
         $unanalyzed = $this->getUnanalyzedEntries($batch_size);
@@ -612,7 +615,7 @@ try {
             
         case 'analyze':
             $analyzer = new MediaseurantaAnalyzer();
-            $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : 1;
+            $batch_size = isset($_GET['batch_size']) ? max(1, min(10, (int)$_GET['batch_size'])) : MEDIASEURANTA_ANALYSIS_LIMIT;
             $result = $analyzer->analyzeEntries($batch_size);
             echo json_encode([
                 'mediaseuranta_analysis' => $result,

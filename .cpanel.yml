@@ -57,5 +57,7 @@ deployment:
     - /bin/cp src/Ai/README.md $DEPLOYPATHAI
     - /bin/cp src/Ai/MEDIASEURANTA_SETUP.md $DEPLOYPATHAI
     - /bin/cp src/Ai/minimal_news_api.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/config_endpoint.php $DEPLOYPATHAI
+    - /bin/cp src/Ai/openai_limits_config.php $DEPLOYPATHAI
     - /bin/cp src/SQL/add_mediaseuranta_ai_columns.sql $DEPLOYPATH
     # NOTE: ai_config.json must be uploaded manually for security (not in version control)

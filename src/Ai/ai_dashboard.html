@@ -293,7 +293,69 @@
     </div>
 
     <script>
+        // ===== CONFIGURATION =====
+        // Configuration will be loaded dynamically from PHP endpoint
+        let OPENAI_ANALYSIS_LIMIT = 1; // Default fallback, will be overridden
+        let CONFIG = {
+            openai_analysis_limit: 1,
+            cost_protection_message: 'Loading configuration...',
+            development_status_message: 'Loading...',
+            source: 'fallback'
+        };
+        
         let volumeChart, sentimentChart, themeChart;
+
+        // Load configuration from PHP endpoint (single source of truth)
+        async function loadConfiguration() {
+            try {
+                const response = await fetch('config_endpoint.php');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const config = await response.json();
+                
+                // Handle error response
+                if (config.error) {
+                    console.warn('Configuration error:', config.message);
+                    CONFIG = config.fallback_config;
+                    OPENAI_ANALYSIS_LIMIT = CONFIG.openai_analysis_limit;
+                    updateStatus('⚠️ Using fallback configuration due to error', 'warning');
+                    return;
+                }
+                
+                // Update global configuration
+                CONFIG = config;
+                OPENAI_ANALYSIS_LIMIT = config.openai_analysis_limit;
+                
+                // Update status to show configuration loaded
+                const envType = config.meta ? config.meta.environment : 
+                               (OPENAI_ANALYSIS_LIMIT === 1 ? 'development' : 'production');
+                
+                updateStatus(`⚙️ Configuration loaded: ${envType} mode (limit: ${OPENAI_ANALYSIS_LIMIT})`, 'success');
+                
+                console.log('Configuration loaded from PHP:', {
+                    source: config.source,
+                    limit: OPENAI_ANALYSIS_LIMIT,
+                    environment: envType,
+                    message: config.development_status_message
+                });
+                
+            } catch (error) {
+                console.error('Failed to load configuration:', error);
+                updateStatus('❌ Configuration load failed - using fallback', 'error');
+                
+                // Use safe fallback
+                OPENAI_ANALYSIS_LIMIT = 1;
+                CONFIG = {
+                    openai_analysis_limit: 1,
+                    cost_protection_message: 'Fallback: max 1 article',
+                    development_status_message: '🔧 FALLBACK MODE: 1 article limit',
+                    source: 'javascript_fallback'
+                };
+            }
+        }
 
         // Initialize charts
         function initCharts() {
@@ -753,7 +815,7 @@
                 container.innerHTML = `
                     <div class="alert medium" style="background: #e8f5e8; border-color: #28a745;">
                         <strong>💰 Cost Protected Analysis</strong><br>
-                        Articles Analyzed: ${data.articles_analyzed || 0} (max 5)<br>
+                        Articles Analyzed: ${data.articles_analyzed || 0} (max ${OPENAI_ANALYSIS_LIMIT})<br>
                         Stored to Database: ${data.analyses_stored || 0}<br>
                         Period: ${data.period_days || 30} days | ${data.cost_protection || 'Cost protection active'}
                     </div>
@@ -854,7 +916,7 @@
                 container.innerHTML = `
                     <div class="alert medium" style="background: #e8f4fd; border-color: #17a2b8;">
                         <strong>📊 Mediaseuranta Analysis Summary</strong><br>
-                        New Analyzed: ${data.analysis_summary?.new_analyzed || 0} (max 5)<br>
+                        New Analyzed: ${data.analysis_summary?.new_analyzed || 0} (max ${OPENAI_ANALYSIS_LIMIT})<br>
                         Total Entries: ${data.analysis_summary?.total_entries || 0}<br>
                         Period: ${data.analysis_summary?.period_days || 30} days | ${data.analysis_summary?.cost_protection || 'Cost protection active'}
                     </div>
@@ -979,7 +1041,7 @@
                 container.innerHTML = `
                     <div class="alert medium" style="background: #e8f0fe; border-color: #2c3e50;">
                         <strong>🏢 Mediaseuranta Competitive Analysis</strong><br>
-                        New Analyzed: ${data.analysis_summary?.new_analyzed || 0} (max 5)<br>
+                        New Analyzed: ${data.analysis_summary?.new_analyzed || 0} (max ${OPENAI_ANALYSIS_LIMIT})<br>
                         Total Insights: ${data.analysis_summary?.total_competitive_insights || 0}<br>
                         Period: ${data.analysis_summary?.period_days || 30} days | ${data.analysis_summary?.cost_protection || 'Cost protection active'}
                     </div>
@@ -1559,7 +1621,7 @@
                 }
                 
                 // Start analysis with small batch size for reliability
-                const response = await fetch('database_news_collector.php?action=analyze&batch_size=1', {
+                const response = await fetch(`database_news_collector.php?action=analyze&batch_size=${OPENAI_ANALYSIS_LIMIT}`, {
                     method: 'GET',
                     headers: {
                         'Accept': 'application/json',
@@ -1688,7 +1750,7 @@
                 }
                 
                 // Start analysis
-                const response = await fetch('mediaseuranta_analyzer.php?action=analyze&batch_size=1');
+                const response = await fetch(`mediaseuranta_analyzer.php?action=analyze&batch_size=${OPENAI_ANALYSIS_LIMIT}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -2041,9 +2103,19 @@
         }
 
         // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load configuration first (single source of truth from PHP)
+            await loadConfiguration();
+            
+            // Then initialize everything else
             initCharts();
-            updateStatus('Dashboard ready', 'success');
+            updateStatus('Dashboard ready - configuration loaded', 'success');
+            
+            console.log('Dashboard initialized with configuration:', {
+                limit: OPENAI_ANALYSIS_LIMIT,
+                source: CONFIG.source,
+                message: CONFIG.development_status_message
+            });
         });
     </script>
 </body>

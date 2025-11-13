@@ -3,6 +3,9 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 0);
 
+// Include the centralized OpenAI limits configuration
+require_once 'openai_limits_config.php';
+
 header('Content-Type: application/json; charset=utf-8');
 
 /**
@@ -10,7 +13,7 @@ header('Content-Type: application/json; charset=utf-8');
  */
 
 // Helper function to get recent news from database
-function getRecentNewsForAlerts($db_connection, $hours = 24, $limit = 1) {
+function getRecentNewsForAlerts($db_connection, $hours = 24, $limit = ALERTS_ANALYSIS_LIMIT) {
     if (!$db_connection) {
         return [];
     }
@@ -366,7 +369,7 @@ function markArticleAsAnalyzed($db_connection, $article_id, $analysis_data) {
 }
 
 // Helper function to get analyzed articles for competitive intelligence
-function getAnalyzedArticlesForCompetitive($db_connection, $days = 30, $limit = 1) {
+function getAnalyzedArticlesForCompetitive($db_connection, $days = 30, $limit = COMPETITIVE_ANALYSIS_LIMIT) {
     if (!$db_connection) {
         return [];
     }
@@ -579,7 +582,7 @@ function storeCompetitiveResults($db_connection, $article_id, $competitive_data)
 }
 
 // Helper function to get mediaseuranta entries for analysis
-function getMediaseurantaEntries($db_connection, $days = 330, $limit = 1) {
+function getMediaseurantaEntries($db_connection, $days = 330, $limit = MEDIASEURANTA_ANALYSIS_LIMIT) {
     if (!$db_connection) {
         return [];
     }
@@ -830,7 +833,7 @@ function storeMediaseurantaResults($db_connection, $entry_url, $analysis_data) {
 // ================= MEDIASEURANTA COMPETITIVE INTELLIGENCE FUNCTIONS =================
 
 // Helper function to get mediaseuranta entries for competitive analysis
-function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = 1) {
+function getMediaseurantaForCompetitive($db_connection, $days = 30, $limit = MEDIASEURANTA_ANALYSIS_LIMIT) {
     if (!$db_connection) {
         return [];
     }
@@ -1305,7 +1308,7 @@ try {
                         'period_days' => $days,
                         'articles_analyzed' => $processed_count,
                         'analyses_stored' => $stored_count,
-                        'cost_protection' => 'Limited to 1 article maximum',
+                        'cost_protection' => getCostProtectionMessage(),
                         'companies_activity' => $companies_mentioned,
                         'funding_activities' => $funding_activities,
                         'market_opportunities' => array_unique($market_opportunities),
@@ -1406,7 +1409,7 @@ try {
                             'new_analyzed' => $analyzed_count,
                             'stored_analyses' => $stored_count,
                             'total_entries' => count($analyzed_data),
-                            'cost_protection' => 'Limited to 1 new analysis maximum'
+                            'cost_protection' => getCostProtectionMessage()
                         ],
                         'theme_breakdown' => $theme_breakdown,
                         'sentiment_summary' => $sentiment_summary,
@@ -1557,7 +1560,7 @@ try {
                             'new_analyzed' => $analyzed_count,
                             'stored_analyses' => $stored_count,
                             'total_competitive_insights' => count($competitive_insights),
-                            'cost_protection' => 'Limited to 1 new analysis maximum'
+                            'cost_protection' => getCostProtectionMessage()
                         ],
                         'companies_activity' => $companies_activity,
                         'funding_activities' => array_slice($funding_activities, 0, 10), // Top 10
