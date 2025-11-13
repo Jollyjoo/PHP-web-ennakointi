@@ -1181,8 +1181,8 @@ try {
                 $processed_count = 0;
                 
                 try {
-                    // Get recent unanalyzed news (limit to 1 for cost control)
-                    $recent_news = getRecentNewsForAlerts($db_connection, 24, 5);
+                    // Get recent unanalyzed news (limit from config for cost control)
+                    $recent_news = getRecentNewsForAlerts($db_connection, 24, ALERTS_ANALYSIS_LIMIT);
                     
                     foreach ($recent_news as $article) {
                         $processed_count++;
@@ -1263,9 +1263,9 @@ try {
                 ];
             } else {
                 try {
-                    // Get analyzed articles for competitive intelligence (limit 1 for cost protection)
+                    // Get analyzed articles for competitive intelligence (limit from config for cost protection)
                     $days = $_GET['days'] ?? 30;
-                    $recent_articles = getAnalyzedArticlesForCompetitive($db_connection, $days, 5);
+                    $recent_articles = getAnalyzedArticlesForCompetitive($db_connection, $days, COMPETITIVE_ANALYSIS_LIMIT);
                     
                     $companies_mentioned = [];
                     $funding_activities = [];
@@ -1341,8 +1341,8 @@ try {
                 ];
             } else {
                 try {
-                    // First, analyze unanalyzed entries (limit 1 for cost protection)
-                    $unanalyzed_entries = getMediaseurantaEntries($db_connection, 9999, 5);
+                    // First, analyze unanalyzed entries (limit from config for cost protection)
+                    $unanalyzed_entries = getMediaseurantaEntries($db_connection, 9999, MEDIASEURANTA_ANALYSIS_LIMIT);
                     $analyzed_count = 0;
                     $stored_count = 0;
                     
@@ -1451,8 +1451,8 @@ try {
                 ];
             } else {
                 try {
-                    // Get mediaseuranta entries ready for competitive analysis (limit 1)
-                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, 9999, 5);
+                    // Get mediaseuranta entries ready for competitive analysis (limit from config)
+                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, 9999, MEDIASEURANTA_ANALYSIS_LIMIT);
                     $analyzed_count = 0;
                     $stored_count = 0;
                     
