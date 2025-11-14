@@ -173,6 +173,38 @@
                         <option value="Kanta-Häme">Kanta-Häme</option>
                     </select>
                 </form>
+
+                <!-- AI Sentiment Filter -->
+                <div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #dee2e6;">
+                    <p align="center"><b>🤖 Suodata AI-tunnelman mukaan:</b></p>
+                    <form align="center" id="sentiment-filter">
+                        <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-top: 10px;">
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="radio" name="sentiment" value="" checked onchange="filterBySentiment(this.value)">
+                                <span style="margin-left: 5px;">🔄 Kaikki</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="radio" name="sentiment" value="positive" onchange="filterBySentiment(this.value)">
+                                <span style="margin-left: 5px;">😊 Myönteinen</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="radio" name="sentiment" value="neutral" onchange="filterBySentiment(this.value)">
+                                <span style="margin-left: 5px;">😐 Neutraali</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="radio" name="sentiment" value="negative" onchange="filterBySentiment(this.value)">
+                                <span style="margin-left: 5px;">😟 Kielteinen</span>
+                            </label>
+                            <label style="display: flex; align-items: center; cursor: pointer;">
+                                <input type="radio" name="sentiment" value="crisis" onchange="filterBySentiment(this.value)">
+                                <span style="margin-left: 5px;">🚨 Kriisihälytys</span>
+                            </label>
+                        </div>
+                        <div id="filter-status" style="margin-top: 10px; font-size: 14px; color: #666; text-align: center;">
+                            Näytetään: <strong>Kaikki uutiset</strong>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <div class="newsContainer">
@@ -301,6 +333,94 @@
                 }
             };
             xhttp.open("GET", "./haehakusanalla.php?q=" + str, true);
+            xhttp.send();
+        }
+
+        // Global variable to store current sentiment filter
+        let currentSentimentFilter = '';
+
+        function filterBySentiment(sentiment) {
+            currentSentimentFilter = sentiment;
+            
+            // Update filter status display
+            const statusElement = document.getElementById('filter-status');
+            const sentimentNames = {
+                '': 'Kaikki uutiset',
+                'positive': 'Myönteiset uutiset 😊',
+                'neutral': 'Neutraalit uutiset 😐',
+                'negative': 'Kielteiset uutiset 😟',
+                'crisis': 'Kriisihälytykset 🚨'
+            };
+            
+            if (statusElement) {
+                statusElement.innerHTML = 'Näytetään: <strong>' + sentimentNames[sentiment] + '</strong>';
+            }
+            
+            // Get all news items from the results container
+            const resultsContainer = document.getElementById("txtHint");
+            if (!resultsContainer) return;
+            
+            const newsItems = resultsContainer.querySelectorAll('div[style*="border"], .news-item, div:has(.ai-indicator)');
+            let visibleCount = 0;
+            
+            newsItems.forEach(function(item) {
+                let shouldShow = true;
+                
+                if (sentiment !== '') {
+                    // Look for AI indicator elements within this news item
+                    const aiIndicators = item.querySelectorAll('.ai-indicator');
+                    let hasMatchingSentiment = false;
+                    
+                    aiIndicators.forEach(function(indicator) {
+                        const tooltip = indicator.getAttribute('data-tooltip') || indicator.getAttribute('title') || '';
+                        
+                        // Check sentiment based on the AI analysis content
+                        if (sentiment === 'positive' && (tooltip.includes('Myönteinen') || tooltip.includes('positive'))) {
+                            hasMatchingSentiment = true;
+                        } else if (sentiment === 'neutral' && (tooltip.includes('Neutraali') || tooltip.includes('neutral'))) {
+                            hasMatchingSentiment = true;
+                        } else if (sentiment === 'negative' && (tooltip.includes('Kielteinen') || tooltip.includes('negative'))) {
+                            hasMatchingSentiment = true;
+                        } else if (sentiment === 'crisis' && (tooltip.includes('Kriisihälytys') || tooltip.includes('crisis') || indicator.textContent.includes('🚨'))) {
+                            hasMatchingSentiment = true;
+                        }
+                    });
+                    
+                    shouldShow = hasMatchingSentiment;
+                }
+                
+                if (shouldShow) {
+                    item.style.display = '';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Update status with count if filtering is active
+            if (sentiment !== '' && statusElement) {
+                statusElement.innerHTML = 'Näytetään: <strong>' + sentimentNames[sentiment] + ' (' + visibleCount + ' uutista)</strong>';
+            }
+        }
+
+        // Update the haeMaakunnalla function to respect current sentiment filter
+        function haeMaakunnalla(str) {
+            var xhttp;
+            if (str == "") {
+                document.getElementById("txtHint").innerHTML = "";
+                return;
+            }
+            xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    document.getElementById("txtHint").innerHTML = this.responseText;
+                    // Reapply sentiment filter after loading new content
+                    if (currentSentimentFilter !== '') {
+                        setTimeout(() => filterBySentiment(currentSentimentFilter), 100);
+                    }
+                }
+            };
+            xhttp.open("GET", "./haeMaakunnalla.php?q=" + str, true);
             xhttp.send();
         }
     </script>
