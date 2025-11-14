@@ -57,7 +57,7 @@
 
         /* Enhanced tooltip styling */
         .ai-indicator:hover::after {
-            content: attr(title);
+            content: attr(data-tooltip);
             position: absolute;
             bottom: 100%;
             left: 50%;
@@ -308,25 +308,18 @@
     <script>
         // Hide default browser tooltip on AI indicators while keeping our custom tooltip
         document.addEventListener('DOMContentLoaded', function() {
-            function hideDefaultTooltips() {
+            function setupAITooltips() {
                 // Use delegation to handle dynamically loaded content
                 document.addEventListener('mouseenter', function(e) {
                     if (e.target.classList.contains('ai-indicator') && e.target.hasAttribute('title')) {
-                        // Store the title and remove it to prevent default tooltip
-                        e.target.setAttribute('data-original-title', e.target.getAttribute('title'));
+                        // Store the title content for our CSS tooltip and remove the title to prevent default tooltip
+                        e.target.setAttribute('data-tooltip', e.target.getAttribute('title'));
                         e.target.removeAttribute('title');
-                    }
-                }, true);
-
-                document.addEventListener('mouseleave', function(e) {
-                    if (e.target.classList.contains('ai-indicator') && e.target.hasAttribute('data-original-title')) {
-                        // Restore the title for our CSS tooltip to work
-                        e.target.setAttribute('title', e.target.getAttribute('data-original-title'));
                     }
                 }, true);
             }
 
-            hideDefaultTooltips();
+            setupAITooltips();
         });
     </script>
 </body>
