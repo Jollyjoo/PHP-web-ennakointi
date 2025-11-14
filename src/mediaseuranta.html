@@ -21,6 +21,108 @@
         }
         header();
     </script>
+
+    <!-- AI Analysis Tooltip Styles -->
+    <style>
+        /* AI Indicator styling */
+        .ai-indicator {
+            font-size: 18px;
+            cursor: help;
+            margin: 0 5px;
+            display: inline-block;
+            position: relative;
+        }
+
+        /* Record styling based on AI sentiment */
+        .record.ai-positive {
+            border-left: 4px solid #28a745;
+            background: linear-gradient(90deg, #d4edda 0%, #ffffff 10%);
+        }
+
+        .record.ai-negative {
+            border-left: 4px solid #dc3545;
+            background: linear-gradient(90deg, #f8d7da 0%, #ffffff 10%);
+        }
+
+        .record.ai-neutral {
+            border-left: 4px solid #6c757d;
+            background: linear-gradient(90deg, #e2e3e5 0%, #ffffff 10%);
+        }
+
+        .record.ai-crisis {
+            border-left: 4px solid #ff4757;
+            background: linear-gradient(90deg, #ffe0e0 0%, #ffffff 10%);
+            box-shadow: 0 0 10px rgba(255, 71, 87, 0.3);
+        }
+
+        /* Enhanced tooltip styling */
+        .ai-indicator:hover::after {
+            content: attr(title);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #2c3e50;
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            white-space: pre-wrap;
+            z-index: 1000;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border: 1px solid #34495e;
+        }
+
+        .ai-indicator:hover::before {
+            content: "";
+            position: absolute;
+            bottom: 95%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: #2c3e50;
+            z-index: 1001;
+        }
+
+        /* Hide default title tooltip */
+        .ai-indicator[title]:hover::after {
+            display: block;
+        }
+
+        .ai-indicator[title] {
+            position: relative;
+        }
+
+        /* Add subtle animation to AI indicators */
+        .ai-indicator {
+            transition: transform 0.2s ease;
+        }
+
+        .ai-indicator:hover {
+            transform: scale(1.2);
+        }
+
+        /* AI Analysis info box */
+        .ai-info-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .ai-info-box h4 {
+            margin: 0 0 10px 0;
+            color: #ffffff;
+        }
+
+        .ai-info-box p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+    </style>
 </head>
 
 <body>
@@ -44,10 +146,18 @@
 
             <div style="text-align: center; margin: 20px 0; padding: 15px; background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-radius: 8px;">
                 <a href="Ai/ai_dashboard.html" style="color: white; text-decoration: none; font-weight: bold; font-size: 16px;">
-                    🤖 Kehitteillä: AI News (OpenAI API) Tulevaisuusluotain Dashboard →
+                    🤖 Kehitteillä: AI uutisanalysointi (OpenAI API) Tulevaisuusluotain Dashboard →
                 </a>
                 <br>
                 <small style="color: #e0e0e0;">Automaattinen uutisanalyysi ja tekoälyavusteinen mediaseuranta</small>
+            </div>
+
+            <!-- AI Analysis Information -->
+            <div class="ai-info-box">
+                <h4>🤖 AI-Analysointi Aktivoitunut!</h4>
+                <p>Uutisissa näkyvät tunnelma-ikonit (😊😐😟🚨) perustuvat tekoäly-analyysiin</p>
+                <p><strong>Hover ikonien yli</strong> nähdäksesi: relevanssi, talous- ja työllisyysvaikutukset, sektorit, kriisiriski</p>
+                <p><small>Värikoodi: 🟢 Myönteinen | 🟡 Neutraali | 🔴 Kielteinen | 🚨 Kriisihälytys</small></p>
             </div>
 
             <div class="newsContainer">

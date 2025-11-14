@@ -19,14 +19,18 @@ $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if 
 
 // Adjust the query based on the value of 'q'
 if ($q === "koko-häme") {
-    // Fetch all content if 'koko-häme' is selected
-    $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url 
+    // Fetch all content if 'koko-häme' is selected, including AI analysis data
+    $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url, 
+                   ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
+                   ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status
             FROM catbxjbt_ennakointi.Mediaseuranta
             ORDER BY uutisen_pvm DESC
             LIMIT $start, 20;";
 } else {
-    // Fetch content filtered by 'Maakunta_ID'
-    $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url 
+    // Fetch content filtered by 'Maakunta_ID', including AI analysis data
+    $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url,
+                   ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
+                   ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status
             FROM catbxjbt_ennakointi.Mediaseuranta
             WHERE Maakunta_ID = (SELECT maakunta_id FROM catbxjbt_ennakointi.Maakunnat WHERE maakunta LIKE '%" . $conn->real_escape_string($q) . "%')
             ORDER BY uutisen_pvm DESC
@@ -49,9 +53,78 @@ if ($result->num_rows > 0) {
             $truncatedLuokitus .= "..."; // Add ellipsis if text is truncated
         }
 
-        echo "<div class='record'>";
-        echo "<b> " . $formattedDate . "  </b> "; // Display the formatted date
-        echo "<b title='" . htmlspecialchars($row["Teema"], ENT_QUOTES, 'UTF-8') . "'> " . $truncatedLuokitus . "</b>  "; // Display the truncated 'Hankkeen_luokitus' with full text as tooltip
+        // Prepare AI analysis data for tooltip
+        $hasAiAnalysis = ($row["ai_analysis_status"] === 'completed');
+        $aiTooltip = "";
+        $aiIndicator = "";
+        $recordClass = "record";
+        
+        if ($hasAiAnalysis) {
+            // Decode JSON fields
+            $keySectors = json_decode($row["ai_key_sectors"], true) ?: [];
+            $keywords = json_decode($row["ai_keywords"], true) ?: [];
+            
+            // Build tooltip content
+            $aiTooltip = "🤖 AI ANALYYSI:\n\n";
+            $aiTooltip .= "📊 Relevanssi: " . ($row["ai_relevance_score"] ?: "N/A") . "/10\n";
+            $aiTooltip .= "😊 Tunnelma: " . ($row["ai_sentiment"] ?: "N/A") . "\n";
+            $aiTooltip .= "💰 Talous: " . ($row["ai_economic_impact"] ?: "N/A") . "\n";
+            
+            if (!empty($row["ai_employment_impact"])) {
+                $employmentShort = mb_substr($row["ai_employment_impact"], 0, 60) . "...";
+                $aiTooltip .= "👷 Työllisyys: " . $employmentShort . "\n";
+            }
+            
+            if (!empty($keySectors)) {
+                $aiTooltip .= "🏢 Sektorit: " . implode(", ", array_slice($keySectors, 0, 3)) . "\n";
+            }
+            
+            if ($row["ai_crisis_probability"] && $row["ai_crisis_probability"] > 0.3) {
+                $crisisPercent = round($row["ai_crisis_probability"] * 100);
+                $aiTooltip .= "⚠️ Kriisiriski: " . $crisisPercent . "%\n";
+            }
+            
+            if (!empty($row["ai_summary"])) {
+                $summaryShort = mb_substr($row["ai_summary"], 0, 100) . "...";
+                $aiTooltip .= "\n📝 Yhteenveto: " . $summaryShort;
+            }
+            
+            // Determine AI indicator and styling
+            $sentimentClass = "";
+            switch($row["ai_sentiment"]) {
+                case 'positive':
+                case 'myönteinen':
+                    $sentimentClass = "ai-positive";
+                    $aiIndicator = "😊";
+                    break;
+                case 'negative': 
+                case 'kielteinen':
+                    $sentimentClass = "ai-negative";
+                    $aiIndicator = "😟";
+                    break;
+                default:
+                    $sentimentClass = "ai-neutral";
+                    $aiIndicator = "😐";
+            }
+            
+            // High crisis probability gets special styling
+            if ($row["ai_crisis_probability"] && $row["ai_crisis_probability"] > 0.7) {
+                $recordClass = "record ai-crisis";
+                $aiIndicator = "🚨";
+            } else {
+                $recordClass = "record " . $sentimentClass;
+            }
+        }
+
+        echo "<div class='$recordClass'>";
+        echo "<b> " . $formattedDate . "  </b> "; 
+        echo "<b title='" . htmlspecialchars($row["Teema"], ENT_QUOTES, 'UTF-8') . "'> " . $truncatedLuokitus . "</b>  "; 
+        
+        // Add AI indicator and analysis tooltip if available
+        if ($hasAiAnalysis) {
+            echo "<span class='ai-indicator' title='" . htmlspecialchars($aiTooltip, ENT_QUOTES, 'UTF-8') . "'>" . $aiIndicator . "</span> ";
+        }
+        
         echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a> ";
         echo "</div><br>";
     }
