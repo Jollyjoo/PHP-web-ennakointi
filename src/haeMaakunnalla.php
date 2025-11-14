@@ -71,8 +71,7 @@ if ($result->num_rows > 0) {
             $aiTooltip .= "💰 Talous: " . ($row["ai_economic_impact"] ?: "N/A") . "\n";
             
             if (!empty($row["ai_employment_impact"])) {
-                $employmentShort = mb_substr($row["ai_employment_impact"], 0, 60) . "...";
-                $aiTooltip .= "👷 Työllisyys: " . $employmentShort . "\n";
+                $aiTooltip .= "👷 Työllisyys: " . $row["ai_employment_impact"] . "\n";
             }
             
             if (!empty($keySectors)) {
@@ -85,8 +84,7 @@ if ($result->num_rows > 0) {
             }
             
             if (!empty($row["ai_summary"])) {
-                $summaryShort = mb_substr($row["ai_summary"], 0, 100) . "...";
-                $aiTooltip .= "\n📝 Yhteenveto: " . $summaryShort;
+                $aiTooltip .= "\n📝 Yhteenveto: " . $row["ai_summary"];
             }
             
             // Determine AI indicator and styling
