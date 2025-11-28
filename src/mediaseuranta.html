@@ -510,7 +510,8 @@
             function setupAITooltips() {
                 // Use delegation to handle dynamically loaded content
                 document.addEventListener('mouseenter', function(e) {
-                    if (e.target.classList.contains('ai-indicator') && e.target.hasAttribute('title')) {
+                    // Add null checking to prevent errors
+                    if (e && e.target && e.target.classList && e.target.classList.contains('ai-indicator') && e.target.hasAttribute('title')) {
                         // Store the title content for our CSS tooltip and remove the title to prevent default tooltip
                         e.target.setAttribute('data-tooltip', e.target.getAttribute('title'));
                         e.target.removeAttribute('title');
