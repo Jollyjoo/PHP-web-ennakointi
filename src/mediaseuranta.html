@@ -166,11 +166,9 @@
             <div class="newsContainer">
                 <p align="center"><b>Valitse alue..</b></p>
                 <form align="center">
-                    <select name="customers" onchange="haeMaakunnalla(this.value)">
+                    <select name="customers" id="region-select" onchange="haeMaakunnalla(this.value)">
                         <option value="">Alue:</option>
-                        <option value="koko-häme">KOKO-HÄME</option>
-                        <option value="Päijät-Häme">Päijät-Häme</option>
-                        <option value="Kanta-Häme">Kanta-Häme</option>
+                        <!-- Options will be loaded dynamically from database -->
                     </select>
                 </form>
 
@@ -267,6 +265,101 @@
         let start = 0; // Tracks the starting point for the next batch of records
         let selectedQuery = ""; // Stores the dynamically selected query
         let currentSentimentFilter = ''; // Global variable to store current sentiment filter
+
+        // Load regions from database on page load
+        function loadRegions() {
+            fetch('get_maakunnat.php')
+                .then(response => response.json())
+                .then(data => {
+                    const select = document.getElementById('region-select');
+                    
+                    if (data.success) {
+                        // Clear existing options except the first "Alue:" option
+                        while (select.children.length > 1) {
+                            select.removeChild(select.lastChild);
+                        }
+                        
+                        // Add regions from database
+                        let defaultFound = false;
+                        data.regions.forEach(region => {
+                            const option = document.createElement('option');
+                            option.value = region.Maakunta_ID;
+                            option.textContent = region.Maakunta;
+                            option.setAttribute('data-stat-code', region.stat_code);
+                            
+                            // Set Päijät-Häme as default if available
+                            if (region.Maakunta.toLowerCase().includes('päijät-häme') || 
+                                region.Maakunta_ID === '1' || 
+                                region.Maakunta === 'Päijät-Häme') {
+                                option.selected = true;
+                                defaultFound = true;
+                                selectedQuery = region.Maakunta_ID; // Set global query variable
+                                
+                                // Auto-load data for default selection
+                                setTimeout(() => {
+                                    haeMaakunnalla(region.Maakunta_ID);
+                                }, 500);
+                            }
+                            
+                            select.appendChild(option);
+                        });
+                        
+                        console.log(`Loaded ${data.count} regions from database`);
+                        if (defaultFound) {
+                            console.log('Set Päijät-Häme as default selection');
+                        }
+                    } else {
+                        // Use fallback data if database fails
+                        console.warn('Database failed, using fallback regions:', data.error);
+                        if (data.fallback && data.regions) {
+                            data.regions.forEach(region => {
+                                const option = document.createElement('option');
+                                option.value = region.Maakunta_ID;
+                                option.textContent = region.Maakunta;
+                                
+                                // Set Päijät-Häme as default in fallback too
+                                if (region.Maakunta === 'Päijät-Häme' || region.Maakunta_ID === '1') {
+                                    option.selected = true;
+                                    selectedQuery = region.Maakunta_ID;
+                                    setTimeout(() => haeMaakunnalla(region.Maakunta_ID), 500);
+                                }
+                                
+                                select.appendChild(option);
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Failed to load regions:', error);
+                    // Add fallback hardcoded options
+                    const select = document.getElementById('region-select');
+                    const fallbackRegions = [
+                        { id: 'koko-häme', name: 'KOKO-HÄME' },
+                        { id: 'Päijät-Häme', name: 'Päijät-Häme' },
+                        { id: 'Kanta-Häme', name: 'Kanta-Häme' }
+                    ];
+                    
+                    fallbackRegions.forEach(region => {
+                        const option = document.createElement('option');
+                        option.value = region.id;
+                        option.textContent = region.name;
+                        
+                        // Set Päijät-Häme as default
+                        if (region.name === 'Päijät-Häme') {
+                            option.selected = true;
+                            selectedQuery = region.id;
+                            setTimeout(() => haeMaakunnalla(region.id), 500);
+                        }
+                        
+                        select.appendChild(option);
+                    });
+                });
+        }
+
+        // Load regions when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadRegions();
+        });
 
         function loadMore() {
             if (selectedQuery === "") {
