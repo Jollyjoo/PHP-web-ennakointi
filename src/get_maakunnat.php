@@ -59,7 +59,7 @@ try {
         'error_code' => $e->getCode(),
         'fallback' => true,
         'regions' => [
-            ['Maakunta_ID' => 'koko-häme', 'Maakunta' => 'KOKO-HÄME', 'stat_code' => 'ALL'],
+            ['Maakunta_ID' => 'Koko-maa', 'Maakunta' => 'Koko-maa', 'stat_code' => 'ALL'],
             ['Maakunta_ID' => 'Päijät-Häme', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
             ['Maakunta_ID' => 'Kanta-Häme', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
         ]
@@ -76,7 +76,7 @@ try {
         'error' => $e->getMessage(),
         'fallback' => true,
         'regions' => [
-            ['Maakunta_ID' => 'koko-häme', 'Maakunta' => 'KOKO-HÄME', 'stat_code' => 'ALL'],
+            ['Maakunta_ID' => 'Koko-maa', 'Maakunta' => 'Koko-maa', 'stat_code' => 'ALL'],
             ['Maakunta_ID' => 'Päijät-Häme', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
             ['Maakunta_ID' => 'Kanta-Häme', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
         ]

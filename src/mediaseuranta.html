@@ -167,7 +167,7 @@
                 <p align="center"><b>Valitse alue..</b></p>
                 <form align="center">
                     <select name="customers" id="region-select" onchange="haeMaakunnalla(this.value)">
-                        <option value="">Alue:</option>
+                       <!--  <option value="">Alue:</option> -->
                         <!-- Options will be loaded dynamically from database -->
                     </select>
                 </form>
@@ -334,7 +334,7 @@
                     // Add fallback hardcoded options
                     const select = document.getElementById('region-select');
                     const fallbackRegions = [
-                        { id: 'koko-häme', name: 'KOKO-HÄME' },
+                        { id: 'Koko-maa', name: 'Koko-maa' },
                         { id: 'Päijät-Häme', name: 'Päijät-Häme' },
                         { id: 'Kanta-Häme', name: 'Kanta-Häme' }
                     ];
