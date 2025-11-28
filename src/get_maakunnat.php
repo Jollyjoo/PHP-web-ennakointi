@@ -5,11 +5,19 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
-// Include database connection
-require_once 'db.php';
-
 try {
-    // Fetch active regions where type = 'maakunta' and active = 1
+    // Include database connection
+    if (!file_exists('db.php')) {
+        throw new Exception('db.php file not found');
+    }
+    
+    require_once 'db.php';
+    
+    if (!isset($pdo)) {
+        throw new Exception('PDO connection not established in db.php');
+    }
+    
+    // Simple query to fetch active regions
     $sql = "SELECT Maakunta_ID, Maakunta, stat_code 
             FROM Maakunnat 
             WHERE type = 'maakunta' AND active = 1 
@@ -22,6 +30,10 @@ try {
     // Add special "koko-häme" option at the beginning
     $response = [
         'success' => true,
+        'debug_info' => [
+            'query' => $sql,
+            'raw_count' => count($regions)
+        ],
         'regions' => array_merge([
             [
                 'Maakunta_ID' => 'koko-häme',
@@ -35,10 +47,13 @@ try {
     echo json_encode($response, JSON_UNESCAPED_UNICODE);
     
 } catch (PDOException $e) {
-    // Fallback to hardcoded values if database fails
-    $fallback = [
+    // Database specific error
+    http_response_code(200); // Don't send 500, send 200 with error info
+    $error_response = [
         'success' => false,
-        'error' => 'Database connection failed',
+        'error_type' => 'PDO_ERROR',
+        'error' => $e->getMessage(),
+        'error_code' => $e->getCode(),
         'fallback' => true,
         'regions' => [
             ['Maakunta_ID' => 'koko-häme', 'Maakunta' => 'KOKO-HÄME', 'stat_code' => 'ALL'],
@@ -47,6 +62,23 @@ try {
         ]
     ];
     
-    echo json_encode($fallback, JSON_UNESCAPED_UNICODE);
+    echo json_encode($error_response, JSON_UNESCAPED_UNICODE);
+    
+} catch (Exception $e) {
+    // General error
+    http_response_code(200); // Don't send 500, send 200 with error info
+    $error_response = [
+        'success' => false,
+        'error_type' => 'GENERAL_ERROR',
+        'error' => $e->getMessage(),
+        'fallback' => true,
+        'regions' => [
+            ['Maakunta_ID' => 'koko-häme', 'Maakunta' => 'KOKO-HÄME', 'stat_code' => 'ALL'],
+            ['Maakunta_ID' => '1', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
+            ['Maakunta_ID' => '2', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
+        ]
+    ];
+    
+    echo json_encode($error_response, JSON_UNESCAPED_UNICODE);
 }
 ?>
