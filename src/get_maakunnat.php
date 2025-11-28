@@ -6,16 +6,11 @@ header('Access-Control-Allow-Methods: GET');
 header('Access-Control-Allow-Headers: Content-Type');
 
 try {
-    // Include database connection
-    if (!file_exists('db.php')) {
-        throw new Exception('db.php file not found');
-    }
-    
+    // Include database connection variables
     require_once 'db.php';
     
-    if (!isset($pdo)) {
-        throw new Exception('PDO connection not established in db.php');
-    }
+    // Create PDO connection (same pattern as other files)
+    $pdo = new PDO($dsn, $db_user, $db_pass, [PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"]);
     
     // Simple query to fetch active regions
     $sql = "SELECT Maakunta_ID, Maakunta, stat_code 
