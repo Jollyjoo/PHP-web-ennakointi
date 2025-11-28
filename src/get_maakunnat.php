@@ -22,7 +22,7 @@ try {
     $stmt->execute();
     $regions = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
-    // Add special "koko-häme" option at the beginning
+    // Add special "Koko-maa" option at the beginning
     $response = [
         'success' => true,
         'debug_info' => [
@@ -31,8 +31,8 @@ try {
         ],
         'regions' => array_merge([
             [
-                'Maakunta_ID' => 'koko-häme',
-                'Maakunta' => 'KOKO-HÄME',
+                'Maakunta_ID' => 'Koko-maa',
+                'Maakunta' => 'Koko-maa',
                 'stat_code' => 'ALL'
             ]
         ], array_map(function($region) {
