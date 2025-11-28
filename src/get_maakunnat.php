@@ -35,7 +35,15 @@ try {
                 'Maakunta' => 'KOKO-HÄME',
                 'stat_code' => 'ALL'
             ]
-        ], $regions),
+        ], array_map(function($region) {
+            // Use Maakunta name as the value instead of ID for compatibility with haeMaakunnalla.php
+            return [
+                'Maakunta_ID' => $region['Maakunta'], // Send name as value
+                'Maakunta' => $region['Maakunta'],    // Display name
+                'stat_code' => $region['stat_code'],
+                'original_id' => $region['Maakunta_ID'] // Keep original ID for reference
+            ];
+        }, $regions)),
         'count' => count($regions) + 1
     ];
     
@@ -52,8 +60,8 @@ try {
         'fallback' => true,
         'regions' => [
             ['Maakunta_ID' => 'koko-häme', 'Maakunta' => 'KOKO-HÄME', 'stat_code' => 'ALL'],
-            ['Maakunta_ID' => '1', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
-            ['Maakunta_ID' => '2', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
+            ['Maakunta_ID' => 'Päijät-Häme', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
+            ['Maakunta_ID' => 'Kanta-Häme', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
         ]
     ];
     
@@ -69,8 +77,8 @@ try {
         'fallback' => true,
         'regions' => [
             ['Maakunta_ID' => 'koko-häme', 'Maakunta' => 'KOKO-HÄME', 'stat_code' => 'ALL'],
-            ['Maakunta_ID' => '1', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
-            ['Maakunta_ID' => '2', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
+            ['Maakunta_ID' => 'Päijät-Häme', 'Maakunta' => 'Päijät-Häme', 'stat_code' => 'MK07'],
+            ['Maakunta_ID' => 'Kanta-Häme', 'Maakunta' => 'Kanta-Häme', 'stat_code' => 'MK05']
         ]
     ];
     
