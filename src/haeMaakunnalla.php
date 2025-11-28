@@ -18,8 +18,8 @@ $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
 // Adjust the query based on the value of 'q'
-if ($q === "koko-häme") {
-    // Fetch all content if 'koko-häme' is selected, including AI analysis data
+if ($q === "koko-häme" || $q === "koko-maa" || $q === "Koko-maa") {
+    // Fetch all content if 'koko-häme' or 'koko-maa' is selected, including AI analysis data
     $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url, 
                    ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
                    ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status
