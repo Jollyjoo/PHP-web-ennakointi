@@ -42,6 +42,15 @@ BEGIN
 END;
 
 -- Step 2: Create trigger on INSERT
+
+
+-- edellinen triggeri oli BLOCKING, eli se piti Azure SQL:n odottamassa HTTP-kutsun valmistumista ennenkuin lisäys hyväksyttiin.
+-- Tämä aiheutti ongelmia, koska Power Automate odotti triggerin valmistumista, ja jos HTTP-kutsu kesti liian kauan, Power Automate aikakatkaisi odotuksen ja lisäys epäonnistuisi kokonaan.
+-- Ratkaisu on tehdä triggeristä NON-BLOCKING, eli sen ei tarvitse odottaa HTTP-kutsun valmistumista.
+-- Drop the existing trigger first
+DROP TRIGGER IF EXISTS tr_Mediaseuranta_ForwardToMySQL;
+
+-- Create a new NON-BLOCKING trigger
 CREATE TRIGGER tr_Mediaseuranta_ForwardToMySQL
 ON Mediaseuranta
 AFTER INSERT
@@ -49,23 +58,10 @@ AS
 BEGIN
     SET NOCOUNT ON;
     
-    -- Forward each newly inserted record
-    DECLARE @RecordID INT;
+    -- Insert into a queue table instead of making HTTP calls directly
+    INSERT INTO MediaseurantaQueue (record_id, created_at, status)
+    SELECT ID, GETDATE(), 'pending'
+    FROM INSERTED;
     
-    DECLARE insert_cursor CURSOR FOR
-    SELECT ID FROM INSERTED;
-    
-    OPEN insert_cursor;
-    FETCH NEXT FROM insert_cursor INTO @RecordID;
-    
-    WHILE @@FETCH_STATUS = 0
-    BEGIN
-        -- Call the forwarding procedure (async to avoid blocking)
-        EXEC sp_ForwardToMySQL @RecordID;
-        
-        FETCH NEXT FROM insert_cursor INTO @RecordID;
-    END;
-    
-    CLOSE insert_cursor;
-    DEALLOCATE insert_cursor;
+    -- The trigger finishes immediately, allowing Power Automate to complete
 END;
