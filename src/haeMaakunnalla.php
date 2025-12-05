@@ -24,8 +24,9 @@ if ($q === "koko-häme" || $q === "koko-maa" || $q === "Koko-maa") {
     // Fetch all content if 'koko-häme' or 'koko-maa' is selected, including AI analysis data
     $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url, 
                    ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
-                   ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status,
-                   competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis
+                   ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status, ai_analyzed_at, ai_processing_time,
+                   competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis,
+                   business_relevance, strategic_importance, funding_intelligence, market_intelligence
             FROM catbxjbt_ennakointi.Mediaseuranta
             ORDER BY uutisen_pvm DESC
             LIMIT $start, 20;";
@@ -33,8 +34,9 @@ if ($q === "koko-häme" || $q === "koko-maa" || $q === "Koko-maa") {
     // Fetch content filtered by 'Maakunta_ID', including AI analysis data
     $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url,
                    ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
-                   ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status,
-                   competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis
+                   ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status, ai_analyzed_at, ai_processing_time,
+                   competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis,
+                   business_relevance, strategic_importance, funding_intelligence, market_intelligence
             FROM catbxjbt_ennakointi.Mediaseuranta
             WHERE Maakunta_ID = (SELECT maakunta_id FROM catbxjbt_ennakointi.Maakunnat WHERE maakunta LIKE '%" . $conn->real_escape_string($q) . "%')
             ORDER BY uutisen_pvm DESC

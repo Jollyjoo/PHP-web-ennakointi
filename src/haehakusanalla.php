@@ -22,13 +22,14 @@ $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
 $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url,
-           ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
-           ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status,
-           competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis
-        FROM catbxjbt_ennakointi.Mediaseuranta
-        WHERE Uutinen LIKE '%" . $q . "%'
-        ORDER BY uutisen_pvm DESC
-        LIMIT $start, 20;";
+              ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
+              ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status, ai_analyzed_at, ai_processing_time,
+              competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis,
+              business_relevance, strategic_importance, funding_intelligence, market_intelligence
+          FROM catbxjbt_ennakointi.Mediaseuranta
+          WHERE Uutinen LIKE '%" . $q . "%'
+          ORDER BY uutisen_pvm DESC
+          LIMIT $start, 20;";
 
 $result = $conn->query($sql);
 
