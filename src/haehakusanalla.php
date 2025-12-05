@@ -20,8 +20,9 @@ $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
 $sql = "SELECT uutisen_pvm as aika, Maakunta_ID, Teema, Uutinen, Hankkeen_luokitus, Url,
-               ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
-               ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status
+           ai_relevance_score, ai_economic_impact, ai_employment_impact, ai_key_sectors, 
+           ai_sentiment, ai_crisis_probability, ai_summary, ai_keywords, ai_analysis_status,
+           competitive_analysis_status, competitive_score, competitors_mentioned, market_opportunities, competitive_analysis
         FROM catbxjbt_ennakointi.Mediaseuranta
         WHERE Uutinen LIKE '%" . $q . "%'
         ORDER BY uutisen_pvm DESC
@@ -47,6 +48,8 @@ if ($result->num_rows > 0) {
         $hasAiAnalysis = ($row["ai_analysis_status"] === 'completed');
         $aiTooltip = "";
         $aiIndicator = "";
+        $compTooltip = "";
+        $compIndicator = "";
         $recordClass = "record";
         
         if ($hasAiAnalysis) {
@@ -111,6 +114,34 @@ if ($result->num_rows > 0) {
         // Add AI indicator and analysis tooltip if available
         if ($hasAiAnalysis) {
             echo "<span class='ai-indicator' title='" . htmlspecialchars($aiTooltip, ENT_QUOTES, 'UTF-8') . "'>" . $aiIndicator . "</span> ";
+        }
+        // Competitive analysis tooltip
+        $hasCompetitive = isset($row["competitive_analysis_status"]) && ($row["competitive_analysis_status"] === 'analyzed' || $row["competitive_analysis_status"] === 'completed');
+        if ($hasCompetitive) {
+            $competitorsList = [];
+            if (!empty($row["competitors_mentioned"])) {
+                $decoded = json_decode($row["competitors_mentioned"], true);
+                if (is_array($decoded)) {
+                    $competitorsList = $decoded;
+                } else {
+                    $competitorsList = array_map('trim', explode(',', $row["competitors_mentioned"]));
+                }
+            }
+            $compTooltip = "📈 KILPAILUANALYYSI:\n\n";
+            if (isset($row["competitive_score"]) && $row["competitive_score"] !== null && $row["competitive_score"] !== '') {
+                $compTooltip .= "⭐ Pisteet: " . $row["competitive_score"] . "/10\n";
+            }
+            if (!empty($competitorsList)) {
+                $compTooltip .= "🏢 Mainitut kilpailijat: " . implode(', ', array_slice($competitorsList, 0, 3)) . "\n";
+            }
+            if (!empty($row["market_opportunities"])) {
+                $compTooltip .= "💡 Mahdollisuuksia: " . mb_substr(strip_tags($row["market_opportunities"]), 0, 140) . "…\n";
+            }
+            if (!empty($row["competitive_analysis"])) {
+                $compTooltip .= "\n📝 Yhteenveto: " . mb_substr(strip_tags($row["competitive_analysis"]), 0, 200) . "…";
+            }
+            $compIndicator = "📊";
+            echo "<span class='ai-indicator' title='" . htmlspecialchars($compTooltip, ENT_QUOTES, 'UTF-8') . "'>" . $compIndicator . "</span> ";
         }
         
         echo "<a href='" . $row["Url"] . "' target='_blank' class='styled-link'>" . $cleanedUutinen . "</a>, ";        
