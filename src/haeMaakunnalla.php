@@ -29,6 +29,29 @@ function normalize_utf8($s) {
     return $converted !== false ? $converted : $s;
 }
 
+function decode_json_text($s) {
+    if ($s === null || $s === '') return $s;
+    $decoded = json_decode($s, true);
+    if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+        // Not valid JSON; return original string
+        return $s;
+    }
+    if (is_array($decoded)) {
+        // Flatten array of strings or nested values into a readable string
+        $flat = [];
+        $iterator = new RecursiveIteratorIterator(new RecursiveArrayIterator($decoded));
+        foreach ($iterator as $v) {
+            if ($v !== null && $v !== '') { $flat[] = (string)$v; }
+        }
+        return implode(', ', array_unique($flat));
+    }
+    if (is_string($decoded)) {
+        return $decoded;
+    }
+    // For objects/numbers/bools, stringify
+    return (string) $decoded;
+}
+
 $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
@@ -67,11 +90,11 @@ if ($result->num_rows > 0) {
         $row["Uutinen"] = normalize_utf8($row["Uutinen"]);
         $row["Teema"] = normalize_utf8($row["Teema"]);
         if (isset($row["ai_summary"])) { $row["ai_summary"] = normalize_utf8($row["ai_summary"]); }
-        if (isset($row["market_opportunities"])) { $row["market_opportunities"] = normalize_utf8($row["market_opportunities"]); }
-        if (isset($row["competitive_analysis"])) { $row["competitive_analysis"] = normalize_utf8($row["competitive_analysis"]); }
-        if (isset($row["funding_intelligence"])) { $row["funding_intelligence"] = normalize_utf8($row["funding_intelligence"]); }
-        if (isset($row["market_intelligence"])) { $row["market_intelligence"] = normalize_utf8($row["market_intelligence"]); }
-        if (isset($row["business_relevance"])) { $row["business_relevance"] = normalize_utf8($row["business_relevance"]); }
+        if (isset($row["market_opportunities"])) { $row["market_opportunities"] = normalize_utf8(decode_json_text($row["market_opportunities"])); }
+        if (isset($row["competitive_analysis"])) { $row["competitive_analysis"] = normalize_utf8(decode_json_text($row["competitive_analysis"])); }
+        if (isset($row["funding_intelligence"])) { $row["funding_intelligence"] = normalize_utf8(decode_json_text($row["funding_intelligence"])); }
+        if (isset($row["market_intelligence"])) { $row["market_intelligence"] = normalize_utf8(decode_json_text($row["market_intelligence"])); }
+        if (isset($row["business_relevance"])) { $row["business_relevance"] = normalize_utf8(decode_json_text($row["business_relevance"])); }
 
         // Replace '-?' with '-' in the 'Uutinen' field
         $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
