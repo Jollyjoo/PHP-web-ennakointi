@@ -231,7 +231,8 @@ Vastaa JSON-muodossa:
             return [
                 'error' => 'AI Analysis failed: ' . $e->getMessage(),
                 'relevance_score' => 1,
-                'economic_impact' => 'neutral'
+                'economic_impact' => 'neutral',
+                'analysis_failed' => true  // Flag to mark as failed
             ];
         }
     }
@@ -270,6 +271,39 @@ Vastaa JSON-muodossa:
             $sentiment = $analysis['sentiment'] ?? 'neutral';
             $crisis_probability = $analysis['crisis_probability'] ?? 0.0;
             $summary = $analysis['summary'] ?? '';
+            
+            // Check if analysis failed and mark accordingly
+            if (isset($analysis['analysis_failed']) && $analysis['analysis_failed']) {
+                // Mark as failed instead of completed
+                $stmt = $this->db->prepare("
+                    UPDATE Mediaseuranta SET
+                        ai_analysis_status = 'failed',
+                        ai_analyzed_at = NOW(),
+                        ai_summary = ?
+                    WHERE Maakunta_ID = ? AND uutisen_pvm = ? AND Uutinen LIKE ? 
+                    LIMIT 1
+                ");
+                
+                $error_message = $analysis['error'] ?? 'Analysis failed';
+                $news_pattern = substr($entry['Uutinen'], 0, 100) . '%';
+                
+                $stmt->bind_param("siss",
+                    $error_message,
+                    $entry['Maakunta_ID'],
+                    $entry['uutisen_pvm'],
+                    $news_pattern
+                );
+                
+                $result = $stmt->execute();
+                $stmt->close();
+                
+                if (!$result) {
+                    error_log("Failed to mark Mediaseuranta entry as failed: " . $this->db->error);
+                    return false;
+                }
+                
+                return true; // Successfully marked as failed
+            }
             
             // Use first 100 characters for LIKE pattern to avoid length issues
             $news_pattern = substr($entry['Uutinen'], 0, 100) . '%';
