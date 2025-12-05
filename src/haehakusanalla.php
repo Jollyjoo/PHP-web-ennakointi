@@ -14,7 +14,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 // Set character set to UTF-8
-$conn->set_charset("utf8");
+$conn->set_charset("utf8mb4");
+// Ensure full Unicode (emojit yms.)
+$conn->query("SET NAMES utf8mb4");
 
 $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
@@ -75,7 +77,20 @@ if ($result->num_rows > 0) {
                 $crisisPercent = round($row["ai_crisis_probability"] * 100);
                 $aiTooltip .= "⚠️ Kriisiriski: " . $crisisPercent . "%\n";
             }
-            
+            // Extra AI details
+            if (!empty($keywords)) {
+                $aiTooltip .= "🏷️ Avainsanat: " . implode(", ", array_slice($keywords, 0, 5)) . "\n";
+            }
+            if (!empty($row["ai_analyzed_at"])) {
+                $aiTooltip .= "⏱️ Analysoitu: " . (new DateTime($row["ai_analyzed_at"]))->format('d.m.Y H:i') . "\n";
+            }
+            if (!empty($row["ai_processing_time"])) {
+                $aiTooltip .= "⏳ Käsittelyaika: " . $row["ai_processing_time"] . " s\n";
+            }
+            if (!empty($row["ai_analysis_status"])) {
+                $aiTooltip .= "📌 Tila: " . $row["ai_analysis_status"] . "\n";
+            }
+
             if (!empty($row["ai_summary"])) {
                 $aiTooltip .= "\n📝 Yhteenveto: " . $row["ai_summary"];
             }
@@ -136,6 +151,19 @@ if ($result->num_rows > 0) {
             }
             if (!empty($row["market_opportunities"])) {
                 $compTooltip .= "💡 Mahdollisuuksia: " . mb_substr(strip_tags($row["market_opportunities"]), 0, 140) . "…\n";
+            }
+            if (!empty($row["business_relevance"])) {
+                $compTooltip .= "🏷️ Liiketoiminnan relevanssi: " . $row["business_relevance"] . "\n";
+            }
+            if (isset($row["strategic_importance"]) && $row["strategic_importance"] !== null && $row["strategic_importance"] !== '') {
+                $stars = str_repeat('★', max(0, (int)$row["strategic_importance"])) . str_repeat('☆', max(0, 5 - (int)$row["strategic_importance"])) ;
+                $compTooltip .= "🎯 Strateginen tärkeys: " . $stars . "\n";
+            }
+            if (!empty($row["funding_intelligence"])) {
+                $compTooltip .= "💶 Rahoitushavainnot: " . mb_substr(strip_tags($row["funding_intelligence"]), 0, 120) . "…\n";
+            }
+            if (!empty($row["market_intelligence"])) {
+                $compTooltip .= "📊 Markkinatieto: " . mb_substr(strip_tags($row["market_intelligence"]), 0, 120) . "…\n";
             }
             if (!empty($row["competitive_analysis"])) {
                 $compTooltip .= "\n📝 Yhteenveto: " . mb_substr(strip_tags($row["competitive_analysis"]), 0, 200) . "…";
