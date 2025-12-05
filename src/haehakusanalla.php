@@ -18,6 +18,19 @@ $conn->set_charset("utf8mb4");
 // Ensure full Unicode (emojit yms.)
 $conn->query("SET NAMES utf8mb4");
 
+// Ensure browser treats output as UTF-8
+header('Content-Type: text/html; charset=utf-8');
+if (function_exists('mb_internal_encoding')) { mb_internal_encoding('UTF-8'); }
+
+function normalize_utf8($s) {
+    if ($s === null || $s === '') return $s;
+    if (!mb_check_encoding($s, 'UTF-8')) {
+        $s = mb_convert_encoding($s, 'UTF-8', 'Windows-1252, ISO-8859-1, ISO-8859-15');
+    }
+    $converted = @iconv('UTF-8', 'UTF-8//IGNORE', $s);
+    return $converted !== false ? $converted : $s;
+}
+
 $q = $_GET['q'];
 $start = isset($_GET['start']) ? intval($_GET['start']) : 0; // Default to 0 if not provided
 
@@ -37,6 +50,16 @@ if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         // Convert 'aika' to Finnish date format
         $formattedDate = (new DateTime($row["aika"]))->format('d.m.Y');
+
+        // Normalize and clean textual fields for consistent UTF-8
+        $row["Uutinen"] = normalize_utf8($row["Uutinen"]);
+        $row["Teema"] = normalize_utf8($row["Teema"]);
+        if (isset($row["ai_summary"])) { $row["ai_summary"] = normalize_utf8($row["ai_summary"]); }
+        if (isset($row["market_opportunities"])) { $row["market_opportunities"] = normalize_utf8($row["market_opportunities"]); }
+        if (isset($row["competitive_analysis"])) { $row["competitive_analysis"] = normalize_utf8($row["competitive_analysis"]); }
+        if (isset($row["funding_intelligence"])) { $row["funding_intelligence"] = normalize_utf8($row["funding_intelligence"]); }
+        if (isset($row["market_intelligence"])) { $row["market_intelligence"] = normalize_utf8($row["market_intelligence"]); }
+        if (isset($row["business_relevance"])) { $row["business_relevance"] = normalize_utf8($row["business_relevance"]); }
 
         // Replace '-?' with '-' in the 'Uutinen' field
         $cleanedUutinen = str_replace('-?', '-', $row["Uutinen"]);
