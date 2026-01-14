@@ -1451,8 +1451,11 @@ try {
                 ];
             } else {
                 try {
-                    // Get mediaseuranta entries ready for competitive analysis (limit from config)
-                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, 9999, MEDIASEURANTA_ANALYSIS_LIMIT);
+                    // Get batch size from URL parameter, default to config constant
+                    $batch_size = isset($_GET['batch_size']) ? intval($_GET['batch_size']) : MEDIASEURANTA_ANALYSIS_LIMIT;
+                    
+                    // Get mediaseuranta entries ready for competitive analysis
+                    $entries_for_analysis = getMediaseurantaForCompetitive($db_connection, 9999, $batch_size);
                     $analyzed_count = 0;
                     $stored_count = 0;
                     
